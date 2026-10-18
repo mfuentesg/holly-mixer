@@ -450,10 +450,11 @@ final class Mixer {
     }
 
     /// Asks the mixer for the current values of these addresses (answers update their `Param`s).
+    /// Addresses that already have a value are skipped: the mixer pushes later changes through
+    /// `/xremote`, and a reconnect re-requests every known address.
     func request(_ addresses: [String]) {
-        for address in addresses {
-            _ = param(address)
-        }
+        let addresses = addresses.filter { param($0).value == nil }
+        guard !addresses.isEmpty else { return }
         Task {
             for (index, address) in addresses.enumerated() {
                 connection.send(OSCMessage(address))

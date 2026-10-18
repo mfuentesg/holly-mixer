@@ -3,17 +3,21 @@
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
 for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
-## What works now (v0.3)
+## What works now (v0.4)
 
-- New "graphite console" design (see the Mixit design canvas)
-- Connect screen: finds mixers on the network, manual IP, recent mixers, network check, demo
-- Channels 1–16, Aux In, FX returns, Bus 1–6, FX sends and Main LR: names, colours, faders, mutes,
-  pan, gate/compressor status, LED meters with peak hold
-- SOLO on channels, mute groups 1–4, undo with recent-change history
-- Monitor mixes: pick a bus or FX send at the top and the faders become that mix's sends
-- Changes made on the mixer or in other apps show up live and briefly highlight the strip
-- Reconnects after Wi-Fi drop-outs; controls go read-only until the mixer answers
-- Grab a fader cap to move it (relative, no jumping); double-tap the fader for 0 dB
+Everything in the Mixit design canvas:
+
+- **Mixer (iPad):** graphite console design, channels 1–16, Aux In, FX returns, buses, FX sends and
+  Main LR with faders, mutes, solo, pan, EQ thumbnails, gate/compressor status, LED meters with peak hold;
+  mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
+- **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
+  low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
+- **Order of service:** scenes captured by the app, grouped Pre-service → Post, recall preview showing
+  every change, live-signal warning, hold to recall, optional 2 s fade, recall safes, undo recall
+- **Service Mode:** locked volunteer layout with big faders and min/max limits, PIN to exit, and an editor
+- **iPhone:** portrait mixer with horizontal faders; musician "My mix" mode paired by QR code from the iPad
+- **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer
+- App icon from the design
 
 No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the
 church's channel names, faders and mutes, and moving meters.
