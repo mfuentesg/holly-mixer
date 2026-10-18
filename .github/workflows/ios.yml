@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Build Mixit.swiftpm for the iOS simulator
@@ -20,4 +20,9 @@ jobs:
           xcodebuild build -quiet \
             -scheme Mixit \
             -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/derived" \
             CODE_SIGNING_ALLOWED=NO
+          app=$(find "$RUNNER_TEMP/derived/Build/Products" -name 'Mixit.app' -type d | head -n 1)
+          test -n "$app" || { echo "::error::Mixit.app was not produced"; exit 1; }
+          echo "Built $app"
+          ls "$app"
