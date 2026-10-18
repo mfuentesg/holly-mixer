@@ -3,8 +3,14 @@ import SwiftUI
 struct ChannelStripView: View {
     @Environment(Mixer.self) private var mixer
     let strip: Strip
+    /// What the fader controls: the strip's own fader or one of its sends.
+    let control: LevelControl
+    /// Colour of the selected bus when the faders show sends.
+    let accent: Color?
 
     var body: some View {
+        let level = strip.level(control)
+
         VStack(spacing: 8) {
             Text(strip.displayName)
                 .font(.caption.weight(.semibold))
@@ -19,15 +25,17 @@ struct ChannelStripView: View {
                 MeterView(level: strip.meter)
                     .frame(width: 6)
                 FaderView(
-                    value: strip.fader,
-                    onTouchingChanged: { mixer.setFaderTouching(strip, $0) },
-                    onChange: { mixer.setFader(strip, to: $0) }
+                    value: level,
+                    accent: accent,
+                    label: faderLabel,
+                    onTouchingChanged: { mixer.setTouching(strip, control, $0) },
+                    onChange: { mixer.setLevel(strip, control, to: $0) }
                 )
             }
 
-            Text(formatDecibels(strip.fader))
+            Text(formatDecibels(level))
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(accent ?? .secondary)
 
             Button {
                 mixer.toggleMute(strip)
@@ -45,7 +53,23 @@ struct ChannelStripView: View {
         }
         .frame(width: 76)
         .padding(6)
-        .background(Color(white: 0.11), in: RoundedRectangle(cornerRadius: 10))
+        .background(stripBackground, in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var stripBackground: Color {
+        if let accent, control != .fader {
+            return accent.opacity(0.12)
+        }
+        return Color(white: 0.11)
+    }
+
+    private var faderLabel: String {
+        switch control {
+        case .fader:
+            return "\(strip.displayName) fader"
+        case .send:
+            return "\(strip.displayName) send to \(mixer.master(for: mixer.selectedMix).displayName)"
+        }
     }
 }
 

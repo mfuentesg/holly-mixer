@@ -4,6 +4,9 @@ import SwiftUI
 /// double-tap returns it to 0 dB.
 struct FaderView: View {
     let value: Float
+    /// Tints the fader cap, e.g. with the colour of the bus whose sends are shown.
+    var accent: Color? = nil
+    var label = "Fader"
     var onTouchingChanged: (Bool) -> Void
     var onChange: (Float) -> Void
 
@@ -27,8 +30,7 @@ struct FaderView: View {
                     .offset(y: capHeight / 2 + CGFloat(1 - Self.unity) * travel)
 
                 RoundedRectangle(cornerRadius: 5)
-                    .fill(LinearGradient(colors: [Color(white: 0.75), Color(white: 0.45)],
-                                         startPoint: .top, endPoint: .bottom))
+                    .fill(LinearGradient(colors: capColors, startPoint: .top, endPoint: .bottom))
                     .overlay(Rectangle().fill(.black).frame(height: 2))
                     .frame(width: min(geometry.size.width, 44), height: capHeight)
                     .shadow(radius: 2, y: 1)
@@ -60,12 +62,19 @@ struct FaderView: View {
         .frame(minHeight: 160)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
         .accessibilityElement()
-        .accessibilityLabel("Fader")
+        .accessibilityLabel(label)
         .accessibilityValue(formatDecibels(value) + " dB")
         .accessibilityAdjustableAction { direction in
             let step: Float = 0.02
             let next = direction == .increment ? value + step : value - step
             onChange(min(max(next, 0), 1))
         }
+    }
+
+    private var capColors: [Color] {
+        if let accent {
+            return [accent, accent.opacity(0.55)]
+        }
+        return [Color(white: 0.75), Color(white: 0.45)]
     }
 }
