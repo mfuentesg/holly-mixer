@@ -324,9 +324,10 @@ This is the recommended setup, and it shapes the first version:
 - Latency: median 3.0 ms, max 3.2 ms, 0/20 lost. The network has plenty of headroom.
 - The very first send failed with `EHOSTUNREACH` (errno 65) until iOS's Local Network permission
   was granted. The app must treat that error as "waiting for permission" and retry, not as "mixer offline".
-- `/node ch/01/mix` got no reply on the `/node` address (the X32 replies on `node`, without a slash;
-  now under test). If firmware 1.16 doesn't support it, the initial sync falls back to pipelined
-  per-parameter reads. At 3 ms RTT and ~30 requests in flight, a full sync still fits the 2 s budget.
+- `/node ,s "ch/01/mix"` **works**. The reply comes back on the address `node` (no slash), like the X32:
+  `node ,s "/ch/01/mix ON  +7.8 ON +0\n"`, which is mix on, fader in dB, LR assign, pan.
+  Values are human-readable text (dB, ON/OFF), so the sync engine needs a text parser per node
+  type. Initial sync uses `/node`, with pipelined per-parameter reads as a fallback.
 
 To check the connection from a laptop on the church Wi-Fi, run the read-only probe
 `python3 tools/xr18_probe.py 192.168.1.2`. It never changes mixer settings, so it's safe during a service.
