@@ -19,7 +19,7 @@ let package = Package(
             bundleIdentifier: "com.mfuentesg.mixit",
             displayVersion: "0.1",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .mic),
+            appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.orange),
             supportedDeviceFamilies: [
                 .pad,
