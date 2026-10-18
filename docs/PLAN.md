@@ -311,6 +311,16 @@ scene timeline, feedback assistant), undo, and a native iPad-first feel.
 The XR18 is connected by **Ethernet to the church router**, and the iPad/iPhone joins that router's Wi-Fi.
 This is the recommended setup, and it shapes the first version:
 
+| | |
+|---|---|
+| Model | XR18 |
+| Firmware | 1.16 |
+| IP | 192.168.1.2 (router LAN 192.168.1.0/24) |
+| Name | `XR18-C3-D7-F9` (factory default, derived from the MAC address) |
+
+To check the connection from a laptop on the church Wi-Fi, run the read-only probe
+`python3 tools/xr18_probe.py 192.168.1.2`. It never changes mixer settings, so it's safe during a service.
+
 - **Connection:** the app talks to the mixer's LAN IP on UDP 10024. The XR18's built-in AP is not used.
 - **Stable IP:** give the XR18 a **DHCP reservation** (or a static IP outside the DHCP pool) on the
   router, so the app's "recent mixer" entry never goes stale. The app still re-discovers by `/xinfo`
@@ -324,7 +334,7 @@ This is the recommended setup, and it shapes the first version:
 
 ## 11. Next steps
 
-1. Confirm the XR18 firmware version (Setup → Info in X AIR) and the mixer's IP address on the router.
+1. Run `tools/xr18_probe.py` at church and check that `/node` and `/meters` behave as expected on firmware 1.16.
 2. Phase 0 spike: create the Xcode project + `MixerKit` package, OSC codec, connect to the mixer.
 3. Clickable mockups of the iPad mixer view, channel inspector and Service Mode to validate the UX
    with the volunteers who'll actually use it.
