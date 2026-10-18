@@ -3,14 +3,17 @@
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
 for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
-## What works now (v0.2)
+## What works now (v0.3)
 
-- Connects to the mixer by IP (remembers the last one) and reconnects after Wi-Fi drop-outs
-- Channels 1–16 and Main LR: names, colours, faders, mutes, live meters
-- Aux In, FX returns 1–4, Bus 1–6 and FX send 1–4 masters
+- New "graphite console" design (see the Mixit design canvas)
+- Connect screen: finds mixers on the network, manual IP, recent mixers, network check, demo
+- Channels 1–16, Aux In, FX returns, Bus 1–6, FX sends and Main LR: names, colours, faders, mutes,
+  pan, gate/compressor status, LED meters with peak hold
+- SOLO on channels, mute groups 1–4, undo with recent-change history
 - Monitor mixes: pick a bus or FX send at the top and the faders become that mix's sends
-- Changes made on the mixer or in other apps show up live
-- Faders follow your finger without jumping; double-tap a fader for 0 dB
+- Changes made on the mixer or in other apps show up live and briefly highlight the strip
+- Reconnects after Wi-Fi drop-outs; controls go read-only until the mixer answers
+- Grab a fader cap to move it (relative, no jumping); double-tap the fader for 0 dB
 
 No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the
 church's channel names, faders and mutes, and moving meters.
