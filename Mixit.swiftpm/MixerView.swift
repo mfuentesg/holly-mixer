@@ -18,20 +18,25 @@ struct MixerView: View {
             }
             Divider()
             HStack(spacing: 0) {
-                ScrollView(.horizontal) {
-                    HStack(spacing: 6) {
-                        ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
-                            ChannelStripView(strip: strip, control: control, accent: accent)
-                        }
-                        if target == .main {
-                            Divider()
-                                .padding(.horizontal, 4)
-                            ForEach(mixer.buses + mixer.fxSends) { strip in
-                                ChannelStripView(strip: strip, control: .fader, accent: nil)
+                ScrollViewReader { proxy in
+                    VStack(spacing: 0) {
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 6) {
+                                ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
+                                    ChannelStripView(strip: strip, control: control, accent: accent)
+                                }
+                                if target == .main {
+                                    Divider()
+                                        .padding(.horizontal, 4)
+                                    ForEach(mixer.buses + mixer.fxSends) { strip in
+                                        ChannelStripView(strip: strip, control: .fader, accent: nil)
+                                    }
+                                }
                             }
+                            .padding(8)
                         }
+                        bankBar(proxy: proxy, showMasters: target == .main)
                     }
-                    .padding(8)
                 }
                 Divider()
                 ChannelStripView(strip: master, control: .fader, accent: accent)
@@ -39,6 +44,32 @@ struct MixerView: View {
             }
         }
         .background(Color(white: 0.06))
+    }
+
+    /// Buttons that jump the strip row to a group of strips.
+    private func bankBar(proxy: ScrollViewProxy, showMasters: Bool) -> some View {
+        var banks = [
+            Bank(title: "1–8", first: .channel(1)),
+            Bank(title: "9–16", first: .channel(9)),
+            Bank(title: "Aux · FX", first: .auxIn),
+        ]
+        if showMasters {
+            banks.append(Bank(title: "Buses · FX Sends", first: .bus(1)))
+        }
+        return HStack(spacing: 8) {
+            ForEach(banks) { bank in
+                Button(bank.title) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        proxy.scrollTo(bank.first, anchor: .leading)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
     }
 
     private func sendsBanner(_ master: Strip) -> some View {
@@ -88,6 +119,14 @@ struct MixerView: View {
         .padding(.vertical, 10)
         .background(Color(white: 0.1))
     }
+}
+
+private struct Bank: Identifiable {
+    let title: String
+    /// The strip the bank button scrolls to.
+    let first: Strip.Kind
+
+    var id: String { title }
 }
 
 /// Chips for Main LR, Bus 1-6 and FX 1-4; the selected mix decides what the faders control.
