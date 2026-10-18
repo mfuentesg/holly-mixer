@@ -103,9 +103,28 @@ final class Strip: Identifiable {
         }
     }
 
+    /// Short label shown above the name: "1"..."16", "AUX", "FX1", "B1", "LR".
+    var shortLabel: String {
+        switch kind {
+        case .channel(let number): return "\(number)"
+        case .auxIn: return "AUX"
+        case .fxReturn(let number): return "FX\(number)"
+        case .bus(let number): return "BUS \(number)"
+        case .fxSend(let number): return "FX \(number)"
+        case .main: return "LR"
+        }
+    }
+
     /// X AIR colour indices 0-7 (8-15 are the same colours, inverted on the mixer's scribble strip).
     static let palette: [Color] = [
-        Color(white: 0.35), .red, .green, .yellow, .blue, .pink, .cyan, .white,
+        Color(white: 0.45),
+        Color(red: 0.96, green: 0.34, blue: 0.34),
+        Color(red: 0.3, green: 0.82, blue: 0.46),
+        Color(red: 0.98, green: 0.8, blue: 0.26),
+        Color(red: 0.32, green: 0.56, blue: 0.98),
+        Color(red: 0.86, green: 0.42, blue: 0.88),
+        Color(red: 0.3, green: 0.78, blue: 0.92),
+        Color(white: 0.92),
     ]
 
     var color: Color { Strip.palette[colorIndex % 8] }

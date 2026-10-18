@@ -11,39 +11,46 @@ struct MixerView: View {
 
         VStack(spacing: 0) {
             topBar
-            Divider()
             MixSelector()
             if target != .main {
                 sendsBanner(master)
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
-            Divider()
             HStack(spacing: 0) {
                 ScrollViewReader { proxy in
                     VStack(spacing: 0) {
-                        ScrollView(.horizontal) {
+                        ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 6) {
                                 ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
                                     ChannelStripView(strip: strip, control: control, accent: accent)
                                 }
                                 if target == .main {
-                                    Divider()
-                                        .padding(.horizontal, 4)
+                                    Rectangle()
+                                        .fill(Theme.cardBorder)
+                                        .frame(width: 1)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 20)
                                     ForEach(mixer.buses + mixer.fxSends) { strip in
                                         ChannelStripView(strip: strip, control: .fader, accent: nil)
                                     }
                                 }
                             }
-                            .padding(8)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 10)
                         }
                         bankBar(proxy: proxy, showMasters: target == .main)
                     }
                 }
-                Divider()
-                ChannelStripView(strip: master, control: .fader, accent: accent)
-                    .padding(8)
+                ChannelStripView(strip: master, control: .fader, accent: accent, width: 96)
+                    .padding(10)
+                    .background(Theme.bar.opacity(0.6))
+                    .overlay(alignment: .leading) {
+                        Rectangle().fill(Theme.cardBorder).frame(width: 1)
+                    }
             }
         }
-        .background(Color(white: 0.06))
+        .background(Theme.background.ignoresSafeArea())
+        .animation(.easeInOut(duration: 0.2), value: target)
     }
 
     /// Buttons that jump the strip row to a group of strips.
@@ -56,68 +63,103 @@ struct MixerView: View {
         if showMasters {
             banks.append(Bank(title: "Buses · FX Sends", first: .bus(1)))
         }
-        return HStack(spacing: 8) {
+        return HStack(spacing: 6) {
             ForEach(banks) { bank in
-                Button(bank.title) {
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo(bank.first, anchor: .leading)
                     }
+                } label: {
+                    Text(bank.title)
+                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(Theme.control, in: Capsule())
+                        .overlay(Capsule().stroke(Theme.cardBorder, lineWidth: 1))
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.8))
             }
             Spacer()
         }
         .padding(.horizontal, 12)
-        .padding(.bottom, 8)
+        .padding(.bottom, 10)
     }
 
     private func sendsBanner(_ master: Strip) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "arrow.turn.down.right")
+                .foregroundStyle(master.color)
             Text("Faders are sends to **\(master.displayName)**")
             Spacer()
-            Button("Back to Main") {
+            Button {
                 mixer.selectedMix = .main
+            } label: {
+                Label("Back to Main", systemImage: "xmark.circle.fill")
+                    .font(.subheadline.weight(.semibold))
             }
-            .font(.subheadline.weight(.semibold))
+            .buttonStyle(.plain)
+            .foregroundStyle(master.color)
         }
         .font(.subheadline)
         .padding(.horizontal, 16)
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity)
-        .background(master.color.opacity(0.25))
+        .background(master.color.opacity(0.14))
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(master.color.opacity(0.5)).frame(height: 1)
+        }
     }
 
     private var topBar: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(mixer.status == .connected ? Color.green : Color.orange)
-                .frame(width: 10, height: 10)
-            VStack(alignment: .leading, spacing: 1) {
+        HStack(spacing: 14) {
+            Image(systemName: "slider.vertical.3")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.tint)
+                .frame(width: 38, height: 38)
+                .background(Color.accentColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 2) {
                 Text(mixer.mixerName.isEmpty ? mixer.host : mixer.mixerName)
-                    .font(.headline)
-                Text("\(mixer.model) · firmware \(mixer.firmware) · \(mixer.host)")
-                    .font(.caption)
+                    .font(.system(.headline, design: .rounded))
+                Text("\(mixer.model) · v\(mixer.firmware) · \(mixer.host)")
+                    .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
-            if mixer.status != .connected {
-                Label("Reconnecting…", systemImage: "wifi.exclamationmark")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Color.orange.opacity(0.25), in: Capsule())
-                    .foregroundStyle(.orange)
-            }
+            statusPill
             Spacer()
-            Button("Disconnect") {
+            Button {
                 mixer.disconnect()
+            } label: {
+                Image(systemName: "power")
+                    .font(.headline)
+                    .frame(width: 38, height: 38)
+                    .background(Theme.control, in: Circle())
+                    .overlay(Circle().stroke(Theme.cardBorder, lineWidth: 1))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .accessibilityLabel("Disconnect")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(Color(white: 0.1))
+        .background(Theme.bar)
+    }
+
+    private var statusPill: some View {
+        let connected = mixer.status == .connected
+        let color = connected ? Theme.meterGreen : Color.orange
+        return HStack(spacing: 6) {
+            Circle()
+                .fill(color)
+                .frame(width: 7, height: 7)
+                .shadow(color: color, radius: 3)
+            Text(connected ? "Connected" : "Reconnecting…")
+                .font(.system(.caption, design: .rounded).weight(.semibold))
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(color.opacity(0.12), in: Capsule())
     }
 }
 
@@ -140,14 +182,20 @@ struct MixSelector: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                Text("MIX")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.tertiary)
                 ForEach(targets, id: \.self) { target in
                     chip(for: target)
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.vertical, 8)
         }
-        .background(Color(white: 0.09))
+        .background(Theme.bar)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Theme.cardBorder).frame(height: 1)
+        }
     }
 
     private func chip(for target: MixTarget) -> some View {
@@ -161,13 +209,14 @@ struct MixSelector: View {
                     .fill(strip.color)
                     .frame(width: 8, height: 8)
                 Text(strip.displayName)
-                    .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                    .font(.system(.subheadline, design: .rounded).weight(isSelected ? .bold : .medium))
                     .lineLimit(1)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(isSelected ? strip.color.opacity(0.35) : Color(white: 0.16), in: Capsule())
-            .overlay(Capsule().stroke(isSelected ? strip.color : Color.clear, lineWidth: 1.5))
+            .foregroundStyle(isSelected ? Color.white : Color.white.opacity(0.7))
+            .background(isSelected ? strip.color.opacity(0.3) : Theme.control, in: Capsule())
+            .overlay(Capsule().stroke(isSelected ? strip.color : Theme.cardBorder, lineWidth: isSelected ? 1.5 : 1))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
