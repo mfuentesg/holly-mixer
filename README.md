@@ -3,10 +3,12 @@
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
 for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
-## What works now (v0.1)
+## What works now (v0.2)
 
 - Connects to the mixer by IP (remembers the last one) and reconnects after Wi-Fi drop-outs
 - Channels 1–16 and Main LR: names, colours, faders, mutes, live meters
+- Aux In, FX returns 1–4, Bus 1–6 and FX send 1–4 masters
+- Monitor mixes: pick a bus or FX send at the top and the faders become that mix's sends
 - Changes made on the mixer or in other apps show up live
 - Faders follow your finger without jumping; double-tap a fader for 0 dB
 
