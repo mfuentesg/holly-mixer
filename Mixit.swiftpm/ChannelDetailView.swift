@@ -1,11 +1,293 @@
 import SwiftUI
 
-/// Channel / bus / main detail page (Channel.dc.html). Placeholder until implemented.
+/// The sections of the detail page.
+enum ChannelDetailTab: String, CaseIterable, Identifiable {
+    case input = "Input"
+    case gate = "Gate"
+    case eq = "EQ"
+    case dynamics = "Dynamics"
+    case sends = "Sends"
+    case config = "Config"
+
+    var id: String { rawValue }
+
+    /// Tabs a strip has: channels all of them, returns EQ and sends, buses and main EQ and dynamics.
+    @MainActor
+    static func available(for strip: Strip) -> [ChannelDetailTab] {
+        allCases.filter { tab in
+            switch tab {
+            case .input: return strip.hasPreamp
+            case .gate: return strip.hasGate
+            case .eq: return strip.hasEQ
+            case .dynamics: return strip.hasDynamics
+            case .sends: return strip.hasSendLevels
+            case .config: return true
+            }
+        }
+    }
+}
+
+/// Channel / bus / main detail page (Channel.dc.html): preamp, gate, EQ, dynamics, sends and config.
+@MainActor
 struct ChannelDetailView: View {
+    @Environment(Mixer.self) private var mixer
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    let strip: Strip
+
+    @State private var selectedTab = ChannelDetailTab.eq
+
+    var body: some View {
+        let tabs = ChannelDetailTab.available(for: strip)
+        let current = tabs.contains(selectedTab) ? selectedTab : (tabs.contains(.eq) ? .eq : .config)
+        VStack(spacing: 0) {
+            ScreenTopBar(title: strip.displayName, subtitle: subtitle) {
+                headerTrailing
+            }
+            tabBar(tabs: tabs, current: current)
+            HStack(alignment: .top, spacing: 16) {
+                content(current)
+                    .id(strip.id)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                if sizeClass != .compact {
+                    ChannelDetailSideFader(strip: strip)
+                        .frame(width: 208)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .task(id: strip.id) {
+            mixer.request(XR18Params.detailAddresses(for: strip))
+        }
+    }
+
+    private var subtitle: String {
+        switch strip.kind {
+        case .channel(let number): return "Input \(number)"
+        case .auxIn: return "Aux input"
+        case .fxReturn(let number): return "FX return \(number)"
+        case .bus(let number): return "Bus \(number) · 6-band EQ"
+        case .fxSend(let number): return "FX send \(number)"
+        case .main: return "Main LR · 6-band EQ"
+        }
+    }
+
+    @ViewBuilder
+    private func content(_ tab: ChannelDetailTab) -> some View {
+        switch tab {
+        case .input: ChannelDetailInputTab(strip: strip)
+        case .gate: ChannelDetailGateTab(strip: strip)
+        case .eq: ChannelDetailEQTab(strip: strip)
+        case .dynamics: ChannelDetailDynamicsTab(strip: strip)
+        case .sends: ChannelDetailSendsTab(strip: strip)
+        case .config: ChannelDetailConfigTab(strip: strip)
+        }
+    }
+
+    // MARK: Top bar
+
+    private var headerTrailing: some View {
+        HStack(spacing: 8) {
+            if strip.hasPreamp && sizeClass != .compact {
+                neighbourButton(offset: -1)
+                neighbourButton(offset: 1)
+                statusChips
+            }
+            Button {
+                mixer.undo()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.uturn.backward")
+                    if sizeClass != .compact { Text("Undo") }
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.textBright)
+                .padding(.horizontal, 14)
+                .frame(height: 44)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .disabled(mixer.history.isEmpty)
+            .opacity(mixer.history.isEmpty ? 0.4 : 1)
+            .accessibilityLabel("Undo")
+            Button {
+                mixer.presentedScreen = nil
+            } label: {
+                Text("Done")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Theme.onAccent)
+                    .padding(.horizontal, 18)
+                    .frame(height: 44)
+                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    /// Previous / next input channel.
+    private func neighbourButton(offset: Int) -> some View {
+        let number = strip.channelNumber ?? 1
+        let target = number + offset
+        let exists = (1...16).contains(target)
+        let neighbour = exists ? mixer.channels[target - 1] : nil
+        return Button {
+            if exists {
+                mixer.selectedStrip = .channel(target)
+                mixer.presentedScreen = .channel(.channel(target))
+            }
+        } label: {
+            Image(systemName: offset < 0 ? "chevron.left" : "chevron.right")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Theme.textControl)
+                .frame(width: 44, height: 44)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .disabled(!exists)
+        .opacity(exists ? 1 : 0.35)
+        .accessibilityLabel(offset < 0 ? "Previous channel" : "Next channel")
+        .accessibilityValue(neighbour?.displayName ?? "")
+    }
+
+    private var statusChips: some View {
+        let number = strip.channelNumber ?? 1
+        let phantom = mixer.param(XR18Params.headamp(number, "phantom")).bool ?? false
+        let gain = mixer.realValue(XR18Params.headamp(number, "gain"), XR18Params.preampGain)
+        let lowCutOn = EQModel.lowCutIsOn(mixer, strip)
+        let lowCut = lowCutOn ? "LC \(ParamFormat.frequency(EQModel.lowCutFrequency(mixer, strip))) Hz" : "LC off"
+        return HStack(spacing: 6) {
+            chip(phantom ? "+48V on" : "+48V off", color: phantom ? Theme.meterRed : Theme.textTertiary)
+            chip(gain.map { "Gain " + ParamFormat.signed($0) } ?? "Gain —", color: Theme.textControl)
+            chip(lowCut, color: lowCutOn ? Theme.textBright : Theme.textTertiary)
+        }
+        .padding(.trailing, 4)
+    }
+
+    private func chip(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(Theme.mono(12, .bold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 10)
+            .frame(height: 30)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
+    }
+
+    // MARK: Tabs
+
+    private func tabBar(tabs: [ChannelDetailTab], current: ChannelDetailTab) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 2) {
+                ForEach(tabs) { tab in
+                    tabButton(tab, isCurrent: tab == current)
+                }
+            }
+            .padding(3)
+            .background(Theme.strip, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
+            .padding(.horizontal, 16)
+        }
+        .frame(height: 64)
+    }
+
+    private func tabButton(_ tab: ChannelDetailTab, isCurrent: Bool) -> some View {
+        Button {
+            selectedTab = tab
+        } label: {
+            HStack(spacing: 8) {
+                Text(tab.rawValue)
+                    .font(.system(size: 14, weight: .semibold))
+                if isActive(tab) {
+                    Circle().fill(Theme.meterGreen).frame(width: 6, height: 6)
+                }
+            }
+            .foregroundStyle(isCurrent ? Color.white : Theme.textSecondary)
+            .padding(.horizontal, 20)
+            .frame(height: 44)
+            .background(isCurrent ? Theme.controlSelected : Color.clear, in: RoundedRectangle(cornerRadius: 9))
+            .overlay(RoundedRectangle(cornerRadius: 9)
+                .stroke(isCurrent ? Theme.accent.opacity(0.7) : Color.clear, lineWidth: 1))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(tab.rawValue)
+        .accessibilityAddTraits(isCurrent ? .isSelected : [])
+    }
+
+    /// Green dot on a tab whose section is switched on.
+    private func isActive(_ tab: ChannelDetailTab) -> Bool {
+        switch tab {
+        case .gate: return mixer.param(XR18Params.gate(strip.base, "on")).bool ?? strip.gateOn
+        case .eq: return EQModel.isOn(mixer, strip)
+        case .dynamics: return mixer.param(XR18Params.dyn(strip.base, "on")).bool ?? strip.compressorOn
+        default: return false
+        }
+    }
+}
+
+/// The strip's fader, meter, solo and mute, always at hand while editing (right column).
+@MainActor
+private struct ChannelDetailSideFader: View {
     @Environment(Mixer.self) private var mixer
     let strip: Strip
 
+    @State private var isDragging = false
+
     var body: some View {
-        PlaceholderScreen(title: strip.displayName, message: "Channel detail is coming soon.")
+        VStack(spacing: 10) {
+            Text("RIDE WHILE EDITING").sectionLabelStyle()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            if strip.hasGate || strip.hasDynamics {
+                HStack(spacing: 6) {
+                    if strip.hasGate {
+                        Pill(text: "GATE", isOn: mixer.param(XR18Params.gate(strip.base, "on")).bool ?? strip.gateOn,
+                             onColor: Theme.meterGreen, onText: Theme.greenText)
+                    }
+                    if strip.hasDynamics {
+                        Pill(text: "DYN", isOn: mixer.param(XR18Params.dyn(strip.base, "on")).bool ?? strip.compressorOn,
+                             onColor: Theme.meterAmber, onText: Theme.amberText)
+                    }
+                }
+            }
+            HStack(spacing: 6) {
+                FaderView(
+                    value: strip.fader,
+                    lineColor: strip.color,
+                    capLineColor: strip.color,
+                    isMuted: !strip.isOn,
+                    capWidth: 44,
+                    label: "\(strip.displayName) fader",
+                    isDragging: $isDragging,
+                    onTouchingChanged: { mixer.setTouching(strip, .fader, $0) },
+                    onChange: { mixer.setLevel(strip, .fader, to: $0) }
+                )
+                MeterView(level: strip.meter, peak: strip.peak)
+                    .frame(width: 10)
+                    .padding(.vertical, 28)
+            }
+            Text(formatDecibels(strip.fader) + " dB")
+                .font(Theme.mono(14, .bold))
+                .foregroundStyle(Theme.textPrimary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 30)
+                .background(Theme.background, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
+            if strip.soloAddress != nil {
+                StripButton(title: "SOLO", isOn: strip.isSoloed, style: .solo, height: 44,
+                            accessibilityLabel: "Solo \(strip.displayName)") {
+                    mixer.toggleSolo(strip)
+                }
+            }
+            StripButton(title: "MUTE", isOn: !strip.isOn, style: .mute, height: 56,
+                        accessibilityLabel: "Mute \(strip.displayName)") {
+                mixer.toggleMute(strip)
+            }
+        }
+        .padding(14)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.border, lineWidth: 1))
     }
 }
