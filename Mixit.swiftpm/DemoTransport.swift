@@ -48,27 +48,41 @@ final class DemoTransport: MixerTransport {
         let isOn: Bool
         /// Typical pre-fader signal level in dBFS, or nil for no signal.
         let signal: Float?
+        /// -1 (left) ... 1 (right).
+        var pan: Float = 0
+        var gate = false
+        var compressor = false
+        /// Send to Bus 2 "IEM Batería" in dB, nil for -∞.
+        var drumMonitor: Float? = nil
     }
 
+    // Names, colours and faders from the church's XR18; pans, dynamics and sends from the design.
     // X AIR colours: 1 red, 3 yellow, 6 cyan.
     private static let channels: [DemoChannel] = [
-        DemoChannel(name: "Pulpito", color: 3, db: 7.8, isOn: true, signal: -22),
-        DemoChannel(name: "Mic Oscar", color: 3, db: 6.9, isOn: false, signal: -20),
-        DemoChannel(name: "Guitarra Acus", color: 6, db: 0.7, isOn: false, signal: -16),
-        DemoChannel(name: "Bajo", color: 6, db: -3.0, isOn: false, signal: -14),
-        DemoChannel(name: "Mic Martin", color: 3, db: 7.3, isOn: false, signal: -20),
-        DemoChannel(name: "Mic Cata", color: 3, db: 6.0, isOn: false, signal: -21),
-        DemoChannel(name: "Voz Off", color: 1, db: -.infinity, isOn: false, signal: -30),
-        DemoChannel(name: "Guit Marcelo", color: 6, db: -8.5, isOn: false, signal: -17),
-        DemoChannel(name: "Martín", color: 6, db: -1.7, isOn: false, signal: -19),
-        DemoChannel(name: "Batería", color: 6, db: 0.7, isOn: false, signal: -12),
-        DemoChannel(name: "Maxi", color: 6, db: -6.0, isOn: false, signal: -18),
-        DemoChannel(name: "", color: 0, db: -.infinity, isOn: false, signal: nil),
+        DemoChannel(name: "Pulpito", color: 3, db: 7.8, isOn: true, signal: -14, gate: true, compressor: true, drumMonitor: -12),
+        DemoChannel(name: "Mic Oscar", color: 3, db: 6.9, isOn: true, signal: -11, pan: -0.1, gate: true, compressor: true, drumMonitor: -8),
+        DemoChannel(name: "Guitarra Acus", color: 6, db: 0.7, isOn: true, signal: -19, pan: -0.4, drumMonitor: 0),
+        DemoChannel(name: "Bajo", color: 6, db: -3.0, isOn: true, signal: -12, compressor: true, drumMonitor: 3),
+        DemoChannel(name: "Mic Martin", color: 3, db: 7.3, isOn: true, signal: -16, pan: 0.2, gate: true, compressor: true, drumMonitor: -6),
+        DemoChannel(name: "Mic Cata", color: 3, db: 6.0, isOn: true, signal: -24, pan: 0.3, gate: true, compressor: true, drumMonitor: -12),
+        DemoChannel(name: "Voz Off", color: 1, db: -.infinity, isOn: false, signal: -60),
+        DemoChannel(name: "Guit Marcelo", color: 6, db: -8.5, isOn: true, signal: -27, pan: 0.5, drumMonitor: -4),
+        DemoChannel(name: "Martín", color: 6, db: -1.7, isOn: true, signal: -18, pan: -0.6, drumMonitor: -2),
+        DemoChannel(name: "Batería", color: 6, db: 0.7, isOn: true, signal: -8, compressor: true, drumMonitor: 2),
+        DemoChannel(name: "Maxi", color: 6, db: -6.0, isOn: true, signal: -22, pan: 0.35, drumMonitor: -5),
+        DemoChannel(name: "", color: 0, db: -.infinity, isOn: true, signal: nil),
         DemoChannel(name: "", color: 0, db: -.infinity, isOn: true, signal: nil),
         DemoChannel(name: "", color: 0, db: -.infinity, isOn: true, signal: nil),
         DemoChannel(name: "", color: 0, db: -.infinity, isOn: true, signal: nil),
         DemoChannel(name: "", color: 0, db: -.infinity, isOn: true, signal: nil),
     ]
+
+    /// Monitor mixes (X AIR colours: 5 magenta, 4 blue, 2 green, 3 yellow, 7 white, 0 grey).
+    private static let buses: [(name: String, color: Int32)] = [
+        ("Monitor Pulpito", 5), ("IEM Batería", 4), ("IEM Bajo", 2),
+        ("Wedge Coro", 3), ("Stream", 7), ("Lobby", 0),
+    ]
+    private static let fxNames = ["Hall", "Plate", "Delay", "Chorus"]
 
     private static func initialState() -> [String: OSCArgument] {
         var values: [String: OSCArgument] = [:]
@@ -78,6 +92,7 @@ final class DemoTransport: MixerTransport {
             values["\(base)/config/color"] = .int(color)
             values["\(base)/mix/fader"] = .float(decibelsToFader(db))
             values["\(base)/mix/on"] = .int(isOn ? 1 : 0)
+            values["\(base)/mix/pan"] = .float(0.5)
             for send in 0..<sends {
                 // Varied but repeatable monitor send levels between -20 and 0 dB.
                 let db = Float((base.hashValueStable + send * 7) % 21) - 20
@@ -86,20 +101,28 @@ final class DemoTransport: MixerTransport {
         }
 
         for (index, channel) in channels.enumerated() {
-            strip(String(format: "/ch/%02d", index + 1), name: channel.name, color: channel.color,
-                  db: channel.db, isOn: channel.isOn, sends: 10)
+            let base = String(format: "/ch/%02d", index + 1)
+            strip(base, name: channel.name, color: channel.color, db: channel.db, isOn: channel.isOn, sends: 10)
+            values["\(base)/mix/pan"] = .float((channel.pan + 1) / 2)
+            values["\(base)/gate/on"] = .int(channel.gate ? 1 : 0)
+            values["\(base)/dyn/on"] = .int(channel.compressor ? 1 : 0)
+            values["\(base)/\(LevelControl.send(1).path)"] = .float(channel.drumMonitor.map(decibelsToFader) ?? 0)
+            values[String(format: "/-stat/solosw/%02d", index + 1)] = .int(0)
         }
-        strip("/rtn/aux", name: "", color: 0, db: -10, isOn: true, sends: 10)
-        for number in 1...4 {
-            strip("/rtn/\(number)", name: "", color: 0, db: -10, isOn: true, sends: 6)
+        strip("/rtn/aux", name: "Playback", color: 7, db: -10, isOn: true, sends: 10)
+        for (index, name) in fxNames.enumerated() {
+            strip("/rtn/\(index + 1)", name: name, color: 0, db: -10, isOn: true, sends: 6)
         }
-        for number in 1...6 {
-            strip("/bus/\(number)", name: "", color: 0, db: 0, isOn: true, sends: 0)
+        for (index, bus) in buses.enumerated() {
+            strip("/bus/\(index + 1)", name: bus.name, color: bus.color, db: 0, isOn: true, sends: 0)
         }
-        for number in 1...4 {
-            strip("/fxsend/\(number)", name: "", color: 0, db: 0, isOn: true, sends: 0)
+        for (index, name) in fxNames.enumerated() {
+            strip("/fxsend/\(index + 1)", name: name, color: 0, db: 0, isOn: true, sends: 0)
         }
         strip("/lr", name: "", color: 0, db: -1.5, isOn: true, sends: 0)
+        for group in 1...4 {
+            values["/config/mute/\(group)"] = .int(0)
+        }
         return values
     }
 

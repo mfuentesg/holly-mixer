@@ -6,80 +6,192 @@ struct ChannelStripView: View {
     /// What the fader controls: the strip's own fader or one of its sends.
     let control: LevelControl
     /// Colour of the selected bus when the faders show sends.
-    let accent: Color?
-    var width: CGFloat = 78
+    let busColor: Color?
+    /// The wide strip pinned on the right: Main LR, or the selected bus.
+    var isMaster = false
+
+    @State private var isDragging = false
 
     var body: some View {
         let level = strip.level(control)
-        let tint = accent ?? strip.color
+        let muted = !strip.isOn
+        let isSelected = !isMaster && mixer.selectedStrip == strip.kind
 
-        VStack(spacing: 10) {
-            header
+        VStack(spacing: 6) {
+            Rectangle()
+                .fill(barColor)
+                .opacity(muted ? 0.35 : strip.isNamed || isMaster ? 1 : 0.5)
+                .frame(height: 4)
+                .padding(.horizontal, isMaster ? -8 : -6)
 
-            HStack(spacing: 4) {
+            header(muted: muted)
+
+            if strip.isChannel {
+                processingPills
+            }
+            if strip.hasPan && !isMaster {
+                PanArc(pan: strip.pan)
+                    .frame(width: 66, height: 28)
+            }
+            if isMaster {
+                Text(strip.meterRight == nil ? "MONO" : "STEREO")
+                    .sectionLabelStyle()
+                    .frame(height: 28)
+            }
+
+            HStack(spacing: 3) {
                 FaderView(
                     value: level,
-                    tint: tint,
-                    isDimmed: !strip.isOn,
+                    lineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textDim),
+                    capLineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textTertiary),
+                    isMuted: muted,
+                    capWidth: isMaster ? 44 : 38,
                     label: faderLabel,
+                    isDragging: $isDragging,
                     onTouchingChanged: { mixer.setTouching(strip, control, $0) },
                     onChange: { mixer.setLevel(strip, control, to: $0) }
                 )
-                MeterView(level: strip.meter)
-                    .frame(width: 5)
-                    .padding(.vertical, 22)
+                meters
+                    .padding(.vertical, 28)
             }
+            .frame(maxHeight: .infinity)
 
             Text(formatDecibels(level))
-                .font(.system(.caption, design: .rounded).weight(.semibold).monospacedDigit())
-                .foregroundStyle(accent ?? Color.white.opacity(0.75))
+                .font(Theme.mono(12))
+                .foregroundStyle(dbColor(muted: muted))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
-                .background(Theme.control, in: Capsule())
+                .frame(height: 24)
+                .background(Theme.background, in: RoundedRectangle(cornerRadius: 6))
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(dbBorder, lineWidth: 1))
 
-            MuteButton(isMuted: !strip.isOn, name: strip.displayName) {
+            if strip.soloAddress != nil {
+                StripButton(title: "SOLO", isOn: strip.isSoloed, style: .solo, height: 40,
+                            accessibilityLabel: "Solo \(strip.displayName)") {
+                    mixer.toggleSolo(strip)
+                }
+            }
+            StripButton(title: "MUTE", isOn: muted, style: .mute, height: 44,
+                        accessibilityLabel: "Mute \(strip.displayName)") {
                 mixer.toggleMute(strip)
             }
         }
-        .padding(.horizontal, 7)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
-        .frame(width: width)
-        .background {
+        .padding(.horizontal, isMaster ? 8 : 6)
+        .padding(.bottom, 6)
+        .frame(width: isMaster ? 112 : 78)
+        .background(stripFill, in: RoundedRectangle(cornerRadius: 12))
+        .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .fill(stripBackground)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.cardBorder, lineWidth: 1))
+                .stroke(stripBorder(isSelected: isSelected), lineWidth: isSelected ? 1.5 : 1)
+        }
+        .overlay {
+            if strip.changedElsewhere {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(hex: 0xEBEBEB, opacity: 0.55), lineWidth: 2)
+                    .shadow(color: Color(hex: 0xEBEBEB, opacity: 0.18), radius: 11)
+                    .transition(.opacity)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if strip.changedElsewhere {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 8, weight: .heavy))
+                    .foregroundStyle(Theme.background)
+                    .frame(width: 16, height: 16)
+                    .background(Color(hex: 0xEBEBEB), in: Circle())
+                    .padding(.top, 9)
+                    .padding(.trailing, 5)
+                    .accessibilityLabel("Changed on another device")
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .animation(.easeOut(duration: 0.25), value: strip.changedElsewhere)
+    }
+
+    // MARK: - Parts
+
+    private var barColor: Color {
+        if isMaster, case .main = strip.kind { return Color(hex: 0xEBEBEB) }
+        return busColor.map { isMaster ? $0 : strip.color } ?? strip.color
+    }
+
+    private func header(muted: Bool) -> some View {
+        Button {
+            mixer.selectedStrip = strip.kind
+        } label: {
+            VStack(spacing: 2) {
+                Text(isMaster ? masterTag : strip.shortLabel)
+                    .font(Theme.mono(11, .regular))
+                    .tracking(isMaster ? 0.6 : 0)
+                    .foregroundStyle(Theme.textTertiary)
+                Text(strip.displayName)
+                    .font(Theme.rounded(isMaster ? 14 : 13, isMaster ? .heavy : .bold))
+                    .foregroundStyle(muted ? Theme.textMuted : strip.isNamed || isMaster ? Theme.textPrimary : Color(hex: 0x7C818B))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.75)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 44, alignment: .top)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isMaster)
+        .accessibilityLabel("Select \(strip.displayName)")
+    }
+
+    private var masterTag: String {
+        switch strip.kind {
+        case .main: return "MAIN"
+        case .bus(let number): return "BUS \(number)"
+        case .fxSend(let number): return "FX \(number)"
+        default: return strip.shortLabel
         }
     }
 
-    private var header: some View {
-        VStack(spacing: 3) {
-            Capsule()
-                .fill(strip.color)
-                .frame(height: 4)
-                .padding(.horizontal, 10)
-                .shadow(color: strip.color.opacity(0.6), radius: 4)
-            Text(strip.shortLabel)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
-                .foregroundStyle(.secondary)
-                .padding(.top, 4)
-            Text(strip.displayName)
-                .font(.system(.footnote, design: .rounded).weight(.semibold))
-                .foregroundStyle(strip.isOn ? Color.white : Color.white.opacity(0.45))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+    private var processingPills: some View {
+        HStack(spacing: 4) {
+            Pill(text: "G", isOn: strip.gateOn, onColor: Theme.meterGreen, onText: Color(hex: 0x6FE597))
+            Pill(text: "C", isOn: strip.compressorOn, onColor: Theme.meterAmber, onText: Theme.amberText)
+                .layoutPriority(1)
         }
-        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Gate \(strip.gateOn ? "on" : "off"), compressor \(strip.compressorOn ? "on" : "off")")
     }
 
-    private var stripBackground: some ShapeStyle {
-        if let accent, control != .fader {
-            return AnyShapeStyle(LinearGradient(
-                colors: [accent.opacity(0.16), Theme.card],
-                startPoint: .top, endPoint: .bottom
-            ))
+    @ViewBuilder
+    private var meters: some View {
+        if let right = strip.meterRight {
+            HStack(spacing: 3) {
+                MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)
+                MeterView(level: right, peak: strip.peak).frame(width: 7)
+            }
+        } else {
+            MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)
         }
-        return AnyShapeStyle(Theme.card)
+    }
+
+    private var stripFill: Color {
+        if let busColor { return busColor.opacity(isMaster ? 0.16 : 0.10) }
+        return Theme.strip
+    }
+
+    private func stripBorder(isSelected: Bool) -> Color {
+        if isSelected { return Theme.accent }
+        if let busColor { return busColor.opacity(isMaster ? 0.55 : 0.32) }
+        return isMaster ? Theme.borderStrong : Theme.border
+    }
+
+    private func dbColor(muted: Bool) -> Color {
+        if muted { return Theme.textMuted }
+        if isDragging { return Theme.accent }
+        if strip.changedElsewhere { return .white }
+        return Theme.textBright
+    }
+
+    private var dbBorder: Color {
+        if isDragging { return Theme.accent.opacity(0.6) }
+        if strip.changedElsewhere { return Color(hex: 0xEBEBEB, opacity: 0.6) }
+        return Color.white.opacity(0.08)
     }
 
     private var faderLabel: String {
@@ -92,62 +204,112 @@ struct ChannelStripView: View {
     }
 }
 
-struct MuteButton: View {
-    let isMuted: Bool
-    let name: String
+/// Small status pill, e.g. G (gate) and C (compressor).
+struct Pill: View {
+    let text: String
+    let isOn: Bool
+    let onColor: Color
+    let onText: Color
+
+    var body: some View {
+        Text(text)
+            .font(Theme.mono(10, .bold))
+            .foregroundStyle(isOn ? onText : Theme.textDim)
+            .frame(maxWidth: .infinity)
+            .frame(height: 18)
+            .background(isOn ? onColor.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: 5))
+            .overlay(RoundedRectangle(cornerRadius: 5).stroke(isOn ? onColor.opacity(0.35) : Color.white.opacity(0.08), lineWidth: 1))
+    }
+}
+
+/// SOLO and MUTE buttons.
+struct StripButton: View {
+    enum Style { case mute, solo }
+
+    let title: String
+    let isOn: Bool
+    let style: Style
+    let height: CGFloat
+    let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .font(.system(size: 10, weight: .bold))
-                Text("MUTE")
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .foregroundStyle(isMuted ? Color.white : Color.white.opacity(0.5))
-            .background {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isMuted
-                          ? AnyShapeStyle(LinearGradient(colors: [Theme.mute, Theme.mute.opacity(0.75)],
-                                                         startPoint: .top, endPoint: .bottom))
-                          : AnyShapeStyle(Theme.control))
-                    .shadow(color: isMuted ? Theme.mute.opacity(0.55) : .clear, radius: 6)
-            }
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(isMuted ? 0.25 : 0.06), lineWidth: 1))
+            Text(title)
+                .font(.system(size: 11, weight: .heavy))
+                .tracking(0.8)
+                .foregroundStyle(foreground)
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .background(isOn ? onColor : Theme.control, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(border, lineWidth: 1))
+                .shadow(color: isOn ? onColor.opacity(style == .mute ? 0.45 : 0.35) : .clear,
+                        radius: style == .mute ? 9 : 7)
         }
         .buttonStyle(.plain)
-        .sensoryFeedback(.impact(weight: .medium), trigger: isMuted)
-        .accessibilityLabel(isMuted ? "Unmute \(name)" : "Mute \(name)")
+        .sensoryFeedback(.impact(weight: .medium), trigger: isOn)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue(isOn ? "on" : "off")
+    }
+
+    private var onColor: Color { style == .mute ? Theme.mute : Theme.solo }
+
+    private var foreground: Color {
+        guard isOn else { return style == .mute ? Theme.textControl : Theme.textSecondary }
+        return style == .mute ? .white : Theme.onSolo
+    }
+
+    private var border: Color {
+        guard isOn else { return Color.white.opacity(0.08) }
+        return style == .mute ? Theme.muteBorder : Theme.solo
     }
 }
 
-/// LED-style segmented meter, -60...0 dBFS.
-struct MeterView: View {
-    let level: Float
+/// Pan position as an arc: centre at the top, left and right along the curve.
+struct PanArc: View {
+    /// 0...1, 0.5 = centre.
+    let pan: Float
 
     var body: some View {
         Canvas { context, size in
-            let segments = max(min(Int(size.height / 6), 48), 8)
-            let segmentHeight = size.height / CGFloat(segments)
-            let lit = Int((min(max((level + 60) / 60, 0), 1) * Float(segments)).rounded())
-            for index in 0..<segments {
-                let db = -60 + Float(index) / Float(segments) * 60
-                let color = db >= -6 ? Theme.meterRed : db >= -18 ? Theme.meterAmber : Theme.meterGreen
-                let rect = CGRect(
-                    x: 0,
-                    y: size.height - CGFloat(index + 1) * segmentHeight,
-                    width: size.width,
-                    height: segmentHeight - 1.5
-                )
-                context.fill(
-                    Path(roundedRect: rect, cornerRadius: 1),
-                    with: .color(index < lit ? color : color.opacity(0.1))
-                )
+            let center = CGPoint(x: size.width / 2, y: 24)
+            let radius: CGFloat = 20
+            // Angle 0 = straight up, -90 = hard left, +90 = hard right.
+            func point(_ degrees: Double) -> CGPoint {
+                let radians = degrees * .pi / 180
+                return CGPoint(x: center.x + radius * CGFloat(sin(radians)),
+                               y: center.y - radius * CGFloat(cos(radians)))
             }
+            func arc(from start: Double, to end: Double) -> Path {
+                var path = Path()
+                let steps = 24
+                for step in 0...steps {
+                    let p = point(start + (end - start) * Double(step) / Double(steps))
+                    if step == 0 { path.move(to: p) } else { path.addLine(to: p) }
+                }
+                return path
+            }
+            let rounded = StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+            context.stroke(arc(from: -90, to: 90), with: .color(.white.opacity(0.14)), style: rounded)
+
+            let amount = Double(pan) * 2 - 1
+            if abs(amount) > 0.01 {
+                context.stroke(arc(from: 0, to: amount * 90), with: .color(Theme.textControl), style: rounded)
+            }
+            let dot = point(amount * 90)
+            context.fill(Path(ellipseIn: CGRect(x: dot.x - 3.5, y: dot.y - 3.5, width: 7, height: 7)),
+                         with: .color(Theme.textPrimary))
+            context.draw(Text(label).font(Theme.mono(9, .semibold)).foregroundStyle(Theme.textTertiary),
+                         at: CGPoint(x: center.x, y: 22), anchor: .center)
         }
-        .accessibilityHidden(true)
+        .accessibilityElement()
+        .accessibilityLabel("Pan")
+        .accessibilityValue(label)
+    }
+
+    private var label: String {
+        let amount = Int((Double(pan) * 2 - 1) * 100)
+        if amount == 0 { return "C" }
+        return (amount < 0 ? "L" : "R") + "\(abs(amount))"
     }
 }
