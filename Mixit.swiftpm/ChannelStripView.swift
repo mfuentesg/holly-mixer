@@ -26,6 +26,8 @@ struct ChannelStripView: View {
 
             header(muted: muted)
 
+            StripEQThumbnail(strip: strip, width: isMaster ? 96 : 66)
+
             if strip.isChannel {
                 processingPills
             }
@@ -64,6 +66,20 @@ struct ChannelStripView: View {
                 .background(Theme.background, in: RoundedRectangle(cornerRadius: 6))
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(dbBorder, lineWidth: 1))
 
+            if isMaster {
+                Button {
+                    mixer.presentedScreen = .channel(strip.kind)
+                } label: {
+                    Text(strip.kind == .main ? "EQ · Dyn" : "Bus EQ · Dyn")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.textControl)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(Theme.control, in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
             if strip.soloAddress != nil {
                 StripButton(title: "SOLO", isOn: strip.isSoloed, style: .solo, height: 40,
                             accessibilityLabel: "Solo \(strip.displayName)") {
@@ -116,6 +132,9 @@ struct ChannelStripView: View {
 
     private func header(muted: Bool) -> some View {
         Button {
+            if mixer.selectedStrip == strip.kind || isMaster {
+                mixer.presentedScreen = .channel(strip.kind)
+            }
             mixer.selectedStrip = strip.kind
         } label: {
             VStack(spacing: 2) {
@@ -135,8 +154,8 @@ struct ChannelStripView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(isMaster)
-        .accessibilityLabel("Select \(strip.displayName)")
+        .accessibilityLabel(isMaster ? "Open \(strip.displayName) processing" : "Select \(strip.displayName)")
+        .accessibilityHint(isMaster ? "" : "Tap again to open the channel")
     }
 
     private var masterTag: String {

@@ -64,6 +64,12 @@ struct MixerView: View {
         .background(Theme.background.ignoresSafeArea())
         .animation(.easeInOut(duration: 0.2), value: target)
         .animation(.easeInOut(duration: 0.2), value: isReconnecting)
+        .fullScreenCover(item: Binding(get: { mixer.presentedScreen }, set: { mixer.presentedScreen = $0 })) { screen in
+            PresentedScreenView(screen: screen)
+                .environment(mixer)
+                .preferredColorScheme(.dark)
+                .tint(Theme.accent)
+        }
         .onChange(of: target) { _, newTarget in
             if newTarget != .main && bank == .masters { bank = .channels1to8 }
         }
@@ -137,6 +143,11 @@ struct MixerHeader: View {
             Spacer(minLength: 8)
 
             if !isCompact {
+                HeaderSceneControl()
+                Spacer(minLength: 8)
+            }
+
+            if !isCompact {
                 HStack(spacing: 4) {
                     ForEach(1...4, id: \.self) { number in
                         let isOn = mixer.muteGroups[number - 1]
@@ -161,6 +172,7 @@ struct MixerHeader: View {
             }
 
             UndoButton()
+            MoreMenu()
 
             if !isCompact {
                 MiniStereoMeter(left: mixer.main.meter, right: mixer.main.meterRight ?? mixer.main.meter)
@@ -190,6 +202,67 @@ struct MixerHeader: View {
         .overlay(alignment: .bottom) {
             Rectangle().fill(Theme.border).frame(height: 1)
         }
+    }
+}
+
+/// The page for a `Screen`.
+struct PresentedScreenView: View {
+    @Environment(Mixer.self) private var mixer
+    let screen: Screen
+
+    var body: some View {
+        switch screen {
+        case .channel(let kind):
+            if let strip = mixer.strip(kind) {
+                ChannelDetailView(strip: strip)
+            }
+        case .scenes:
+            ScenesView()
+        case .serviceMode:
+            ServiceModeView()
+        case .serviceEditor:
+            ServiceEditorView()
+        case .monitorPairing:
+            MonitorPairingView()
+        }
+    }
+}
+
+/// Header menu for the less frequent pages.
+struct MoreMenu: View {
+    @Environment(Mixer.self) private var mixer
+
+    var body: some View {
+        Menu {
+            Button {
+                mixer.presentedScreen = .scenes
+            } label: {
+                Label("Order of service", systemImage: "list.bullet.rectangle")
+            }
+            Button {
+                mixer.presentedScreen = .serviceMode
+            } label: {
+                Label("Start Service Mode", systemImage: "lock")
+            }
+            Button {
+                mixer.presentedScreen = .serviceEditor
+            } label: {
+                Label("Edit Service Mode", systemImage: "slider.horizontal.3")
+            }
+            Button {
+                mixer.presentedScreen = .monitorPairing
+            } label: {
+                Label("Pair a musician's iPhone", systemImage: "qrcode")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Theme.textControl)
+                .frame(width: 44, height: 44)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        }
+        .accessibilityLabel("More")
     }
 }
 

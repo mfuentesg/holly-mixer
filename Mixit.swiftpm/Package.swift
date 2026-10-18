@@ -32,7 +32,8 @@ let package = Package(
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
             ],
             capabilities: [
-                .localNetwork(purposeString: "Mixit connects to your X AIR mixer on the local network.")
+                .localNetwork(purposeString: "Mixit connects to your X AIR mixer on the local network."),
+                .camera(purposeString: "Mixit scans the pairing code shown on the sound desk's iPad.")
             ],
             appCategory: .music
         )

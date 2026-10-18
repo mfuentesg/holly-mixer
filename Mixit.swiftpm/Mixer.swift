@@ -40,6 +40,8 @@ final class Mixer {
     var selectedMix = MixTarget.main
     /// The strip highlighted for editing.
     var selectedStrip: Strip.Kind? = .channel(1)
+    /// Full-screen page shown over the mixer (channel detail, scenes, Service Mode…).
+    var presentedScreen: Screen?
 
     let channels: [Strip]
     let auxIn: Strip
@@ -70,6 +72,9 @@ final class Mixer {
     /// Set once the initial sync is done, so the sync itself doesn't flash every strip.
     @ObservationIgnored private var isSynced = false
     @ObservationIgnored private var flashGeneration: [Strip.Kind: Int] = [:]
+    /// Observable values for any other OSC address (EQ, dynamics, preamp…), created on demand.
+    @ObservationIgnored private var params: [String: Param] = [:]
+    @ObservationIgnored private var editStartValues: [String: OSCArgument] = [:]
 
     /// Levels are sent at most this often while dragging.
     private static let levelSendInterval: TimeInterval = 0.025
@@ -206,6 +211,7 @@ final class Mixer {
 
     private func requestState() {
         let addresses = allStrips.flatMap(\.syncAddresses) + (1...4).map { "/config/mute/\($0)" }
+            + params.keys.sorted()
         Task {
             // Small batches so the mixer isn't flooded with a burst of requests.
             for (index, address) in addresses.enumerated() {
@@ -310,6 +316,9 @@ final class Mixer {
     /// the user's finger are ignored, and changes made elsewhere make the strip flash.
     private func route(_ message: OSCMessage, fromMixer: Bool) {
         if fromMixer && touchedAddresses.contains(message.address) { return }
+        if let param = params[message.address], let value = message.arguments.first {
+            param.value = value
+        }
         let parts = message.address.split(separator: "/").map(String.init)
         if parts.count == 3, parts[0] == "config", parts[1] == "mute",
            let number = Int(parts[2]), (1...4).contains(number), case .int(let value)? = message.arguments.first {
@@ -430,6 +439,74 @@ final class Mixer {
         }
     }
 
+    // MARK: - Any parameter
+
+    /// The observable value of an OSC address, e.g. "/ch/01/eq/1/f". Ask the mixer for it with `request`.
+    func param(_ address: String) -> Param {
+        if let param = params[address] { return param }
+        let param = Param(address: address)
+        params[address] = param
+        return param
+    }
+
+    /// Asks the mixer for the current values of these addresses (answers update their `Param`s).
+    func request(_ addresses: [String]) {
+        for address in addresses {
+            _ = param(address)
+        }
+        Task {
+            for (index, address) in addresses.enumerated() {
+                connection.send(OSCMessage(address))
+                if index % 8 == 7 {
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
+            }
+        }
+    }
+
+    /// Sets a parameter once (a switch, a picker). With a `label` the change can be undone.
+    func set(_ address: String, _ value: OSCArgument, label: String? = nil) {
+        let param = param(address)
+        let old = param.value
+        param.value = value
+        connection.send(OSCMessage(address, value))
+        if let label, let old, old != value {
+            record(Change(address: address, old: old, new: value, label: label))
+        }
+    }
+
+    /// Call when a finger starts dragging a continuous control (knob, EQ node).
+    /// Incoming values for it are ignored until `endEdit`.
+    func beginEdit(_ address: String) {
+        touchedAddresses.insert(address)
+        editStartValues[address] = param(address).value
+    }
+
+    /// Sends a continuous value while dragging, at most every 25 ms.
+    func setContinuous(_ address: String, _ value: Float) {
+        param(address).value = .float(value)
+        if Date().timeIntervalSince(lastSent[address] ?? .distantPast) >= Self.levelSendInterval {
+            lastSent[address] = Date()
+            pendingAddresses.remove(address)
+            connection.send(OSCMessage(address, .float(value)))
+        } else {
+            pendingAddresses.insert(address)
+        }
+    }
+
+    /// Call when the finger lifts: sends the final value and records one undo step.
+    func endEdit(_ address: String, label: String) {
+        touchedAddresses.remove(address)
+        let param = param(address)
+        if pendingAddresses.remove(address) != nil, let value = param.value {
+            lastSent[address] = Date()
+            connection.send(OSCMessage(address, value))
+        }
+        if let old = editStartValues.removeValue(forKey: address), let new = param.value, old != new {
+            record(Change(address: address, old: old, new: new, label: label))
+        }
+    }
+
     // MARK: - Undo
 
     private func record(_ change: Change) {
@@ -446,6 +523,46 @@ final class Mixer {
         route(message, fromMixer: false)
         connection.send(message)
     }
+}
+
+/// Pages shown full screen over the mixer.
+enum Screen: Identifiable, Hashable {
+    case channel(Strip.Kind)
+    case scenes
+    case serviceMode
+    case serviceEditor
+    case monitorPairing
+
+    var id: Self { self }
+}
+
+/// The value of one OSC address, observable by views.
+@MainActor
+@Observable
+final class Param {
+    let address: String
+    var value: OSCArgument?
+
+    init(address: String) {
+        self.address = address
+    }
+
+    var float: Float? {
+        if case .float(let value)? = value { return value }
+        return nil
+    }
+
+    var int: Int? {
+        if case .int(let value)? = value { return Int(value) }
+        return nil
+    }
+
+    var string: String? {
+        if case .string(let value)? = value { return value }
+        return nil
+    }
+
+    var bool: Bool? { int.map { $0 != 0 } }
 }
 
 /// X32/X AIR fader taper: position 0...1 to dB (-inf...+10).

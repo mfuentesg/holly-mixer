@@ -8,7 +8,7 @@ final class DemoTransport: MixerTransport {
     var onMessage: ((OSCMessage) -> Void)?
     var onStateChange: ((NWConnection.State) -> Void)?
 
-    private var values = DemoTransport.initialState()
+    private var values = DemoTransport.initialState().merging(DemoSeeds.channelDetail()) { current, _ in current }
     private var meterTask: Task<Void, Never>?
 
     func connect(host: String) {

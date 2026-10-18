@@ -16,6 +16,7 @@ struct MixitApp: App {
 
 struct ContentView: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @AppStorage("mixerHost") private var host = "192.168.1.2"
     @AppStorage("recentMixers") private var recentJSON = "[]"
     @State private var didAutoConnect = false
@@ -23,7 +24,11 @@ struct ContentView: View {
     var body: some View {
         Group {
             if mixer.hasSession {
-                MixerView()
+                if sizeClass == .compact {
+                    PhoneRootView()
+                } else {
+                    MixerView()
+                }
             } else {
                 ConnectView(host: $host)
             }
