@@ -468,7 +468,7 @@ final class Mixer {
     func set(_ address: String, _ value: OSCArgument, label: String? = nil) {
         let param = param(address)
         let old = param.value
-        param.value = value
+        route(OSCMessage(address, value), fromMixer: false)
         connection.send(OSCMessage(address, value))
         if let label, let old, old != value {
             record(Change(address: address, old: old, new: value, label: label))
@@ -484,7 +484,8 @@ final class Mixer {
 
     /// Sends a continuous value while dragging, at most every 25 ms.
     func setContinuous(_ address: String, _ value: Float) {
-        param(address).value = .float(value)
+        _ = param(address)
+        route(OSCMessage(address, .float(value)), fromMixer: false)
         if Date().timeIntervalSince(lastSent[address] ?? .distantPast) >= Self.levelSendInterval {
             lastSent[address] = Date()
             pendingAddresses.remove(address)
