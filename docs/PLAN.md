@@ -306,9 +306,25 @@ scene timeline, feedback assistant), undo, and a native iPad-first feel.
 
 ---
 
-## 10. Next steps
+## 10. Our church setup
 
-1. Confirm the XR18 firmware version and how it's networked (built-in AP or router).
+The XR18 is connected by **Ethernet to the church router**, and the iPad/iPhone joins that router's Wi-Fi.
+This is the recommended setup, and it shapes the first version:
+
+- **Connection:** the app talks to the mixer's LAN IP on UDP 10024. The XR18's built-in AP is not used.
+- **Stable IP:** give the XR18 a **DHCP reservation** (or a static IP outside the DHCP pool) on the
+  router, so the app's "recent mixer" entry never goes stale. The app still re-discovers by `/xinfo`
+  if the saved IP stops answering.
+- **Discovery on this network:** a unicast `/xinfo` sweep of the router's /24 subnet finds the mixer
+  without needing Apple's multicast entitlement, so Phase 0 can start before Apple approves it.
+- **Router settings to check:** "AP/client isolation" and "guest network" must be off for the
+  Wi-Fi the tablets use, or they can't reach the mixer. Use the 5 GHz band for the iPads.
+- **Onboarding** gets a "Check my network" step: same subnet, mixer reachable, round-trip latency,
+  packet loss. It also warns if the device is on a guest SSID.
+
+## 11. Next steps
+
+1. Confirm the XR18 firmware version (Setup → Info in X AIR) and the mixer's IP address on the router.
 2. Phase 0 spike: create the Xcode project + `MixerKit` package, OSC codec, connect to the mixer.
 3. Clickable mockups of the iPad mixer view, channel inspector and Service Mode to validate the UX
    with the volunteers who'll actually use it.
