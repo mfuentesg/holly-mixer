@@ -318,6 +318,16 @@ This is the recommended setup, and it shapes the first version:
 | IP | 192.168.1.2 (router LAN 192.168.1.0/24) |
 | Name | `XR18-C3-D7-F9` (factory default, derived from the MAC address) |
 
+**Probe results (iPad on church Wi-Fi, run in a-Shell):**
+
+- `/xinfo`, `/status`, single-parameter reads and the `/meters/1` subscription (40 values) all work.
+- Latency: median 3.0 ms, max 3.2 ms, 0/20 lost. The network has plenty of headroom.
+- The very first send failed with `EHOSTUNREACH` (errno 65) until iOS's Local Network permission
+  was granted. The app must treat that error as "waiting for permission" and retry, not as "mixer offline".
+- `/node ch/01/mix` got no reply on the `/node` address (the X32 replies on `node`, without a slash;
+  now under test). If firmware 1.16 doesn't support it, the initial sync falls back to pipelined
+  per-parameter reads. At 3 ms RTT and ~30 requests in flight, a full sync still fits the 2 s budget.
+
 To check the connection from a laptop on the church Wi-Fi, run the read-only probe
 `python3 tools/xr18_probe.py 192.168.1.2`. It never changes mixer settings, so it's safe during a service.
 

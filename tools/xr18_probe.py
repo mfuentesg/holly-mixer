@@ -112,9 +112,13 @@ class Probe:
     def send(self, host: str, address: str, *args):
         self.sock.sendto(osc_message(address, *args), (host, PORT))
 
-    def query(self, host: str, address: str, *args, expect: str = None):
-        """Send a message and wait for the reply to `expect` (default: same address)."""
-        expect = expect or address
+    def query(self, host: str, address: str, *args, expect=None):
+        """Send a message and wait for a reply whose address is in `expect` (default: same address).
+
+        Replies to other addresses are kept in `self.unmatched` for diagnostics.
+        """
+        expect = (expect,) if isinstance(expect, str) else expect or (address,)
+        self.unmatched = []
         self.send(host, address, *args)
         deadline = time.monotonic() + self.sock.gettimeout()
         while time.monotonic() < deadline:
@@ -123,8 +127,9 @@ class Probe:
             except socket.timeout:
                 break
             reply_address, reply_args = osc_parse(data)
-            if reply_address == expect:
+            if reply_address in expect:
                 return reply_args
+            self.unmatched.append((reply_address, reply_args))
         return None
 
 
@@ -154,14 +159,21 @@ def run(host: str) -> int:
     probe = Probe()
     ok = True
 
-    def check(label, result):
+    def check(label, result, optional=False):
         nonlocal ok
-        print(f"[{'ok' if result is not None else 'FAIL'}] {label}")
-        if result is None:
+        print(f"[{'ok' if result is not None else 'skip' if optional else 'FAIL'}] {label}")
+        if result is None and not optional:
             ok = False
         return result
 
-    info = check("/xinfo (model / firmware)", probe.query(host, "/xinfo"))
+    try:
+        info = probe.query(host, "/xinfo")
+    except OSError as error:
+        # iOS/macOS refuse local network traffic until the user allows it.
+        print(f"[FAIL] cannot reach {host}: {error}\nIf a 'Local Network' permission prompt"
+              " appeared, tap Allow and run this again.")
+        return 1
+    info = check("/xinfo (model / firmware)", info)
     if info is None:
         print(f"\nNo reply from {host}:{PORT}. Check the IP, that this laptop is on the same"
               " network (not a guest Wi-Fi), and that client isolation is off.")
@@ -180,7 +192,15 @@ def run(host: str) -> int:
     if main is not None:
         print(f"      main LR fader {format_db(fader_to_db(main[0]))}")
 
-    node = check("/node ch/01/mix (bulk read)", probe.query(host, "/node", "ch/01/mix"))
+    # X32 answers /node on address "node" (no slash); try both spellings of the argument.
+    node = None
+    for path in ("ch/01/mix", "/ch/01/mix"):
+        node = probe.query(host, "/node", path, expect=("node", "/node"))
+        if node is not None:
+            break
+        for reply in probe.unmatched:
+            print(f"      unexpected reply to /node {path}: {reply}")
+    check(f"/node {path} (bulk read, optional)", node, optional=True)
     if node:
         print(f"      {node[0].strip()}")
 
