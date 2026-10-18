@@ -144,10 +144,8 @@ struct FaderView: View {
 
 /// Inverse of `faderToDecibels`: dB to fader position 0...1.
 func decibelsToFader(_ db: Float) -> Float {
-    switch db {
-    case -10...: return min((db + 30) / 40, 1)
-    case -30 ..< -10: return (db + 50) / 80
-    case -60 ..< -30: return (db + 70) / 160
-    default: return max((db + 90) / 480, 0)
-    }
+    if db >= -10 { return min((db + 30) / 40, 1) }
+    if db >= -30 { return (db + 50) / 80 }
+    if db >= -60 { return (db + 70) / 160 }
+    return max((db + 90) / 480, 0)
 }
