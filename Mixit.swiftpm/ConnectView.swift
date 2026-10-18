@@ -39,6 +39,13 @@ struct ConnectView: View {
             .controlSize(.large)
             .disabled(!isBusy && host.isEmpty)
 
+            Button {
+                mixer.startDemo()
+            } label: {
+                Label("Try the demo mixer", systemImage: "play.circle")
+            }
+            .buttonStyle(.bordered)
+
             statusView
                 .frame(maxWidth: 360)
                 .multilineTextAlignment(.center)

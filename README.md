@@ -12,6 +12,9 @@ for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 - Changes made on the mixer or in other apps show up live
 - Faders follow your finger without jumping; double-tap a fader for 0 dB
 
+No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the
+church's channel names, faders and mutes, and moving meters.
+
 ⚠️ Moving a fader or mute in Mixit really changes the mixer. Try it outside service times.
 
 ## Run it on an iPad with Swift Playgrounds

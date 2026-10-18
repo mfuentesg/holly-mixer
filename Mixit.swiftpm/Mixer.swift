@@ -21,6 +21,8 @@ final class Mixer {
     private(set) var mixerName = ""
     private(set) var model = ""
     private(set) var firmware = ""
+    /// True while talking to the built-in demo mixer instead of real hardware.
+    private(set) var isDemo = false
 
     /// The mix the faders currently control.
     var selectedMix = MixTarget.main
@@ -35,7 +37,7 @@ final class Mixer {
     /// Strips that feed the mixes: channels 1-16, aux in and FX returns.
     var inputs: [Strip] { channels + [auxIn] + fxReturns }
 
-    @ObservationIgnored private let connection = MixerConnection()
+    @ObservationIgnored private var connection: MixerTransport = MixerConnection()
     @ObservationIgnored private var stripsByBase: [String: Strip] = [:]
     @ObservationIgnored private var heartbeat: Task<Void, Never>?
     @ObservationIgnored private var lastReply = Date.distantPast
@@ -60,10 +62,16 @@ final class Mixer {
         for strip in allStrips {
             stripsByBase[strip.base] = strip
         }
-        connection.onMessage = { [weak self] message in
+        use(connection)
+    }
+
+    private func use(_ transport: MixerTransport) {
+        connection.disconnect()
+        connection = transport
+        transport.onMessage = { [weak self] message in
             Task { @MainActor in self?.handle(message) }
         }
-        connection.onStateChange = { [weak self] state in
+        transport.onStateChange = { [weak self] state in
             Task { @MainActor in self?.handle(state) }
         }
     }
@@ -82,6 +90,21 @@ final class Mixer {
     // MARK: - Connection
 
     func connect(host: String) {
+        if isDemo {
+            use(MixerConnection())
+        }
+        isDemo = false
+        start(host: host)
+    }
+
+    /// Connects to the built-in demo mixer, for trying the app without hardware.
+    func startDemo() {
+        use(DemoTransport())
+        isDemo = true
+        start(host: "demo")
+    }
+
+    private func start(host: String) {
         self.host = host
         status = .connecting
         hasSession = false

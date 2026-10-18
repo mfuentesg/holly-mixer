@@ -1,8 +1,17 @@
 import Foundation
 import Network
 
+/// Carries OSC messages to and from a mixer: the real one over UDP, or the in-app demo.
+protocol MixerTransport: AnyObject {
+    var onMessage: ((OSCMessage) -> Void)? { get set }
+    var onStateChange: ((NWConnection.State) -> Void)? { get set }
+    func connect(host: String)
+    func disconnect()
+    func send(_ message: OSCMessage)
+}
+
 /// UDP transport to an X AIR mixer. Callbacks arrive on a private background queue.
-final class MixerConnection {
+final class MixerConnection: MixerTransport {
     static let port: UInt16 = 10024
 
     var onMessage: ((OSCMessage) -> Void)?

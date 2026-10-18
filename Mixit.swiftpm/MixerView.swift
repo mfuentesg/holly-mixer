@@ -147,13 +147,14 @@ struct MixerView: View {
 
     private var statusPill: some View {
         let connected = mixer.status == .connected
-        let color = connected ? Theme.meterGreen : Color.orange
+        let color = mixer.isDemo ? Color.purple : connected ? Theme.meterGreen : Color.orange
+        let text = mixer.isDemo ? "Demo mixer" : connected ? "Connected" : "Reconnecting…"
         return HStack(spacing: 6) {
             Circle()
                 .fill(color)
                 .frame(width: 7, height: 7)
                 .shadow(color: color, radius: 3)
-            Text(connected ? "Connected" : "Reconnecting…")
+            Text(text)
                 .font(.system(.caption, design: .rounded).weight(.semibold))
         }
         .foregroundStyle(color)
