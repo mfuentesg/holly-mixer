@@ -3,10 +3,9 @@ import UIKit
 
 #if DEBUG
 /// Debug builds only: `SIMCTL_CHILD_HM_SHOT=<name>` opens the demo mixer on a given screen, so the manual's
-/// screenshots can be taken from the command line. `HM_BANK` and `HM_TAB` pick the strip bank and detail tab.
+/// screenshots can be taken from the command line. `HM_TAB` picks the detail tab.
 enum ScreenshotMode {
     static var name: String? { ProcessInfo.processInfo.environment["HM_SHOT"] }
-    static var bank: String? { ProcessInfo.processInfo.environment["HM_BANK"] }
     static var tab: String? { ProcessInfo.processInfo.environment["HM_TAB"] }
 
     @MainActor
@@ -29,12 +28,9 @@ enum ScreenshotMode {
         case "bus2": mixer.selectedMix = .bus(2)
         case "channel": mixer.selectedStrip = .channel(3); mixer.presentedScreen = .channel(.channel(3))
         case "master": mixer.presentedScreen = .channel(.main)
-        case "scenes": mixer.presentedScreen = .scenes
-        case "preview":
-            mixer.presentedScreen = .scenes
-            try? await Task.sleep(for: .seconds(1))
-            SceneStore.shared.selectedSceneID = SceneStore.shared.nextScene?.id
         case "backups": mixer.presentedScreen = .backups
+        case "settings": mixer.presentedScreen = .settings
+        case "mutegroups": mixer.presentedScreen = .muteGroups
         case "snapshots": mixer.presentedScreen = .snapshots
         case "pairing": mixer.presentedScreen = .monitorPairing
         case "select": mixer.selectedStrip = .channel(3)

@@ -18,12 +18,11 @@ iPhone, y se conecta a la consola por Wi-Fi o por cable de red.
 4. [Página de un canal](#4-página-de-un-canal)
 5. [El iPhone](#5-el-iphone)
 6. [Modo músico («Mi mezcla»)](#6-modo-músico-mi-mezcla)
-7. [Escenas y orden del servicio](#7-escenas-y-orden-del-servicio)
-8. [Copia de seguridad de ajustes](#8-copia-de-seguridad-de-ajustes)
-9. [Snapshots de la consola](#9-snapshots-de-la-consola)
-10. [Idioma](#10-idioma)
-11. [Preguntas frecuentes](#11-preguntas-frecuentes)
-12. [Glosario](#12-glosario)
+7. [Copia de seguridad de ajustes](#7-copia-de-seguridad-de-ajustes)
+8. [Snapshots de la consola](#8-snapshots-de-la-consola)
+9. [Idioma](#9-idioma)
+10. [Preguntas frecuentes](#10-preguntas-frecuentes)
+11. [Glosario](#11-glosario)
 
 ---
 
@@ -88,7 +87,7 @@ De arriba hacia abajo:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│  CABECERA  (conexión · escena · MG1–4 · deshacer · más · medidor)     │
+│  CABECERA  (conexión · deshacer · AJUSTES · medidor)                  │
 ├───────────────────────────────────────────────────────────────────────┤
 │  MEZCLA   [Main LR] [Bus 1] … [Bus 6] [FX 1] … [FX 4]                 │
 ├───────────────────────────────────────────────────────────────────────┤
@@ -96,7 +95,7 @@ De arriba hacia abajo:
 ├───────────────────────────────────────────────────────────┬───────────┤
 │  Tiras de canal (se desplazan hacia los lados)            │  MASTER   │
 ├───────────────────────────────────────────────────────────┴───────────┤
-│  PIE:  [1–8] [9–16] [Aux · FX] [Buses · Envíos FX] [DCA]   RÁPIDO …   │
+│  PIE:  GRUPOS DE MUTE  [1] [2] [3] [4]                                │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -110,27 +109,35 @@ De izquierda a derecha:
 | **Nombre de la consola** y debajo **modelo · fw · IP** | Identifica a qué consola estás conectado (o «demo»). |
 | **Indicador de conexión** | Verde «Conectado · 12 ms» = todo bien (la cifra es la latencia). Naranja «Reconectando…» = se perdió la consola. Azul/violeta «Consola demo» = simulación. |
 | **SOLO · canal · Quitar** (solo aparece si hay solo) | Avisa de que hay canales en solo (escuchas en auriculares/monitor de sala, según la consola). Tócalo para **quitar todos los solos** de golpe. |
-| **Control de escena** (`‹  ESCENA 3 · SIGUIENTE: …  ›`) | Muestra la escena en vivo y la siguiente. Las flechas abren la **vista previa** de la escena anterior/siguiente (no la cargan todavía). El centro abre el **Orden del servicio**. Ver [sección 7](#7-escenas-y-orden-del-servicio). |
-| **MG1 · MG2 · MG3 · MG4** | Los 4 **grupos de mute** de la consola. Un toque silencia (se pone rojo) o reactiva todos los canales asignados a ese grupo. Los grupos se asignan en la propia consola. |
 | **Deshacer (↶)** | Revierte el último cambio hecho desde la app. Un punto naranja indica que hay cambios por deshacer. **Mantén pulsado** para ver la lista de los últimos 8 cambios con su hora. Guarda hasta 100 cambios. |
-| **Más (⋯)** | Menú de páginas poco frecuentes (ver 2.2). |
+| **Ajustes (⚙)** | Botón siempre visible con la rueda dentada y el texto «Ajustes»: abre la página con todo lo que no es un fader (ver 2.2). |
 | **Medidor Main L/R** | Dos barritas con el nivel de la salida principal. |
 | **Apagar (⏻)** / **Salir de la demo** | Desconecta de la consola y vuelve a la pantalla de conexión. |
 
-En pantallas estrechas (iPad en multitarea, iPhone horizontal) se ocultan el control de escena, MG1–4 y el
+En pantallas estrechas (iPad en multitarea, iPhone horizontal) se ocultan los grupos de mute y el
 medidor para ganar espacio.
 
-### 2.2 Menú «Más (⋯)»
+### 2.2 Ajustes (⚙)
 
-| Opción | Para qué sirve |
-|---|---|
-| **Orden del servicio** | Abre las escenas ([sección 7](#7-escenas-y-orden-del-servicio)). |
-| **Vincular el iPhone de un músico** | Muestra un código QR para que un músico controle solo su mezcla de monitor ([sección 6](#6-modo-músico-mi-mezcla)). |
-| **Copia de ajustes** (*Settings backup*) | Copias de seguridad ([sección 8](#8-copia-de-seguridad-de-ajustes)). |
-| **Snapshots de la consola** | Las 64 memorias internas de la consola ([sección 9](#9-snapshots-de-la-consola)). |
-| **Idioma** | Sistema / English / Español. |
+El botón **Ajustes** (rueda dentada) está **siempre visible en la barra superior**, en iPad y en iPhone. Abre una sola
+página que reúne todo lo que no es un fader, con una descripción debajo de cada elemento:
+
+<p align="center"><img src="manual/ipad-ajustes.jpg" alt="Página de Ajustes" width="420"></p>
+
+| Sección | Opción | Para qué sirve |
+|---|---|---|
+| **MEZCLA** | **Grupos de mute** | Pantalla para elegir **qué canales pertenecen a cada uno de los 4 grupos de mute**. Cada grupo muestra todos los canales; toca un canal para sumarlo o quitarlo (rojo = pertenece). El botón **Silenciar este grupo** lo activa o suelta. |
+| **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
+| | **Snapshots de la consola** | Las 64 memorias internas de la consola ([sección 8](#8-snapshots-de-la-consola)). |
+| **MÚSICOS** | **Vincular el iPhone de un músico** (iPad) / **Vincular como músico…** (iPhone) | En el iPad muestra un código QR; en el iPhone abre la cámara para escanearlo ([sección 6](#6-modo-músico-mi-mezcla)). |
+| **IDIOMA** | Sistema / English / Español | Cambia el idioma de la app. |
+| | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión. |
 
 > *Iniciar / Editar Modo Servicio* existen en el código pero están **ocultos en esta versión**.
+
+<p align="center"><img src="manual/ipad-grupos-mute.jpg" alt="Pantalla Grupos de mute" width="420"></p>
+
+*(Pantalla «Grupos de mute», que se abre desde Ajustes.)*
 
 ### 2.3 Selector de mezcla («MEZCLA»)
 
@@ -151,26 +158,17 @@ Cuando eliges un bus aparece una franja de color: **«Los faders son envíos a �
 - **Se perdió la consola**: ver [1.3](#13-si-se-corta-la-conexión).
 - **Copia de seguridad** (naranja): «Los ajustes de la consola cambiaron desde tu última sesión». Pasó, por ejemplo,
   si la consola se apagó y encendió y perdió ajustes. Dos botones: **Revisar y restaurar** y **Mantener los de la
-  consola**. Ver [sección 8](#8-copia-de-seguridad-de-ajustes).
+  consola**. Ver [sección 7](#7-copia-de-seguridad-de-ajustes).
 
-### 2.5 Pie de página (bancos de canales)
+### 2.5 Pie de página: grupos de mute
 
-<p align="center"><img src="manual/ipad-banco-dca.jpg" alt="Banco DCA" width="420"></p>
+No hay selector de bancos: **todas las tiras están en una sola fila que se desplaza hacia los lados**, en este
+orden: canales 1–16, entrada aux, retornos FX, buses, envíos FX y los 4 DCA (con la mezcla *Main LR*). Con la mezcla de
+un bus o de FX solo se ven las entradas, más el master a la derecha.
 
-Selector para elegir **qué tiras ves**:
-
-| Banco | Contenido |
-|---|---|
-| **1–8** | Canales de entrada 1 a 8. |
-| **9–16** | Canales 9 a 16. |
-| **Aux · FX** | Entrada auxiliar y los 4 retornos de efectos. |
-| **Buses · Envíos FX** | Los 6 buses y los 4 envíos de FX (solo con *Main LR*). |
-| **DCA** | Los 4 grupos DCA (solo con *Main LR*). |
-
-Al tocar un banco la fila se desplaza hasta ese punto. (La fila completa también se puede arrastrar a mano.)
-
-A la derecha del pie, en iPad ancho, hay **RÁPIDO** con atajos: silenciar/reactivar el canal 1, saltar a la mezcla
-del Bus 2, o **Volver a Main** cuando estás dentro de un bus.
+En el pie están los botones **GRUPOS DE MUTE · 1 2 3 4**: un toque silencia (rojo) o reactiva a la vez todos los
+canales del grupo. **Dónde se configura qué canales forman cada grupo:** *Ajustes → Grupos de mute* (ver 2.2), o en la
+página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2).
 
 ---
 
@@ -214,7 +212,7 @@ normal, más:
 
 ### 3.3 Tiras de bus, FX y DCA
 
-- **Buses y envíos FX** (banco *Buses · Envíos FX*): igual que un canal, con su fader y mute.
+- **Buses y envíos FX** (a continuación de los canales en la misma fila): igual que un canal, con su fader y mute.
 - **DCA 1–4**: un fader que **mueve a la vez todos los canales asignados** a ese grupo, sin cambiar los faders
   individuales de cada uno. Muestra el nombre del grupo y cuántos canales tiene. Su **MUTE** silencia todo el grupo.
   Los canales se asignan a un DCA desde su página (*Config.*).
@@ -315,6 +313,7 @@ y el valor en dB. Es el nivel que ese canal manda a cada mezcla de monitor o efe
 | **Nombre** | Renombra el canal (máx. 12 caracteres, con contador). Se guarda al terminar de escribir. |
 | **Color** | 8 colores: gris, rojo, verde, amarillo, azul, magenta, cian, blanco. |
 | **Grupos DCA** | Marca a qué DCA (1–4) pertenece el canal. Un toque suma o quita. |
+| **Grupos de mute** | Marca a cuáles de los 4 grupos de mute (Grupo 1–4) pertenece el canal. Un toque suma o quita (se pone rojo si pertenece). Los botones **GRUPOS DE MUTE 1–4** de la barra superior silencian todos los canales marcados. Los grupos no tienen nombre en la consola XR18. |
 | **Fader** | Deslizador de nivel y botón **MUTE** grande. |
 
 ### 4.3 Fader lateral — «MUEVE MIENTRAS EDITAS»
@@ -337,8 +336,7 @@ La cabecera tiene:
 | **Indicador de conexión** | Igual que en el iPad. |
 | **Nombre de la mezcla ▾** (grande, ej. «Main LR») | Menú para elegir la mezcla: Main LR, Bus 1–6, FX 1–4. Decide qué controlan los faders. |
 | **Deshacer (↶)** | Revierte el último cambio. |
-| **Escenas** | Abre el Orden del servicio. |
-| **Más (⋯)** | Vincular como músico…, Copia de ajustes, Snapshots de la consola, Idioma y **Desconectar**. |
+| **Ajustes (⚙)** | Abre la página de Ajustes: grupos de mute, copia de ajustes, snapshots, vincular como músico, idioma y desconectar. |
 
 <p align="center"><img src="manual/iphone-canal.jpg" alt="Página de canal en iPhone" width="260"> <img src="manual/iphone-bus.jpg" alt="Mezcla de un bus en iPhone" width="260"></p>
 
@@ -348,7 +346,10 @@ Cada **fila de canal** tiene:
 - Barra de color, número, nombre y **dB**. **Toca el nombre** (o desliza a la izquierda) para abrir la página del canal.
 - Un **fader horizontal** con medidor integrado. Se arrastra de la misma manera que el vertical.
 
-**Barra inferior (bancos):** `1–9` · `10–16` · `FX` · `Buses` (en un bus aparece `Master`) · `DCA`.
+**Todo en una sola lista que se desplaza** (sin bancos), con un título pequeño por tipo: **CANALES**, **AUX · FX**,
+**BUSES · ENVÍOS FX** y **DCA** (con la mezcla *Main LR*); en la mezcla de un bus, al final aparece **MASTER**.
+
+**Barra inferior:** **GRUPOS DE MUTE · 1 2 3 4**, para silenciar o reactivar cada grupo con un toque.
 
 ### 5.2 Horizontal
 
@@ -364,7 +365,7 @@ Permite que **cada músico regule su propio monitor desde su iPhone**, sin poder
 
 <p align="center"><img src="manual/ipad-pairing.jpg" alt="Vincular el iPhone de un músico" width="420"></p>
 
-*Más (⋯) → Vincular el iPhone de un músico.*
+*Ajustes → Vincular el iPhone de un músico.*
 
 | Control | Para qué sirve |
 |---|---|
@@ -375,7 +376,7 @@ Permite que **cada músico regule su propio monitor desde su iPhone**, sin poder
 
 ### 6.2 Vincular (en el iPhone del músico)
 
-*Más (⋯) → Vincular como músico…* Apunta la cámara al QR del iPad. Si la cámara no funciona, toca **Escribir a mano**
+*Ajustes → Vincular como músico…* Apunta la cámara al QR del iPad. Si la cámara no funciona, toca **Escribir a mano**
 y rellena la dirección de la consola, el bus y el canal, luego **Unirse**.
 
 ### 6.3 La pantalla del músico
@@ -395,64 +396,7 @@ El músico **solo** mueve los envíos de su bus; no cambia faders, mutes ni nada
 
 ---
 
-## 7. Escenas y orden del servicio
-
-Una **escena** es una «foto» de la mesa: guarda **cada fader, mute, pan, nivel de envío y los grupos de mute**. Sirve
-para dejar la consola lista para cada parte del servicio con un solo gesto.
-
-Para abrirlo: *Más (⋯) → Orden del servicio*, el centro del control de escena en la cabecera, o el botón **Escenas**
-en iPhone.
-
-### 7.1 Barra superior de la página
-
-| Botón | Qué hace |
-|---|---|
-| **Guardar actual…** (naranja) | Guarda el estado actual de la consola como escena nueva. Pide nombre, una nota opcional («Solo púlpito · banda en mute») y la **Sección**. |
-| **Todas las escenas** | Lista completa en orden, con las mismas acciones que las tarjetas. |
-| **Protegido al cargar…** | Ver 7.4. |
-
-### 7.2 Secciones y tarjetas
-
-<p align="center"><img src="manual/ipad-scenes.jpg" alt="Orden del servicio" width="420"></p>
-
-Las escenas se agrupan en **PRE-SERVICIO · ALABANZA · MENSAJE · RESPUESTA · POST-SERVICIO**. Cada tarjeta muestra su
-número, nombre, nota y una etiqueta de estado (**EN VIVO**, **HECHA**, **PRÓXIMA**, **EN VISTA PREVIA**).
-
-- **AHORA / SIGUIENTE** (franja superior con flechas ‹ ›): escena en vivo y la que sigue. Las flechas abren la vista
-  previa de la anterior o siguiente.
-- **Toca una tarjeta** → abre la **vista previa** de esa escena.
-- **Mantén pulsada una tarjeta** → menú: **Ver vista previa**, **Renombrar o mover…**, **Mover antes**, **Mover
-  después**, **Reemplazar con el estado actual de la consola**, **Eliminar** (pide confirmación).
-
-### 7.3 Vista previa de carga (antes de aplicar)
-
-<p align="center"><img src="manual/ipad-preview.jpg" alt="Vista previa de carga" width="420"></p>
-
-Nunca se carga una escena «a ciegas». Antes ves **qué cambiaría**:
-
-- Título **«¿Ir a Escena 2?»** y el recuento de cambios y de valores **protegidos**.
-- Una lista agrupada en **FADERS / MUTES / ENVÍOS / PAN** con `de → a` por cada cambio. «La consola ya coincide con
-  esta escena» si no hay nada que cambiar.
-- **Aviso rojo «… está en vivo ahora»**: si un canal con señal (suena ahora mismo) va a ser bajado o silenciado, te
-  lo advierte con su nivel. Espera a que termine la canción o usa el fundido.
-- **Fundido de faders en 2 s**: en lugar de saltar, los faders se mueven suavemente en 2 segundos.
-- **Cancelar** y el botón **Mantén para cargar**: hay que **mantenerlo pulsado** un instante (0,6 s) para confirmar;
-  evita cargas por un toque accidental.
-- Después de cargar aparece **Deshacer carga**, disponible durante **10 minutos**.
-
-Antes de cada carga, la app guarda automáticamente una **copia de seguridad** del estado actual (ver sección 8).
-
-### 7.4 Protegido al cargar (recall safe)
-
-Cosas que **nunca cambian** al cargar una escena. Siempre protegidos: las **mezclas de monitor de los músicos** (envíos
-a ciertos buses, fader y mute de esos buses) y la **alimentación fantasma**.
-
-- **Buses**: marca los buses que no quieras que cambien (ideal para los retornos de los músicos).
-- **Omitir estos canales**: lista de canales que la carga debe ignorar.
-
----
-
-## 8. Copia de seguridad de ajustes
+## 7. Copia de seguridad de ajustes
 
 <p align="center"><img src="manual/ipad-backups.jpg" alt="Copia de ajustes" width="420"></p>
 
@@ -460,7 +404,7 @@ Una XR18 **olvida sus ajustes si se apaga**. Holly Mixer los guarda **en el prop
 después de cada cambio, para poder devolverlos. Guarda niveles, mutes, nombres, EQ, gate, dinámica, preamp, envíos y
 grupos de mute.
 
-*Más (⋯) → Copia de ajustes.*
+*Ajustes → Copia de ajustes.*
 
 ### 8.1 Cuando la consola «se ve distinta»
 
@@ -488,11 +432,11 @@ Cada copia muestra su nombre (o «Copia automática»), fecha y número de valor
 
 ---
 
-## 9. Snapshots de la consola
+## 8. Snapshots de la consola
 
 <p align="center"><img src="manual/ipad-snapshots.jpg" alt="Snapshots de la consola" width="420"></p>
 
-*Más (⋯) → Snapshots de la consola.* Son las **64 memorias internas de la propia XR18**, no de la app.
+*Ajustes → Snapshots de la consola.* Son las **64 memorias internas de la propia XR18**, no de la app.
 
 - Cada ranura muestra su número y nombre, o **Vacía**. La última usada lleva la etiqueta **ÚLTIMO USADO**.
 - **Cargar**: aplica ese snapshot (pide confirmación; los faders y ajustes pueden saltar, no lo hagas con la banda
@@ -507,14 +451,14 @@ Cada copia muestra su nombre (o «Copia automática»), fecha y número de valor
 
 ---
 
-## 10. Idioma
+## 9. Idioma
 
 La app sigue el idioma del dispositivo (español si el iPad/iPhone está en español, si no, inglés). Para cambiarlo:
-el **globo** en la pantalla de conexión, o *Más (⋯) → Idioma*: **Sistema**, **English**, **Español**.
+el **globo** en la pantalla de conexión, o *Ajustes → Idioma*: **Sistema**, **English**, **Español**.
 
 ---
 
-## 11. Preguntas frecuentes
+## 10. Preguntas frecuentes
 
 **No encuentro la consola.** Comprueba que el dispositivo esté en la **misma red** que la XR18 (no la red de
 invitados), permite el acceso a la red local y, si no aparece, escribe su IP. *Revisar mi red* te dice qué falla.
@@ -533,7 +477,7 @@ para revertir los cambios hechos desde esta app.
 
 ---
 
-## 12. Glosario
+## 11. Glosario
 
 | Término | Significado |
 |---|---|
@@ -553,7 +497,6 @@ para revertir los cambios hechos desde esta app.
 | **Compresor / Dinámica** | Reduce la diferencia entre sonidos fuertes y suaves. |
 | **EQ** | Ecualizador: ajusta graves, medios y agudos. |
 | **Q** | Anchura de una banda de EQ. |
-| **Escena** | Foto guardada del estado de la mesa. |
 | **Snapshot** | Memoria interna de la consola (64 ranuras). |
 | **Retorno** | La mezcla que escucha un músico en sus monitores o auriculares. |
 | **dB / dBFS** | Decibelios / decibelios respecto al máximo digital. |

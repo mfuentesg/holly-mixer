@@ -14,11 +14,12 @@ Everything in the Holly Mixer design canvas:
   mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
-- **Order of service:** scenes captured by the app, grouped Pre-service → Post, recall preview showing
-  every change, live-signal warning, hold to recall, optional 2 s fade, recall safes, undo recall
 - **Service Mode:** (hidden for now, see below)
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
   SOLO and MUTE side by side) so every control fits; musician "My mix" mode paired by QR code from the iPad
+- **Simple navigation:** no strip banks. The iPad shows every strip in one scrolling row and the iPhone one scrolling
+  list (channels, aux/FX, buses, DCA); the four mute groups sit in the bottom bar; a visible **Settings** button
+  opens one page with mute groups (and which channels are in each), backups, snapshots, pairing and language
 - **Faders:** only a clear vertical drag on the cap moves a fader, so swiping sideways across the strips scrolls
   without touching levels; stereo strips keep the cap clear of the meters
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer. No address is
@@ -28,9 +29,9 @@ Everything in the Holly Mixer design canvas:
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
-- **Safer power cycles:** a safety copy is saved before every scene recall, Service Mode and snapshot load;
+- **Safer power cycles:** a safety copy is saved before every Service Mode start and snapshot load;
   optional automatic restore with a visible 10 s countdown (it waits while the sound system is live)
-- **DCA groups:** the four DCAs as faders (iPad bank "DCA", iPhone bank "DCA") and DCA membership per channel
+- **DCA groups:** the four DCAs as faders (last strips on the iPad, last section on the iPhone) and DCA membership per channel
   (channel page, Config tab)
 - **Mixer snapshots:** list, load and save the mixer's own 64 snapshot slots (commands to be verified on a real mixer)
 - **Service Mode** (hidden in this version, `FeatureFlags.serviceMode`): the locked volunteer layout, its editor and the PIN to leave it. Its NOW → NEXT footer and "Call sound lead" button come with it

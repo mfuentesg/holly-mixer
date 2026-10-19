@@ -1,39 +1,9 @@
 import SwiftUI
 
-/// Groups of strips shown at once on the iPhone mixer (bottom bar of the design).
-enum PhoneBank: CaseIterable, Hashable {
-    case first, second, fx, buses, dca
-
-    func title(isMain: Bool) -> String {
-        switch self {
-        case .first: return "1–9"
-        case .second: return "10–16"
-        case .fx: return L("FX")
-        case .buses: return isMain ? L("Buses") : L("Master")
-        case .dca: return "DCA"
-        }
-    }
-
-    /// Strips in this bank for the selected mix.
-    @MainActor
-    func strips(in mixer: Mixer) -> [Strip] {
-        let target = mixer.selectedMix
-        let control = target.control
-        switch self {
-        case .first: return Array(mixer.channels.prefix(9)).filter { $0.hasControl(control) }
-        case .second: return Array(mixer.channels.dropFirst(9)).filter { $0.hasControl(control) }
-        case .fx: return ([mixer.auxIn] + mixer.fxReturns).filter { $0.hasControl(control) }
-        case .buses: return target == .main ? mixer.buses + mixer.fxSends : [mixer.master(for: target)]
-        case .dca: return []
-        }
-    }
-}
-
 /// iPhone mixer in portrait: a list of horizontal faders for the selected mix.
 struct PhoneMixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(Localization.self) private var localization
-    @State private var bank = PhoneBank.first
     @State private var showScanner = false
     var onPair: (MonitorPairing) -> Void
 
@@ -58,15 +28,18 @@ struct PhoneMixerView: View {
                 .opacity(isReconnecting ? 0.4 : 1)
                 .saturation(isReconnecting ? 0.35 : 1)
                 .allowsHitTesting(!isReconnecting)
-            bankBar(isMain: target == .main)
+            muteGroupBar
         }
         .background(Theme.background.ignoresSafeArea())
         .foregroundStyle(Theme.textPrimary)
-        .onChange(of: mixer.selectedMix) { _, newMix in
-            if bank == .dca && newMix != .main { bank = .first }
-        }
         .fullScreenCover(item: Bindable(mixer).presentedScreen) { screen in
             PresentedScreenView(screen: screen)
+        }
+        .onChange(of: mixer.showsPairingScanner) { _, wanted in
+            if wanted {
+                showScanner = true
+                mixer.showsPairingScanner = false
+            }
         }
         .sheet(isPresented: $showScanner) {
             MonitorPairingScannerSheet { pairing in
@@ -86,9 +59,6 @@ struct PhoneMixerView: View {
             }
             Spacer(minLength: 0)
             UndoButton()
-            IconButton(systemName: "rectangle.split.1x2", accessibilityLabel: L("Scenes")) {
-                mixer.presentedScreen = .scenes
-            }
             moreMenu
         }
         .padding(.horizontal, 16)
@@ -129,68 +99,38 @@ struct PhoneMixerView: View {
     }
 
     private var moreMenu: some View {
-        Menu {
-            Button {
-                showScanner = true
-            } label: {
-                Label("Pair as musician…", systemImage: "qrcode.viewfinder")
-            }
-            if FeatureFlags.serviceMode {
-                Button {
-                    mixer.presentedScreen = .serviceMode
-                } label: {
-                    Label("Start Service Mode", systemImage: "lock")
-                }
-            }
-            Button {
-                mixer.presentedScreen = .backups
-            } label: {
-                Label("Settings backup", systemImage: "clock.arrow.circlepath")
-            }
-            Button {
-                mixer.presentedScreen = .snapshots
-            } label: {
-                Label("Mixer snapshots", systemImage: "camera.on.rectangle")
-            }
-            Picker("Language", selection: Bindable(localization).language) {
-                ForEach(AppLanguage.allCases) { language in
-                    Text(language.title).tag(language)
-                }
-            }
-            Button {
-                mixer.disconnect()
-            } label: {
-                Label("Disconnect", systemImage: "wifi.slash")
-            }
-        } label: {
-            Image(systemName: "ellipsis")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Theme.textControl)
-                .frame(width: 44, height: 44)
-                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
-        }
-        .accessibilityLabel("More")
+        MoreMenu(showsTitle: false)
     }
 
     // MARK: - Rows
 
+    /// Every strip in one scrolling list, in the mixer's order, with a small heading for each kind.
     private func rows(target: MixTarget, busColor: Color?) -> some View {
-        let strips = bank.strips(in: mixer)
+        let control = target.control
+        func rows(_ strips: [Strip]) -> some View {
+            ForEach(strips) { strip in
+                PhoneChannelRow(strip: strip, busColor: busColor,
+                                control: strip.sends.isEmpty ? .fader : control)
+            }
+        }
+        let channels = mixer.channels.filter { $0.hasControl(control) }
+        let fx = ([mixer.auxIn] + mixer.fxReturns).filter { $0.hasControl(control) }
         return ScrollView {
             LazyVStack(spacing: 4) {
-                if bank == .dca {
+                heading(L("CHANNELS"))
+                rows(channels)
+                if !fx.isEmpty {
+                    heading(L("AUX · FX"))
+                    rows(fx)
+                }
+                if target == .main {
+                    heading(L("BUSES · FX SENDS"))
+                    rows(mixer.buses + mixer.fxSends)
+                    heading("DCA")
                     ForEach(mixer.dcas) { group in PhoneDCARow(group: group) }
-                }
-                ForEach(strips) { strip in
-                    PhoneChannelRow(strip: strip, busColor: busColor,
-                                    control: strip.sends.isEmpty ? .fader : target.control)
-                }
-                if strips.isEmpty && bank != .dca {
-                    Text("No faders in this bank for this mix.")
-                        .font(.system(size: 14))
-                        .foregroundStyle(Theme.textMuted)
-                        .padding(.top, 40)
+                } else {
+                    heading(L("MASTER"))
+                    rows([mixer.master(for: target)])
                 }
             }
             .padding(.horizontal, 12)
@@ -198,34 +138,45 @@ struct PhoneMixerView: View {
         }
     }
 
-    private func bankBar(isMain: Bool) -> some View {
+    private func heading(_ title: String) -> some View {
+        Text(title)
+            .sectionLabelStyle()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+            .padding(.top, 12)
+            .padding(.bottom, 2)
+    }
+
+    /// The four mute groups, always at hand. Assign channels in Settings > Mute groups.
+    private var muteGroupBar: some View {
         HStack(spacing: 6) {
-            ForEach(PhoneBank.allCases.filter { $0 != .dca || isMain }, id: \.self) { item in
-                bankButton(item, isMain: isMain)
+            Text("MUTE GROUPS")
+                .sectionLabelStyle()
+                .multilineTextAlignment(.leading)
+                .frame(width: 70, alignment: .leading)
+            ForEach(1...4, id: \.self) { number in
+                let isOn = mixer.muteGroups[number - 1]
+                Button {
+                    mixer.toggleMuteGroup(number)
+                } label: {
+                    Text("\(number)")
+                        .font(Theme.mono(15, .bold))
+                        .foregroundStyle(isOn ? .white : Theme.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(isOn ? Theme.mute : Theme.strip, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(isOn ? Theme.muteBorder : Theme.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(L("Mute group \(number)"))
+                .accessibilityValue(isOn ? "on" : "off")
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .padding(.bottom, 6)
         .background(Theme.background)
-    }
-
-    private func bankButton(_ item: PhoneBank, isMain: Bool) -> some View {
-        let isSelected = item == bank
-        return Button {
-            bank = item
-        } label: {
-            Text(item.title(isMain: isMain))
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(isSelected ? Color.white : Theme.textSecondary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(isSelected ? Theme.controlSelected : Theme.strip, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.border, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

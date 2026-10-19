@@ -580,3 +580,34 @@
 "Only the return changes. Your own channel stays the same." = "Solo cambia el retorno. Tu propio canal sigue igual.";
 "Return" = "Retorno";
 "The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Holly Mixer. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";
+
+/* Mute groups */
+"MUTE GROUPS" = "GRUPOS DE MUTE";
+"Mute groups" = "Grupos de mute";
+"Group %lld" = "Grupo %lld";
+"Group %@" = "Grupo %@";
+"Pressing a mute group in the top bar silences every channel in it at once." = "Al pulsar un grupo de mute en la barra superior se silencian a la vez todos los canales que lo integran.";
+"%1$@ in mute group %2$lld: %3$@" = "%1$@ en el grupo de mute %2$lld: %3$@";
+"%1$@ in mute group %2$@: %3$@" = "%1$@ en el grupo de mute %2$@: %3$@";
+"Choose which channels each group silences. Then use the group buttons to mute them together." = "Elige qué canales silencia cada grupo. Luego usa los botones de grupo para silenciarlos a la vez.";
+"Group is muted · tap to release" = "Grupo silenciado · toca para soltar";
+"Mute this group" = "Silenciar este grupo";
+
+/* Settings page */
+"Settings" = "Ajustes";
+"Everything that isn't a fader, in one place." = "Todo lo que no es un fader, en un solo lugar.";
+"SERVICE" = "SERVICIO";
+"SAFETY" = "SEGURIDAD";
+"MUSICIANS" = "MÚSICOS";
+"LANGUAGE" = "IDIOMA";
+"Scenes for each part of the service: preview, then recall." = "Escenas para cada parte del servicio: vista previa y luego cargar.";
+"Choose which channels each of the 4 groups silences together." = "Elige qué canales silencia a la vez cada uno de los 4 grupos.";
+"Saved copies of every setting; restore them if the mixer forgets them." = "Copias guardadas de todos los ajustes; restáuralas si la consola los olvida.";
+"The 64 memories stored inside the mixer itself." = "Las 64 memorias guardadas dentro de la propia consola.";
+"Scan the code on the sound desk's iPad to control only your own monitor mix." = "Escanea el código del iPad de la mesa de sonido para controlar solo tu mezcla de monitor.";
+"Shows a code that locks a musician's iPhone to one monitor mix." = "Muestra un código que fija el iPhone de un músico a una mezcla de monitor.";
+"CHANNELS" = "CANALES";
+"AUX · FX" = "AUX · FX";
+"BUSES · FX SENDS" = "BUSES · ENVÍOS FX";
+"MASTER" = "MASTER";
+"MIXING" = "MEZCLA";

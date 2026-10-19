@@ -123,6 +123,9 @@ final class DemoTransport: MixerTransport {
             // DCA membership: 1 Banda, 2 Voces, 3 Pastor (bit mask).
             let dcaMask: Int32 = [1: 4, 2: 2, 5: 2, 6: 2, 3: 1, 4: 1, 8: 1, 9: 1, 10: 1, 11: 1][index + 1] ?? 0
             values["\(base)/grp/dca"] = .int(dcaMask)
+            // Mute groups: 1 Banda (channels 3-11), 2 Voces (1, 2, 5, 6).
+            let muteMask: Int32 = [1: 2, 2: 2, 5: 2, 6: 2].keys.contains(index + 1) ? 2 : (3...11).contains(index + 1) ? 1 : 0
+            values["\(base)/grp/mute"] = .int(muteMask)
         }
         strip("/rtn/aux", name: "Playback", color: 7, db: -10, isOn: true, sends: 10)
         for (index, name) in fxNames.enumerated() {

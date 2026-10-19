@@ -266,6 +266,7 @@ struct ChannelDetailConfigTab: View {
             nameCard
             colorCard
             dcaCard
+            muteGroupCard
             faderCard
         }
         .onAppear { text = strip.name }
@@ -378,6 +379,39 @@ struct ChannelDetailConfigTab: View {
                 }
             }
             Text("Moving a DCA fader moves every channel in it, without changing their own faders.")
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .detailCard()
+    }
+
+    /// Which of the four mute groups this strip belongs to. The MUTE GROUPS buttons in the mixer's top bar
+    /// silence every strip that is in the group.
+    private var muteGroupCard: some View {
+        let mask = mixer.muteGroupMask(of: strip)
+        return VStack(alignment: .leading, spacing: 10) {
+            CardTitle(text: L("Mute groups"))
+            HStack(spacing: 8) {
+                ForEach(1...4, id: \.self) { number in
+                    let isMember = mask & (1 << (number - 1)) != 0
+                    Button {
+                        mixer.setMuteGroupMembership(strip, group: number, member: !isMember)
+                    } label: {
+                        Text(L("Group \(number)"))
+                            .font(Theme.mono(12, .bold))
+                            .foregroundStyle(isMember ? .white : Theme.textBright)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(isMember ? Theme.mute : Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10)
+                                .stroke(isMember ? Theme.muteBorder : Theme.borderStrong, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L("Mute group \(number)"))
+                    .accessibilityValue(isMember ? L("yes") : L("no"))
+                }
+            }
+            Text("Pressing a mute group in the top bar silences every channel in it at once.")
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textTertiary)
         }

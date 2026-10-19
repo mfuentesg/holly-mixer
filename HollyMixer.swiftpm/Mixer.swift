@@ -27,6 +27,8 @@ final class Mixer {
     /// True once the mixer has answered in this session; the mixer view stays up
     /// across short drop-outs instead of falling back to the connect screen.
     private(set) var hasSession = false
+    /// Set by the Settings page on iPhone to open the musician pairing scanner.
+    var showsPairingScanner = false
     private(set) var host = ""
     private(set) var mixerName = ""
     private(set) var model = ""
@@ -681,6 +683,20 @@ final class Mixer {
             label: L("\(strip.displayName) in DCA \(number): \(member ? L("yes") : L("no"))"))
     }
 
+    /// Which mute groups (bit mask, bit 0 = group 1) a strip belongs to. Needs `/…/grp/mute` to have been read.
+    func muteGroupMask(of strip: Strip) -> Int {
+        if case .int(let value)? = liveValues["\(strip.base)/grp/mute"] { return Int(value) }
+        return 0
+    }
+
+    func setMuteGroupMembership(_ strip: Strip, group number: Int, member: Bool) {
+        var mask = muteGroupMask(of: strip)
+        let bit = 1 << (number - 1)
+        mask = member ? (mask | bit) : (mask & ~bit)
+        set("\(strip.base)/grp/mute", .int(Int32(mask)),
+            label: L("\(strip.displayName) in mute group \(number): \(member ? L("yes") : L("no"))"))
+    }
+
     // MARK: - Any parameter
 
     /// The observable value of an OSC address, e.g. "/ch/01/eq/1/f". Ask the mixer for it with `request`.
@@ -772,12 +788,13 @@ final class Mixer {
 /// Pages shown full screen over the mixer.
 enum Screen: Identifiable, Hashable {
     case channel(Strip.Kind)
-    case scenes
     case serviceMode
     case serviceEditor
     case monitorPairing
     case backups
     case snapshots
+    case muteGroups
+    case settings
 
     var id: Self { self }
 }

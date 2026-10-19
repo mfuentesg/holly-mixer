@@ -4,13 +4,6 @@ struct MixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-    @State private var bank: Bank = {
-        #if DEBUG
-        if let raw = ScreenshotMode.bank, let bank = Bank(rawValue: raw) { return bank }
-        #endif
-        return .channels1to8
-    }()
-
     var body: some View {
         let target = mixer.selectedMix
         let master = mixer.master(for: target)
@@ -32,35 +25,27 @@ struct MixerView: View {
             BackupBanner()
 
             HStack(spacing: 14) {
-                ScrollViewReader { proxy in
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
-                                ChannelStripView(strip: strip, control: control, busColor: busColor)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
+                            ChannelStripView(strip: strip, control: control, busColor: busColor)
+                        }
+                        if target == .main {
+                            ForEach(mixer.buses + mixer.fxSends) { strip in
+                                ChannelStripView(strip: strip, control: .fader, busColor: nil)
                             }
-                            if target == .main {
-                                ForEach(mixer.buses + mixer.fxSends) { strip in
-                                    ChannelStripView(strip: strip, control: .fader, busColor: nil)
-                                }
-                                ForEach(mixer.dcas) { group in
-                                    DCAStripView(group: group)
-                                        .id(group.number == 1 ? AnyHashable("dca") : AnyHashable("dca-\(group.number)"))
-                                }
+                            ForEach(mixer.dcas) { group in
+                                DCAStripView(group: group)
                             }
                         }
-                        .padding(.trailing, 40)
                     }
-                    .overlay(alignment: .trailing) {
-                        LinearGradient(colors: [Theme.background.opacity(0), Theme.background],
-                                       startPoint: .leading, endPoint: .trailing)
-                            .frame(width: 56)
-                            .allowsHitTesting(false)
-                    }
-                    .onChange(of: bank) { _, newBank in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            proxy.scrollTo(newBank.firstStrip, anchor: .leading)
-                        }
-                    }
+                    .padding(.trailing, 40)
+                }
+                .overlay(alignment: .trailing) {
+                    LinearGradient(colors: [Theme.background.opacity(0), Theme.background],
+                                   startPoint: .leading, endPoint: .trailing)
+                        .frame(width: 56)
+                        .allowsHitTesting(false)
                 }
                 ChannelStripView(strip: master, control: .fader, busColor: busColor, isMaster: true)
             }
@@ -70,7 +55,7 @@ struct MixerView: View {
             .saturation(isReconnecting ? 0.35 : 1)
             .allowsHitTesting(!isReconnecting)
 
-            MixerFooter(bank: $bank, isCompact: sizeClass == .compact, isShort: verticalSizeClass == .compact)
+            MixerFooter(isShort: verticalSizeClass == .compact)
         }
         .background(Theme.background.ignoresSafeArea())
         .animation(.easeInOut(duration: 0.2), value: target)
@@ -80,29 +65,6 @@ struct MixerView: View {
                 .environment(mixer)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
-        }
-        .onChange(of: target) { _, newTarget in
-            if newTarget != .main && (bank == .masters || bank == .dca) { bank = .channels1to8 }
-        }
-    }
-}
-
-enum Bank: String, CaseIterable, Identifiable {
-    case channels1to8 = "1–8"
-    case channels9to16 = "9–16"
-    case auxFX = "Aux · FX"
-    case masters = "Buses · FX Sends"
-    case dca = "DCA"
-
-    var id: String { rawValue }
-
-    var firstStrip: AnyHashable {
-        switch self {
-        case .channels1to8: return Strip.Kind.channel(1)
-        case .channels9to16: return Strip.Kind.channel(9)
-        case .auxFX: return Strip.Kind.auxIn
-        case .masters: return Strip.Kind.bus(1)
-        case .dca: return "dca"
         }
     }
 }
@@ -157,37 +119,8 @@ struct MixerHeader: View {
 
             Spacer(minLength: 8)
 
-            if !isCompact {
-                HeaderSceneControl()
-                Spacer(minLength: 8)
-            }
-
-            if !isCompact {
-                HStack(spacing: 4) {
-                    ForEach(1...4, id: \.self) { number in
-                        let isOn = mixer.muteGroups[number - 1]
-                        Button {
-                            mixer.toggleMuteGroup(number)
-                        } label: {
-                            Text("MG\(number)")
-                                .font(Theme.mono(11, .bold))
-                                .foregroundStyle(isOn ? .white : Theme.textSecondary)
-                                .frame(width: 44, height: 44)
-                                .background(isOn ? Theme.mute : Theme.card, in: RoundedRectangle(cornerRadius: 10))
-                                .overlay(RoundedRectangle(cornerRadius: 10)
-                                    .stroke(isOn ? Theme.muteBorder : Color.white.opacity(0.08), lineWidth: 1))
-                                .shadow(color: isOn ? Theme.mute.opacity(0.45) : .clear, radius: 9)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Mute group \(number)")
-                        .accessibilityValue(isOn ? "on" : "off")
-                    }
-                }
-                Rectangle().fill(Color.white.opacity(0.1)).frame(width: 1, height: 28)
-            }
-
             UndoButton()
-            MoreMenu()
+            MoreMenu(showsTitle: !isCompact && !isShort)
 
             if !isCompact {
                 MiniStereoMeter(left: mixer.main.meter, right: mixer.main.meterRight ?? mixer.main.meter)
@@ -231,8 +164,6 @@ struct PresentedScreenView: View {
             if let strip = mixer.strip(kind) {
                 ChannelDetailView(strip: strip)
             }
-        case .scenes:
-            ScenesView()
         case .serviceMode:
             ServiceModeView()
         case .serviceEditor:
@@ -243,63 +174,40 @@ struct PresentedScreenView: View {
             BackupView()
         case .snapshots:
             SnapshotsView()
+        case .muteGroups:
+            MuteGroupsView()
+        case .settings:
+            SettingsHubView()
         }
     }
 }
 
-/// Header menu for the less frequent pages.
+/// Always-visible "Settings" button: opens the page that lists everything that isn't a fader.
 struct MoreMenu: View {
     @Environment(Mixer.self) private var mixer
-    @Environment(Localization.self) private var localization
+    var showsTitle = true
 
     var body: some View {
-        Menu {
-            Button {
-                mixer.presentedScreen = .scenes
-            } label: {
-                Label("Order of service", systemImage: "list.bullet.rectangle")
-            }
-            if FeatureFlags.serviceMode {
-                Button {
-                    mixer.presentedScreen = .serviceMode
-                } label: {
-                    Label("Start Service Mode", systemImage: "lock")
-                }
-                Button {
-                    mixer.presentedScreen = .serviceEditor
-                } label: {
-                    Label("Edit Service Mode", systemImage: "slider.horizontal.3")
-                }
-            }
-            Button {
-                mixer.presentedScreen = .monitorPairing
-            } label: {
-                Label("Pair a musician's iPhone", systemImage: "qrcode")
-            }
-            Button {
-                mixer.presentedScreen = .backups
-            } label: {
-                Label("Settings backup", systemImage: "clock.arrow.circlepath")
-            }
-            Button {
-                mixer.presentedScreen = .snapshots
-            } label: {
-                Label("Mixer snapshots", systemImage: "camera.on.rectangle")
-            }
-            Picker("Language", selection: Bindable(localization).language) {
-                ForEach(AppLanguage.allCases) { language in
-                    Text(language.title).tag(language)
-                }
-            }
+        Button {
+            mixer.presentedScreen = .settings
         } label: {
-            Image(systemName: "ellipsis")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Theme.textControl)
-                .frame(width: 44, height: 44)
-                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+            HStack(spacing: 8) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 17, weight: .semibold))
+                if showsTitle {
+                    Text("Settings")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+            }
+            .foregroundStyle(Theme.textControl)
+            .padding(.horizontal, showsTitle ? 14 : 0)
+            .frame(minWidth: 44, minHeight: 44)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
         }
-        .accessibilityLabel("More")
+        .buttonStyle(.plain)
+        .accessibilityLabel("Settings")
+        .accessibilityHint("Order of service, mute groups, backups, snapshots, pairing, language")
     }
 }
 
@@ -580,49 +488,35 @@ struct ReconnectingBanner: View {
 
 // MARK: - Footer
 
+/// Bottom bar: the four mute groups. Assign channels to them in Settings > Mute groups.
 struct MixerFooter: View {
     @Environment(Mixer.self) private var mixer
-    @Binding var bank: Bank
-    let isCompact: Bool
     var isShort = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 2) {
-                ForEach(Bank.allCases.filter { ($0 != .masters && $0 != .dca) || mixer.selectedMix == .main }) { item in
-                    let isSelected = bank == item
+        HStack(spacing: 14) {
+            Text("MUTE GROUPS").sectionLabelStyle()
+            HStack(spacing: 8) {
+                ForEach(1...4, id: \.self) { number in
+                    let isOn = mixer.muteGroups[number - 1]
                     Button {
-                        bank = item
+                        mixer.toggleMuteGroup(number)
                     } label: {
-                        Text(LocalizedStringKey(item.rawValue))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-                            .lineLimit(1)
-                            .padding(.horizontal, isCompact ? 10 : 18)
-                            .frame(height: isShort ? 34 : 44)
-                            .background(isSelected ? Theme.controlSelected : .clear, in: RoundedRectangle(cornerRadius: 9))
-                            .overlay(RoundedRectangle(cornerRadius: 9)
-                                .stroke(isSelected ? Theme.accent.opacity(0.7) : .clear, lineWidth: 1))
+                        Text("\(number)")
+                            .font(Theme.mono(15, .bold))
+                            .foregroundStyle(isOn ? .white : Theme.textSecondary)
+                            .frame(width: 72, height: isShort ? 34 : 44)
+                            .background(isOn ? Theme.mute : Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                            .overlay(RoundedRectangle(cornerRadius: 10)
+                                .stroke(isOn ? Theme.muteBorder : Color.white.opacity(0.08), lineWidth: 1))
+                            .shadow(color: isOn ? Theme.mute.opacity(0.45) : .clear, radius: 9)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .accessibilityLabel(L("Mute group \(number)"))
+                    .accessibilityValue(isOn ? "on" : "off")
                 }
             }
-            .padding(3)
-            .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
-
             Spacer()
-
-            if !isCompact {
-                Text("QUICK").sectionLabelStyle()
-                quickMute(mixer.channels[0])
-                if mixer.selectedMix == .main {
-                    quickMix(mixer.buses[1], target: .bus(2))
-                } else {
-                    quickBackToMain
-                }
-            }
         }
         .padding(.horizontal, 16)
         .frame(height: isShort ? 46 : 68)
@@ -630,58 +524,5 @@ struct MixerFooter: View {
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 1)
         }
-    }
-
-    private func quickMute(_ strip: Strip) -> some View {
-        let muted = !strip.isOn
-        return Button {
-            mixer.toggleMute(strip)
-        } label: {
-            HStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 2).fill(strip.color).frame(width: 10, height: 10)
-                Text(muted ? L("Unmute \(strip.displayName)") : L("Mute \(strip.displayName)"))
-            }
-            .quickButtonStyle(fill: muted ? Theme.mute.opacity(0.25) : Theme.card,
-                              border: Theme.mute.opacity(muted ? 0.9 : 0.55))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func quickMix(_ strip: Strip, target: MixTarget) -> some View {
-        Button {
-            mixer.selectedMix = target
-        } label: {
-            HStack(spacing: 8) {
-                Circle().fill(strip.color).frame(width: 8, height: 8)
-                Text(strip.displayName)
-            }
-            .quickButtonStyle(fill: Theme.card, border: Color.white.opacity(0.1))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var quickBackToMain: some View {
-        Button {
-            mixer.selectedMix = .main
-        } label: {
-            HStack(spacing: 8) {
-                Circle().fill(Theme.accent).frame(width: 8, height: 8)
-                Text("Back to Main")
-            }
-            .quickButtonStyle(fill: Theme.card, border: Theme.accent.opacity(0.6))
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-private extension View {
-    func quickButtonStyle(fill: Color, border: Color) -> some View {
-        font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Theme.textPrimary)
-            .lineLimit(1)
-            .padding(.horizontal, 14)
-            .frame(height: 44)
-            .background(fill, in: RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(border, lineWidth: 1))
     }
 }
