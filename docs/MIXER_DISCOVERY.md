@@ -68,6 +68,13 @@ python3 tools/xr18_pcap_osc.py xair.pcap --timeline
 This shows the app's own queries and changes, including the addresses it asks for when a page opens, which is the
 list of parameters Mixit should request for the same page.
 
+### 2d. Things in Mixit that follow the official app and still need hardware proof
+
+- Mixer snapshots: `/-snap/NN/name` (read), `/-snap/load ,i N`, `/-snap/save ,i N`, `/-snap/index`. While the official
+  app loads or saves a snapshot, run `xr18_dump.py listen` and compare the addresses it logs with these.
+- DCA: `/dca/N/on`, `/dca/N/fader`, `/dca/N/config/name|color`, and `/ch/NN/grp/dca` as a bit mask (bit 0 = DCA 1).
+  Move a DCA and add a channel to it in the official app and check the values in the log.
+
 ## 3. From captures to Mixit
 
 1. Collect the addresses that exist (`dump`), the ones each screen uses (`listen`, pcap) and the ranges.

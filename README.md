@@ -21,6 +21,11 @@ Everything in the Mixit design canvas:
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
+- **Safer power cycles:** a safety copy is saved before every scene recall, Service Mode and snapshot load;
+  optional automatic restore with a visible 10 s countdown (it waits while the sound system is live)
+- **DCA groups:** the four DCAs as faders (iPad bank "DCA", iPhone bank "DCA") and DCA membership per channel
+  (channel page, Config tab)
+- **Mixer snapshots:** list, load and save the mixer's own 64 snapshot slots (commands to be verified on a real mixer)
 - **Service Mode footer:** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
 - **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be
   changed with the globe button on the Connect screen or in the `…` menu. Texts live in

@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Groups of strips shown at once on the iPhone mixer (bottom bar of the design).
 enum PhoneBank: CaseIterable, Hashable {
-    case first, second, fx, buses
+    case first, second, fx, buses, dca
 
     func title(isMain: Bool) -> String {
         switch self {
@@ -10,6 +10,7 @@ enum PhoneBank: CaseIterable, Hashable {
         case .second: return "10–16"
         case .fx: return L("FX")
         case .buses: return isMain ? L("Buses") : L("Master")
+        case .dca: return "DCA"
         }
     }
 
@@ -23,6 +24,7 @@ enum PhoneBank: CaseIterable, Hashable {
         case .second: return Array(mixer.channels.dropFirst(9)).filter { $0.hasControl(control) }
         case .fx: return ([mixer.auxIn] + mixer.fxReturns).filter { $0.hasControl(control) }
         case .buses: return target == .main ? mixer.buses + mixer.fxSends : [mixer.master(for: target)]
+        case .dca: return []
         }
     }
 }
@@ -60,6 +62,9 @@ struct PhoneMixerView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .foregroundStyle(Theme.textPrimary)
+        .onChange(of: mixer.selectedMix) { _, newMix in
+            if bank == .dca && newMix != .main { bank = .first }
+        }
         .fullScreenCover(item: Bindable(mixer).presentedScreen) { screen in
             PresentedScreenView(screen: screen)
         }
@@ -111,6 +116,7 @@ struct PhoneMixerView: View {
                 Text(master.displayName)
                     .font(.system(size: 24, weight: .bold))
                     .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                 Image(systemName: "chevron.down")
                     .font(.system(size: 14, weight: .heavy))
                     .foregroundStyle(Theme.accentText)
@@ -139,6 +145,11 @@ struct PhoneMixerView: View {
             } label: {
                 Label("Settings backup", systemImage: "clock.arrow.circlepath")
             }
+            Button {
+                mixer.presentedScreen = .snapshots
+            } label: {
+                Label("Mixer snapshots", systemImage: "camera.on.rectangle")
+            }
             Picker("Language", selection: Bindable(localization).language) {
                 ForEach(AppLanguage.allCases) { language in
                     Text(language.title).tag(language)
@@ -166,11 +177,14 @@ struct PhoneMixerView: View {
         let strips = bank.strips(in: mixer)
         return ScrollView {
             LazyVStack(spacing: 4) {
+                if bank == .dca {
+                    ForEach(mixer.dcas) { group in PhoneDCARow(group: group) }
+                }
                 ForEach(strips) { strip in
                     PhoneChannelRow(strip: strip, busColor: busColor,
                                     control: strip.sends.isEmpty ? .fader : target.control)
                 }
-                if strips.isEmpty {
+                if strips.isEmpty && bank != .dca {
                     Text("No faders in this bank for this mix.")
                         .font(.system(size: 14))
                         .foregroundStyle(Theme.textMuted)
@@ -184,7 +198,7 @@ struct PhoneMixerView: View {
 
     private func bankBar(isMain: Bool) -> some View {
         HStack(spacing: 6) {
-            ForEach(PhoneBank.allCases, id: \.self) { item in
+            ForEach(PhoneBank.allCases.filter { $0 != .dca || isMain }, id: \.self) { item in
                 bankButton(item, isMain: isMain)
             }
         }

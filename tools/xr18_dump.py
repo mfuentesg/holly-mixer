@@ -233,6 +233,7 @@ def known_addresses(snapshots: bool = False) -> list:
     add("/info")
     add("/status")
     if snapshots:
+        add("/-snap/index")
         for number in range(1, 65):
             add(f"/-snap/{number:02d}/name")
     return out

@@ -24,6 +24,55 @@ struct BackupBanner: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                if store.isRestoring {
+                    HStack(spacing: 10) {
+                        ProgressView().tint(Theme.accentText)
+                        Text("Restoring \(store.restoreProgress) of \(store.restoreTotal)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Theme.accentText)
+                            .monospacedDigit()
+                    }
+                }
+                if store.restoreWaitsForSilence {
+                    HStack(spacing: 10) {
+                        ProgressView().tint(Theme.accentText)
+                        Text("Waiting for the sound system to go quiet before restoring")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Theme.accentText)
+                        Spacer()
+                        Button {
+                            store.cancelCountdown()
+                        } label: {
+                            Text("Cancel")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.textBright)
+                                .padding(.horizontal, 16)
+                                .frame(height: 44)
+                                .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                if let seconds = store.restoreCountdown {
+                    HStack(spacing: 10) {
+                        Text("Restoring your settings in \(seconds) s")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Theme.accentText)
+                            .monospacedDigit()
+                        Spacer()
+                        Button {
+                            store.cancelCountdown()
+                        } label: {
+                            Text("Cancel")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Theme.textBright)
+                                .padding(.horizontal, 16)
+                                .frame(height: 44)
+                                .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 HStack(spacing: 10) {
                     Button {
                         mixer.presentedScreen = .backups
@@ -203,6 +252,17 @@ struct BackupView: View {
                 }
             }
             .frame(minHeight: 44)
+            Toggle(isOn: Binding(get: { store.isAutoRestoreOn }, set: { store.isAutoRestoreOn = $0 })) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Restore automatically")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text("If the mixer comes back reset, Mixit counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(minHeight: 44)
         }
     }
 
@@ -235,7 +295,7 @@ struct BackupView: View {
     private func row(_ backup: MixerBackup) -> some View {
         let compact = sizeClass == .compact
         let title = HStack(spacing: 12) {
-            Image(systemName: backup.isAuto ? "clock.arrow.circlepath" : "bookmark.fill")
+            Image(systemName: backup.isAuto ? "clock.arrow.circlepath" : backup.isSafety == true ? "shield.lefthalf.filled" : "bookmark.fill")
                 .font(.system(size: 16))
                 .foregroundStyle(backup.isAuto ? Theme.textControl : Theme.accentText)
                 .frame(width: 40, height: 40)

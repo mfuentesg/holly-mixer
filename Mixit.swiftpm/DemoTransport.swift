@@ -100,6 +100,18 @@ final class DemoTransport: MixerTransport {
             }
         }
 
+        let dcaNames: [(String, Int32, Float)] = [("Banda", 6, 0), ("Voces", 3, 2), ("Pastor", 3, 3), ("Playback", 5, -6)]
+        for (index, entry) in dcaNames.enumerated() {
+            let base = "/dca/\(index + 1)"
+            values["\(base)/config/name"] = .string(entry.0)
+            values["\(base)/config/color"] = .int(entry.1)
+            values["\(base)/fader"] = .float(decibelsToFader(entry.2))
+            values["\(base)/on"] = .int(1)
+        }
+        for (slot, name) in ["Domingo AM", "Domingo PM", "Jóvenes", "Ensayo", "Pasos de sonido"].enumerated() {
+            values[String(format: "/-snap/%02d/name", slot + 1)] = .string(name)
+        }
+        values["/-snap/index"] = .int(1)
         for (index, channel) in channels.enumerated() {
             let base = String(format: "/ch/%02d", index + 1)
             strip(base, name: channel.name, color: channel.color, db: channel.db, isOn: channel.isOn, sends: 10)
@@ -108,6 +120,9 @@ final class DemoTransport: MixerTransport {
             values["\(base)/dyn/on"] = .int(channel.compressor ? 1 : 0)
             values["\(base)/\(LevelControl.send(1).path)"] = .float(channel.drumMonitor.map(decibelsToFader) ?? 0)
             values[String(format: "/-stat/solosw/%02d", index + 1)] = .int(0)
+            // DCA membership: 1 Banda, 2 Voces, 3 Pastor (bit mask).
+            let dcaMask: Int32 = [1: 4, 2: 2, 5: 2, 6: 2, 3: 1, 4: 1, 8: 1, 9: 1, 10: 1, 11: 1][index + 1] ?? 0
+            values["\(base)/grp/dca"] = .int(dcaMask)
         }
         strip("/rtn/aux", name: "Playback", color: 7, db: -10, isOn: true, sends: 10)
         for (index, name) in fxNames.enumerated() {

@@ -49,6 +49,12 @@ final class Mixer {
     let buses: [Strip]
     let fxSends: [Strip]
     let main: Strip
+    /// Names of the mixer's 64 snapshot slots (index 0 = slot 1); empty means unused or not read yet.
+    private(set) var snapshotNames = Array(repeating: "", count: 64)
+    /// The slot last loaded or saved, as reported by the mixer (`/-snap/index`), if known.
+    private(set) var currentSnapshot: Int?
+    /// The four DCA groups.
+    let dcas = (1...4).map { DCAGroup(number: $0) }
     /// Mute groups 1-4: true when the group is engaged.
     private(set) var muteGroups = [false, false, false, false]
     /// Changes made from this app, newest last.
@@ -225,6 +231,7 @@ final class Mixer {
 
     private func requestState() {
         let addresses = allStrips.flatMap(\.syncAddresses) + (1...4).map { "/config/mute/\($0)" }
+            + dcas.flatMap(\.syncAddresses) + allStrips.map { "\($0.base)/grp/dca" }
             + params.keys.sorted()
         Task {
             // Small batches so the mixer isn't flooded with a burst of requests.
@@ -256,6 +263,8 @@ final class Mixer {
             if strip.isChannel { add(XR18Params.preamp(strip.base, "rtnsw")) }
         }
         for number in 1...4 { add("/config/mute/\(number)") }
+        for group in dcas { group.syncAddresses.forEach(add) }
+        for strip in allStrips { add("\(strip.base)/grp/dca"); add("\(strip.base)/grp/mute") }
         return list
     }
 
@@ -408,6 +417,19 @@ final class Mixer {
             channels[number - 1].isSoloed = value != 0
             return
         }
+        if parts.count == 3, parts[0] == "-snap", parts[2] == "name", let slot = Int(parts[1]), (1...64).contains(slot),
+           case .string(let value)? = message.arguments.first {
+            snapshotNames[slot - 1] = value
+            return
+        }
+        if parts.count == 2, parts[0] == "-snap", parts[1] == "index", case .int(let value)? = message.arguments.first {
+            currentSnapshot = Int(value)
+            return
+        }
+        if parts.count >= 3, parts[0] == "dca", let number = Int(parts[1]), (1...4).contains(number) {
+            dcas[number - 1].apply(parts[2...].joined(separator: "/"), message.arguments.first)
+            return
+        }
         // "/ch/01/mix/fader" -> base "/ch/01", path "mix/fader"; "/lr/mix/on" -> "/lr", "mix/on"
         let base: String
         let path: ArraySlice<String>
@@ -534,6 +556,73 @@ final class Mixer {
         }
     }
 
+    // MARK: - Mixer snapshots (/-snap, unverified on hardware: see docs/MIXER_DISCOVERY.md)
+
+    /// Asks the mixer for the names of all 64 snapshot slots.
+    func requestSnapshotNames() {
+        let addresses = (1...64).map { String(format: "/-snap/%02d/name", $0) } + ["/-snap/index"]
+        Task {
+            for (index, address) in addresses.enumerated() {
+                connection.send(OSCMessage(address))
+                if index % 8 == 7 { try? await Task.sleep(for: .milliseconds(10)) }
+            }
+        }
+    }
+
+    /// Recalls one of the mixer's own snapshots. Everything the snapshot's recall scope covers changes at once.
+    func loadSnapshot(_ slot: Int) {
+        guard (1...64).contains(slot) else { return }
+        connection.send(OSCMessage("/-snap/load", .int(Int32(slot))))
+        currentSnapshot = slot
+        // The mixer pushes the new values; read them again to be sure the screen matches.
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            requestState()
+        }
+    }
+
+    /// Stores the current state of the mixer in a snapshot slot, with a name.
+    func saveSnapshot(_ slot: Int, name: String) {
+        guard (1...64).contains(slot) else { return }
+        let address = String(format: "/-snap/%02d/name", slot)
+        connection.send(OSCMessage(address, .string(name)))
+        connection.send(OSCMessage("/-snap/save", .int(Int32(slot))))
+        snapshotNames[slot - 1] = name
+        currentSnapshot = slot
+    }
+
+    // MARK: - DCA groups
+
+    func beginDCA(_ group: DCAGroup, touching: Bool) {
+        if touching { beginEdit(group.faderAddress) } else {
+            endEdit(group.faderAddress, label: L("\(group.displayName) fader"))
+        }
+    }
+
+    func setDCALevel(_ group: DCAGroup, to value: Float) {
+        setContinuous(group.faderAddress, value)
+    }
+
+    func toggleDCAMute(_ group: DCAGroup) {
+        let nowOn = !group.isOn
+        set(group.onAddress, .int(nowOn ? 1 : 0),
+            label: nowOn ? L("\(group.displayName) unmuted") : L("\(group.displayName) muted"))
+    }
+
+    /// Which DCAs (bit mask) a strip belongs to. Needs `/…/grp/dca` to have been read.
+    func dcaMask(of strip: Strip) -> Int {
+        if case .int(let value)? = liveValues["\(strip.base)/grp/dca"] { return Int(value) }
+        return 0
+    }
+
+    func setDCAMembership(_ strip: Strip, dca number: Int, member: Bool) {
+        var mask = dcaMask(of: strip)
+        let bit = 1 << (number - 1)
+        mask = member ? (mask | bit) : (mask & ~bit)
+        set("\(strip.base)/grp/dca", .int(Int32(mask)),
+            label: L("\(strip.displayName) in DCA \(number): \(member ? L("yes") : L("no"))"))
+    }
+
     // MARK: - Any parameter
 
     /// The observable value of an OSC address, e.g. "/ch/01/eq/1/f". Ask the mixer for it with `request`.
@@ -630,6 +719,7 @@ enum Screen: Identifiable, Hashable {
     case serviceEditor
     case monitorPairing
     case backups
+    case snapshots
 
     var id: Self { self }
 }

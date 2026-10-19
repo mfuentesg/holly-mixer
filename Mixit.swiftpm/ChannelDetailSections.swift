@@ -265,6 +265,7 @@ struct ChannelDetailConfigTab: View {
         CardGrid(minimumWidth: 340) {
             nameCard
             colorCard
+            dcaCard
             faderCard
         }
         .onAppear { text = strip.name }
@@ -344,6 +345,43 @@ struct ChannelDetailConfigTab: View {
         .buttonStyle(.plain)
         .accessibilityLabel(Self.colorNames[index])
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    /// Which of the four DCA groups this strip belongs to.
+    private var dcaCard: some View {
+        let mask = mixer.dcaMask(of: strip)
+        return VStack(alignment: .leading, spacing: 10) {
+            CardTitle(text: L("DCA groups"))
+            HStack(spacing: 8) {
+                ForEach(mixer.dcas) { group in
+                    let isMember = mask & (1 << (group.number - 1)) != 0
+                    Button {
+                        mixer.setDCAMembership(strip, dca: group.number, member: !isMember)
+                    } label: {
+                        VStack(spacing: 2) {
+                            Text("DCA \(group.number)")
+                                .font(Theme.mono(11, .bold))
+                            Text(group.displayName)
+                                .font(.system(size: 11))
+                                .lineLimit(1)
+                        }
+                        .foregroundStyle(isMember ? Theme.onAccent : Theme.textBright)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(isMember ? group.color : Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10)
+                            .stroke(isMember ? Color.clear : Theme.borderStrong, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("DCA \(group.number) \(group.displayName)")
+                    .accessibilityValue(isMember ? L("yes") : L("no"))
+                }
+            }
+            Text("Moving a DCA fader moves every channel in it, without changing their own faders.")
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textTertiary)
+        }
+        .detailCard()
     }
 
     private var faderCard: some View {

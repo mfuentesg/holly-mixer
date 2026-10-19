@@ -38,6 +38,7 @@ struct ServiceModeView: View {
         .onAppear {
             store.seedIfNeeded(mixer)
             scenes.attach(mixer)
+            if onPreviewExit == nil { BackupStore.shared.saveSafety(reason: L("Service Mode")) }
             UIApplication.shared.isIdleTimerDisabled = true
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }

@@ -33,11 +33,12 @@ meters (bank 1); scenes stored in the app; settings backup and restore.
 
 ## Missing, in the order they matter for a church team
 
-1. **Mixer snapshots (`/-snap/N`)**: save, load and name the XR18's own 64 snapshots. The design's "All 64
+1. **Mixer snapshots (`/-snap/N`)** — DONE in code, verify on hardware: save, load and name the XR18's own 64 snapshots. The design's "All 64
    snapshots" button refers to these. Worth offering as a second layer next to Mixit's scenes.
 2. **FX rack (`/fx/N`, `/fx/N/par`, `/fxsend`, `/rtn`)**: choose the effect type and edit its parameters for
    the 4 slots; edit returns (they have EQ and preamp-style config).
-3. **DCA groups (`/dca/N`) and group assignment (`/ch/N/grp`, `/bus/N/grp`, `/rtn/N/grp`)**: four DCAs exist on
+3. **DCA groups (`/dca/N`) and group assignment** — DONE: faders, mute and membership (the rest of this line is the original note):
+    (`/ch/N/grp`, `/bus/N/grp`, `/rtn/N/grp`)**: four DCAs exist on
    the XR18. An earlier note in the roadmap said it has none; that was wrong.
 4. **Routing (`/routing/main|aux|p16`)**: USB / ULTRANET output sources and main/aux routing.
 5. **Graphic EQ on buses and Main (`/bus/N/geq`, `/lr/geq`)**: the 31-band GEQ.

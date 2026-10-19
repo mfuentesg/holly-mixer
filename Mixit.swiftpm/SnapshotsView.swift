@@ -1,0 +1,113 @@
+import SwiftUI
+
+/// The mixer's own 64 snapshot slots: see their names, load one, or save the current state into one.
+/// Before a load Mixit keeps a safety copy of the current settings, so it can be undone from Settings backup.
+@MainActor
+struct SnapshotsView: View {
+    @Environment(Mixer.self) private var mixer
+    private let backups = BackupStore.shared
+
+    @State private var loading: Int?
+    @State private var saving: Int?
+    @State private var saveName = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScreenTopBar(title: L("Mixer snapshots"), subtitle: L("The 64 slots stored inside the mixer")) {
+                Button {
+                    mixer.requestSnapshotNames()
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textBright)
+                        .padding(.horizontal, 14)
+                        .frame(height: 44)
+                        .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            }
+            List {
+                Section {
+                    ForEach(1...64, id: \.self) { slot in
+                        row(slot)
+                            .listRowBackground(Theme.card)
+                    }
+                } footer: {
+                    Text("Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. These commands follow the official app and still need to be checked on a real mixer.")
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .foregroundStyle(Theme.textPrimary)
+        .onAppear { mixer.requestSnapshotNames() }
+        .confirmationDialog(loading.map { L("Load snapshot \($0)?") } ?? "", isPresented: Binding(
+            get: { loading != nil }, set: { if !$0 { loading = nil } }), titleVisibility: .visible) {
+            Button("Load snapshot") {
+                if let slot = loading {
+                    backups.saveSafety(reason: L("snapshot \(slot)"))
+                    mixer.loadSnapshot(slot)
+                }
+                loading = nil
+            }
+        } message: {
+            Text("Faders, mutes and settings can jump. Don't do this while the band is playing.")
+        }
+        .alert(saving.map { L("Save into slot \($0)") } ?? "", isPresented: Binding(
+            get: { saving != nil }, set: { if !$0 { saving = nil } })) {
+            TextField("Name", text: $saveName)
+            Button("Save") {
+                if let slot = saving { mixer.saveSnapshot(slot, name: saveName) }
+                saving = nil
+            }
+            Button("Cancel", role: .cancel) { saving = nil }
+        } message: {
+            Text("This replaces what the slot holds now.")
+        }
+    }
+
+    private func row(_ slot: Int) -> some View {
+        let name = mixer.snapshotNames[slot - 1]
+        let isCurrent = mixer.currentSnapshot == slot
+        return HStack(spacing: 12) {
+            Text(String(format: "%02d", slot))
+                .font(Theme.mono(13, .bold))
+                .foregroundStyle(isCurrent ? Theme.accentText : Theme.textTertiary)
+                .frame(width: 30, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name.isEmpty ? L("Empty") : name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(name.isEmpty ? Theme.textMuted : Theme.textPrimary)
+                    .lineLimit(1)
+                if isCurrent {
+                    Text("LAST USED").sectionLabelStyle(Theme.accentText)
+                }
+            }
+            Spacer()
+            Button {
+                saveName = name
+                saving = slot
+            } label: {
+                Text("Save here")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.textControl)
+                    .padding(.horizontal, 12)
+                    .frame(height: 44)
+            }
+            .buttonStyle(.plain)
+            Button {
+                loading = slot
+            } label: {
+                Text("Load")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(name.isEmpty ? Theme.textMuted : Theme.onAccent)
+                    .padding(.horizontal, 16)
+                    .frame(height: 44)
+                    .background(name.isEmpty ? Theme.control : Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+            .disabled(name.isEmpty)
+        }
+        .frame(minHeight: 52)
+    }
+}

@@ -2,6 +2,9 @@
 
 Ordered by value for a church sound team. Items marked (needs hardware) should be checked on a real XR18.
 
+## Done since this list was written
+Automatic restore with countdown, safety copies before risky actions, DCA groups, mixer snapshots.
+
 ## Safety and reliability
 1. **Auto-restore on connect, with a countdown** (opt-in): if the mixer comes back reset, restore the last
    backup after a visible 10 s countdown with Cancel. Builds on Settings backup.

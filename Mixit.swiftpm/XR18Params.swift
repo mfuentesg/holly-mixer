@@ -113,7 +113,7 @@ enum XR18Params {
         if strip.hasDynamics {
             addresses += dynFields.map { dyn(strip.base, $0) }
         }
-        addresses += ["config/name", "config/color"].map { "\(strip.base)/\($0)" }
+        addresses += ["config/name", "config/color", "grp/dca"].map { "\(strip.base)/\($0)" }
         return addresses
     }
 }

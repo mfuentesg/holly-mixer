@@ -45,6 +45,9 @@ struct MixerBackup: Codable, Identifiable, Equatable {
     var mixerName: String
     var firmware: String
     var values: BackupValues
+    /// Saved automatically right before a risky action (scene recall, Service Mode, automatic restore).
+    /// Optional so backups written before this existed still load.
+    var isSafety: Bool?
 }
 
 /// One value that differs between a backup and the mixer.
@@ -97,9 +100,21 @@ final class BackupStore {
         didSet { UserDefaults.standard.set(isAutoBackupOn, forKey: Self.enabledKey) }
     }
 
+    /// Put the saved settings back by itself, after a visible countdown, when the mixer comes back reset.
+    var isAutoRestoreOn: Bool {
+        didSet { UserDefaults.standard.set(isAutoRestoreOn, forKey: Self.autoRestoreKey) }
+    }
+    /// Seconds left before an automatic restore, or nil when none is waiting.
+    private(set) var restoreCountdown: Int?
+    /// True while an automatic restore is waiting for the sound system to go quiet.
+    private(set) var restoreWaitsForSilence = false
+
     /// At least this many different values count as "the mixer lost its settings".
     static let differenceThreshold = 8
     private static let enabledKey = "autoBackupEnabled"
+    private static let autoRestoreKey = "autoRestoreEnabled"
+    static let countdownSeconds = 10
+    private static let safetyLimit = 10
     private static let historyLimit = 8
     private static let historySpacing: TimeInterval = 3600
 
@@ -107,11 +122,14 @@ final class BackupStore {
     @ObservationIgnored private var key: String?
     @ObservationIgnored private var dirty = false
     @ObservationIgnored private var saveTask: Task<Void, Never>?
+    @ObservationIgnored private var countdownTask: Task<Void, Never>?
     /// The backup stored in auto.json: the one automatic saving overwrites.
     @ObservationIgnored private var latestAutoID: UUID?
 
     init() {
-        isAutoBackupOn = UserDefaults.standard.object(forKey: Self.enabledKey) as? Bool ?? true
+        let defaults = UserDefaults.standard
+        isAutoBackupOn = defaults.object(forKey: Self.enabledKey) == nil ? true : defaults.bool(forKey: Self.enabledKey)
+        isAutoRestoreOn = defaults.object(forKey: Self.autoRestoreKey) == nil ? false : defaults.bool(forKey: Self.autoRestoreKey)
     }
 
     // MARK: - Attaching
@@ -154,6 +172,7 @@ final class BackupStore {
         let changes = Self.differences(from: latest.values, to: mixer.liveValues)
         if changes.count >= Self.differenceThreshold {
             pending = PendingBackupDecision(backup: latest, changes: changes)
+            startCountdownIfAllowed(mixer)
         } else if isAutoBackupOn {
             archiveLatestIfDue(latest)
             writeAuto(from: mixer)
@@ -182,6 +201,7 @@ final class BackupStore {
     /// Writes the saved values back to the mixer. Phantom power only when `includePhantom`.
     func restore(_ changes: [BackupChange], includePhantom: Bool) async {
         guard let mixer, !isRestoring else { return }
+        cancelCountdown()
         let chosen = changes.filter { includePhantom || !$0.isPhantom }
         isRestoring = true
         restoreProgress = 0
@@ -211,10 +231,80 @@ final class BackupStore {
     /// Accepts the mixer as it is now. The older automatic backup is kept in the history first.
     func keepMixerState() {
         guard let mixer else { return }
+        cancelCountdown()
         if let latest = pending?.backup { archive(latest) }
         pending = nil
         if isAutoBackupOn { writeAuto(from: mixer) }
         notice = L("Kept the mixer's current settings.")
+    }
+
+    // MARK: - Automatic restore
+
+    /// Starts the visible countdown, unless the sound system looks live: restoring then could jump a fader
+    /// under a speaker.
+    private func startCountdownIfAllowed(_ mixer: Mixer) {
+        guard isAutoRestoreOn, pending != nil else { return }
+        countdownTask?.cancel()
+        countdownTask = Task { [weak self] in
+            // Wait for silence first: restoring while someone speaks could jump a fader under a speaker.
+            while let self, self.pending != nil, !Task.isCancelled {
+                let isLive = (mixer.channels + [mixer.main]).contains { $0.meter > SceneStore.liveThreshold }
+                if !isLive || Self.ignoreLive { break }
+                self.restoreWaitsForSilence = true
+                try? await Task.sleep(for: .seconds(2))
+            }
+            guard let self, self.pending != nil, !Task.isCancelled else { return }
+            self.restoreWaitsForSilence = false
+            self.restoreCountdown = Self.countdownSeconds
+            while let left = self.restoreCountdown, !Task.isCancelled {
+                if left <= 0 {
+                    await self.finishCountdown()
+                    return
+                }
+                try? await Task.sleep(for: .seconds(1))
+                if Task.isCancelled { return }
+                self.restoreCountdown = left - 1
+            }
+        }
+    }
+
+    func cancelCountdown() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        restoreCountdown = nil
+        restoreWaitsForSilence = false
+    }
+
+    /// Test hook: skip the "sound system is live" check.
+    private static var ignoreLive: Bool { ProcessInfo.processInfo.environment["MIXIT_IGNORE_LIVE"] != nil }
+
+    private func finishCountdown() async {
+        guard let pending else { cancelCountdown(); return }
+        saveSafety(reason: L("automatic restore"))
+        let changes = pending.changes
+        countdownTask = nil
+        restoreCountdown = nil
+        await restore(changes, includePhantom: false)
+    }
+
+    // MARK: - Safety backups
+
+    /// Saves the mixer as it is right now, named "Before …", so a risky action can be undone later.
+    /// Keeps the newest few. Does nothing until the mixer has been fully read.
+    @discardableResult
+    func saveSafety(reason: String) -> MixerBackup? {
+        guard let mixer, mixer.fullStateReady else { return nil }
+        key = currentKey()
+        var backup = MixerBackup(name: L("Before \(reason)"), date: Date(), isAuto: false,
+                                 mixerName: mixer.mixerName, firmware: mixer.firmware,
+                                 values: BackupValues(mixer.liveValues))
+        backup.isSafety = true
+        write(backup, file: "manual-\(backup.id.uuidString).json")
+        reload()
+        let old = backups.filter { $0.isSafety == true }.dropFirst(Self.safetyLimit)
+        for item in old { if let url = url(file(for: item)) { try? FileManager.default.removeItem(at: url) } }
+        if !old.isEmpty { reload() }
+        return backup
     }
 
     // MARK: - Manual backups

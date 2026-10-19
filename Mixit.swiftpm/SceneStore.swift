@@ -254,6 +254,7 @@ final class SceneStore {
     func recall(_ sceneID: UUID, fade: Bool) {
         guard let scene = scene(sceneID), let before = capture() else { return }
         let changes = diff(to: scene.snapshot).changes
+        BackupStore.shared.saveSafety(reason: L("scene \(label(of: scene))"))
         setUndo(SceneUndoState(snapshot: before, previousSceneID: show.currentSceneID,
                                sceneLabel: label(of: scene), date: Date()))
         apply(changes, fade: fade)

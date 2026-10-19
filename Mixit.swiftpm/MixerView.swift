@@ -36,6 +36,10 @@ struct MixerView: View {
                                 ForEach(mixer.buses + mixer.fxSends) { strip in
                                     ChannelStripView(strip: strip, control: .fader, busColor: nil)
                                 }
+                                ForEach(mixer.dcas) { group in
+                                    DCAStripView(group: group)
+                                        .id(group.number == 1 ? AnyHashable("dca") : AnyHashable("dca-\(group.number)"))
+                                }
                             }
                         }
                         .padding(.trailing, 40)
@@ -72,7 +76,7 @@ struct MixerView: View {
                 .tint(Theme.accent)
         }
         .onChange(of: target) { _, newTarget in
-            if newTarget != .main && bank == .masters { bank = .channels1to8 }
+            if newTarget != .main && (bank == .masters || bank == .dca) { bank = .channels1to8 }
         }
     }
 }
@@ -82,15 +86,17 @@ enum Bank: String, CaseIterable, Identifiable {
     case channels9to16 = "9–16"
     case auxFX = "Aux · FX"
     case masters = "Buses · FX Sends"
+    case dca = "DCA"
 
     var id: String { rawValue }
 
-    var firstStrip: Strip.Kind {
+    var firstStrip: AnyHashable {
         switch self {
-        case .channels1to8: return .channel(1)
-        case .channels9to16: return .channel(9)
-        case .auxFX: return .auxIn
-        case .masters: return .bus(1)
+        case .channels1to8: return Strip.Kind.channel(1)
+        case .channels9to16: return Strip.Kind.channel(9)
+        case .auxFX: return Strip.Kind.auxIn
+        case .masters: return Strip.Kind.bus(1)
+        case .dca: return "dca"
         }
     }
 }
@@ -227,6 +233,8 @@ struct PresentedScreenView: View {
             MonitorPairingView()
         case .backups:
             BackupView()
+        case .snapshots:
+            SnapshotsView()
         }
     }
 }
@@ -262,6 +270,11 @@ struct MoreMenu: View {
                 mixer.presentedScreen = .backups
             } label: {
                 Label("Settings backup", systemImage: "clock.arrow.circlepath")
+            }
+            Button {
+                mixer.presentedScreen = .snapshots
+            } label: {
+                Label("Mixer snapshots", systemImage: "camera.on.rectangle")
             }
             Picker("Language", selection: Bindable(localization).language) {
                 ForEach(AppLanguage.allCases) { language in
@@ -565,7 +578,7 @@ struct MixerFooter: View {
     var body: some View {
         HStack(spacing: 12) {
             HStack(spacing: 2) {
-                ForEach(Bank.allCases.filter { $0 != .masters || mixer.selectedMix == .main }) { item in
+                ForEach(Bank.allCases.filter { ($0 != .masters && $0 != .dca) || mixer.selectedMix == .main }) { item in
                     let isSelected = bank == item
                     Button {
                         bank = item
