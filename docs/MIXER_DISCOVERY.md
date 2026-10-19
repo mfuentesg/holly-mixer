@@ -1,7 +1,7 @@
 # Learning everything the mixer and the official app know
 
 Goal: when the XR18 is reachable, collect the full parameter list, the value ranges and the exact addresses
-each screen of X-AIR-Edit uses, then compare them with what Mixit implements (`XR18Params.swift`).
+each screen of X-AIR-Edit uses, then compare them with what Holly Mixer implements (`XR18Params.swift`).
 
 Everything below only reads. None of these steps changes the mixer.
 
@@ -43,7 +43,7 @@ on this firmware). Run it again after switching the mixer off and on and compare
 diff <(python3 -m json.tool xair-captures/dump-A.json) <(python3 -m json.tool xair-captures/dump-B.json)
 ```
 
-That diff shows exactly what the XR18 forgets at power-off, which is what Mixit's backup should protect.
+That diff shows exactly what the XR18 forgets at power-off, which is what Holly Mixer's backup should protect.
 Pass `--extra file.txt` to ask for more addresses (one per line) found in section 1.
 
 ### 2b. Live log: what the official app touches
@@ -66,18 +66,18 @@ python3 tools/xr18_pcap_osc.py xair.pcap --timeline
 ```
 
 This shows the app's own queries and changes, including the addresses it asks for when a page opens, which is the
-list of parameters Mixit should request for the same page.
+list of parameters Holly Mixer should request for the same page.
 
-### 2d. Things in Mixit that follow the official app and still need hardware proof
+### 2d. Things in Holly Mixer that follow the official app and still need hardware proof
 
 - Mixer snapshots: the official protocol document (`docs/XAIR_PROTOCOL_NOTES.md`) lists `/snap/NN/name`,
   `/snap/name`, `/snap/index`, `/snap/load N`, `/snap/save N`, `/snap/delete N` and `/snap/NN/scope`. The official app's
-  binary also holds `/-snap`; Mixit asks for both and uses the one the mixer answers to. While the official app loads
+  binary also holds `/-snap`; Holly Mixer asks for both and uses the one the mixer answers to. While the official app loads
   or saves a snapshot, run `xr18_dump.py listen` to confirm which spelling your firmware uses.
 - DCA: `/dca/N/on`, `/dca/N/fader`, `/dca/N/config/name|color`, and `/ch/NN/grp/dca` as a bit mask (bit 0 = DCA 1).
   Move a DCA and add a channel to it in the official app and check the values in the log.
 
-## 3. From captures to Mixit
+## 3. From captures to Holly Mixer
 
 1. Collect the addresses that exist (`dump`), the ones each screen uses (`listen`, pcap) and the ranges.
 2. Add each one to `XR18Params.swift` with its `ParamRange` and enumerations, as the gate and dynamics already are.

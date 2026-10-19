@@ -1,7 +1,7 @@
-# Design brief: Mixit, an iPad & iPhone app to control a Behringer XR18 digital mixer
+# Design brief: Holly Mixer, an iPad & iPhone app to control a Behringer XR18 digital mixer
 
 You are a senior product designer for pro-audio and live-production tools. Design a complete,
-high-fidelity UI for **Mixit**, a native iPadOS/iOS app that remotely controls a **Behringer XR18**
+high-fidelity UI for **Holly Mixer**, a native iPadOS/iOS app that remotely controls a **Behringer XR18**
 digital mixer (and later the X32 family) over Wi-Fi. It replaces Behringer's official "X AIR" app,
 which is outdated and unmaintained. It must have **full feature parity** with X AIR and be much
 easier, safer and more beautiful to use.
@@ -217,7 +217,7 @@ Invent sensible bus names: "Monitor Pulpito", "IEM Batería", "IEM Bajo", "Wedge
   controls only for faders, meters, EQ/dynamics graphs and the mix selector.
 - Meters render at 20–60 fps, so keep them simple shapes (no heavy blur on animated layers).
 - No Behringer/X AIR trademarks or logos; describe compatibility only.
-- The app name is **Mixit**. Design an app icon (fader + soundwave idea, dark with orange accent)
+- The app name is **Holly Mixer**. Design an app icon (fader + soundwave idea, dark with orange accent)
   and a small logomark for the top bar.
 
 ## 9. Deliverables

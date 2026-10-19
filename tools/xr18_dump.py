@@ -13,7 +13,7 @@ compare the two files with `diff`.
 
 `listen` answers "what does the official app touch": open X-AIR-Edit on the same network, move one control at
 a time, and type a note (then Enter) before each one. Every change is logged with its address, value and the
-note, and the session ends with the observed range of each parameter. That is how Mixit learns the value
+note, and the session ends with the observed range of each parameter. That is how Holly Mixer learns the value
 ranges and which address each screen of the official app uses.
 
 Python 3.8+, standard library only.

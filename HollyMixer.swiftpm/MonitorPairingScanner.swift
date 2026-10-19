@@ -31,11 +31,11 @@ struct MonitorPairing: Codable, Equatable {
         return MonitorSwitching.available.contains(mode) ? mode : .locked
     }
 
-    /// Parses `mixit://monitor?host=<host>&bus=<n>&me=<n>`; nil for anything else.
+    /// Parses `hollymixer://monitor?host=<host>&bus=<n>&me=<n>`; nil for anything else.
     init?(code: String) {
         let text = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let components = URLComponents(string: text),
-              components.scheme?.lowercased() == "mixit",
+              components.scheme?.lowercased() == "hollymixer",
               components.host?.lowercased() == "monitor" else { return nil }
         let items = components.queryItems ?? []
         func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
@@ -53,14 +53,14 @@ struct MonitorPairing: Codable, Equatable {
     /// The text encoded in the QR code.
     var code: String {
         var components = URLComponents()
-        components.scheme = "mixit"
+        components.scheme = "hollymixer"
         components.host = "monitor"
         components.queryItems = [
             URLQueryItem(name: "host", value: host),
             URLQueryItem(name: "bus", value: String(bus)),
             URLQueryItem(name: "me", value: String(me)),
         ] + (lock.map { [URLQueryItem(name: "lock", value: $0)] } ?? [])
-        return components.string ?? "mixit://monitor?host=\(host)&bus=\(bus)&me=\(me)"
+        return components.string ?? "hollymixer://monitor?host=\(host)&bus=\(bus)&me=\(me)"
     }
 
     var isDemo: Bool { host == "demo" }
@@ -160,7 +160,7 @@ struct MonitorPairingScannerSheet: View {
                 if let pairing = MonitorPairing(code: code) {
                     onPair(pairing)
                 } else {
-                    message = "That isn't a Mixit pairing code."
+                    message = "That isn't a Holly Mixer pairing code."
                 }
             }
             .frame(height: 300)

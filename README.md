@@ -1,11 +1,11 @@
-# Mixit
+# Holly Mixer
 
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
 for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
 ## What works now (v0.5)
 
-Everything in the Mixit design canvas:
+Everything in the Holly Mixer design canvas:
 
 - **Mixer (iPad):** graphite console design, channels 1–16, Aux In, FX returns, buses, FX sends and
   Main LR with faders, mutes, solo, pan, EQ thumbnails, gate/compressor status, LED meters with peak hold;
@@ -17,7 +17,7 @@ Everything in the Mixit design canvas:
 - **Service Mode:** (hidden for now, see below)
 - **iPhone:** portrait mixer with horizontal faders; musician "My mix" mode paired by QR code from the iPad
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer
-- **Settings backup:** Mixit saves every level, mute, name, EQ, gate and dynamics value on the device a few
+- **Settings backup:** Holly Mixer saves every level, mute, name, EQ, gate and dynamics value on the device a few
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
@@ -30,21 +30,21 @@ Everything in the Mixit design canvas:
 - **Service Mode footer (hidden with Service Mode):** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
 - **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be
   changed with the globe button on the Connect screen or in the `…` menu. Texts live in
-  `Mixit.swiftpm/es.lproj/Localizable.strings` (English text = key)
+  `HollyMixer.swiftpm/es.lproj/Localizable.strings` (English text = key)
 - App icon from the design
 
 No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the
 church's channel names, faders and mutes, and moving meters.
 
-⚠️ Moving a fader or mute in Mixit really changes the mixer. Try it outside service times.
+⚠️ Moving a fader or mute in Holly Mixer really changes the mixer. Try it outside service times.
 
 ## Run it on an iPad with Swift Playgrounds
 
 1. Install **Swift Playgrounds** from the App Store (free).
 2. In Safari on the iPad, open
-   <https://github.com/mfuentesg/mixit/archive/refs/heads/main.zip> and download it.
-3. In the **Files** app, open Downloads and tap `mixit-main.zip` to unzip it.
-4. Open the `mixit-main` folder and tap **Mixit** (the `Mixit.swiftpm` package).
+   <https://github.com/mfuentesg/holly-mixer/archive/refs/heads/main.zip> and download it.
+3. In the **Files** app, open Downloads and tap `holly-mixer-main.zip` to unzip it.
+4. Open the `holly-mixer-main` folder and tap **HollyMixer** (the `HollyMixer.swiftpm` package).
    It opens in Swift Playgrounds. If it doesn't, long-press it → Share → Swift Playgrounds.
 5. Tap **▶ Run** (or the app preview). Allow **Local Network** access when iOS asks.
 6. Enter the mixer IP (`192.168.1.2` is pre-filled) and tap **Connect**.
@@ -59,6 +59,6 @@ The iPhone can't run Swift Playgrounds. It will get the app through TestFlight l
 free **a-Shell** app:
 
 ```
-curl -L -o probe.py https://raw.githubusercontent.com/mfuentesg/mixit/main/tools/xr18_probe.py
+curl -L -o probe.py https://raw.githubusercontent.com/mfuentesg/holly-mixer/main/tools/xr18_probe.py
 python3 probe.py 192.168.1.2
 ```

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The mixer's own 64 snapshot slots: see their names, load one, or save the current state into one.
-/// Before a load Mixit keeps a safety copy of the current settings, so it can be undone from Settings backup.
+/// Before a load Holly Mixer keeps a safety copy of the current settings, so it can be undone from Settings backup.
 @MainActor
 struct SnapshotsView: View {
     @Environment(Mixer.self) private var mixer
@@ -34,7 +34,7 @@ struct SnapshotsView: View {
                             .listRowBackground(Theme.card)
                     }
                 } footer: {
-                    Text("Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer.")
+                    Text("Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Holly Mixer saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer.")
                 }
             }
             .scrollContentBackground(.hidden)

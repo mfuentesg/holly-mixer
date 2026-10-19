@@ -87,7 +87,7 @@ struct MonitorPairingView: View {
                     ForEach(MonitorSwitching.available) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                Text("The mixer has no user accounts, so this limit lives in Mixit only. Locked: the musician can't change return. Free: one tap, for the sound lead.")
+                Text("The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead.")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -153,7 +153,7 @@ struct MonitorPairingView: View {
                     .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
                     .frame(maxWidth: 360)
                     .accessibilityLabel("Pairing QR code for \(mixer.master(for: .bus(bus)).displayName)")
-                Text("On the musician's iPhone open Mixit, then More > Pair as musician and scan this code.")
+                Text("On the musician's iPhone open Holly Mixer, then More > Pair as musician and scan this code.")
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)

@@ -18,7 +18,7 @@ final class MixerConnection: MixerTransport {
     var onStateChange: ((NWConnection.State) -> Void)?
 
     private var connection: NWConnection?
-    private let queue = DispatchQueue(label: "mixit.osc")
+    private let queue = DispatchQueue(label: "hollymixer.osc")
 
     func connect(host: String) {
         disconnect()

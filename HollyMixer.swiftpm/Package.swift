@@ -8,16 +8,16 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "Mixit",
+    name: "HollyMixer",
     defaultLocalization: "en",
     platforms: [
         .iOS("17.0")
     ],
     products: [
         .iOSApplication(
-            name: "Mixit",
+            name: "Holly Mixer",
             targets: ["AppModule"],
-            bundleIdentifier: "com.mfuentesg.mixit",
+            bundleIdentifier: "com.mfuentesg.hollymixer",
             displayVersion: "0.1",
             bundleVersion: "1",
             appIcon: .asset("AppIcon"),
@@ -33,8 +33,8 @@ let package = Package(
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
             ],
             capabilities: [
-                .localNetwork(purposeString: "Mixit connects to your X AIR mixer on the local network."),
-                .camera(purposeString: "Mixit scans the pairing code shown on the sound desk's iPad.")
+                .localNetwork(purposeString: "Holly Mixer connects to your X AIR mixer on the local network."),
+                .camera(purposeString: "Holly Mixer scans the pairing code shown on the sound desk's iPad.")
             ],
             appCategory: .music
         )

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MixitApp: App {
+struct HollyMixerApp: App {
     @State private var mixer = Mixer()
     @State private var localization = Localization.shared
 

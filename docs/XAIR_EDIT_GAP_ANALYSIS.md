@@ -1,4 +1,4 @@
-# What the official X-AIR-Edit has that Mixit does not
+# What the official X-AIR-Edit has that Holly Mixer does not
 
 Source: X-AIR-Edit 1.8.1 for macOS (universal Mach-O). Inspected with REA (`rea inspect-macho`, evidence
 `sha256 6294054c…c96d96`) and with the string table of the arm64 slice (`strings`), to list the OSC addresses
@@ -25,7 +25,7 @@ Binary facts (from REA): arm64 + x86_64, built with the macOS 14.2 SDK, minimum 
 | `/fx/N`, `/fx/N/par` | 8 | the 4 FX slots and their parameters |
 | `/dca/N`, `/config/...` | 8 + 7 | 4 DCA groups; `amixenable`, `amixlock`, `buslink`, `chlink`, `linkcfg`, `mute`, `solo` |
 
-## What Mixit already covers
+## What Holly Mixer already covers
 
 Faders, mutes, pan, solo; bus and FX-send levels per channel; names, colours, icons and input source (in the
 backup); preamp gain, +48V, polarity, low cut; gate and dynamics (all fields); EQ (4 or 6 bands); mute groups;
@@ -34,7 +34,7 @@ meters (bank 1); scenes stored in the app; settings backup and restore.
 ## Missing, in the order they matter for a church team
 
 1. **Mixer snapshots (`/-snap/N`)** — DONE in code, verify on hardware: save, load and name the XR18's own 64 snapshots. The design's "All 64
-   snapshots" button refers to these. Worth offering as a second layer next to Mixit's scenes.
+   snapshots" button refers to these. Worth offering as a second layer next to Holly Mixer's scenes.
 2. **FX rack (`/fx/N`, `/fx/N/par`, `/fxsend`, `/rtn`)**: choose the effect type and edit its parameters for
    the 4 slots; edit returns (they have EQ and preamp-style config).
 3. **DCA groups (`/dca/N`) and group assignment** — DONE: faders, mute and membership (the rest of this line is the original note):

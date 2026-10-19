@@ -1,4 +1,4 @@
-# Mixit roadmap: ideas worth building next
+# Holly Mixer roadmap: ideas worth building next
 
 Ordered by value for a church sound team. Items marked (needs hardware) should be checked on a real XR18.
 
@@ -46,7 +46,7 @@ Automatic restore with countdown, safety copies before risky actions, DCA groups
 ## Known gaps (not possible or unverified)
 - **Wi-Fi signal (dBm) and "other clients"** in Check my network: iOS has no public API for the first without a
   special entitlement, and the XR18 does not list its clients.
-- **Guest network detection**: Mixit shows a hint when the mixer can't be seen, because reading the network
+- **Guest network detection**: Holly Mixer shows a hint when the mixer can't be seen, because reading the network
   name needs an entitlement that Swift Playgrounds can't grant.
 - **Backup covers** levels, mutes, pan, sends, names, colors, icons, input source, preamp, EQ, gate and
   dynamics. FX, routing and global settings are not read yet.

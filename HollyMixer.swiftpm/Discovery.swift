@@ -186,7 +186,7 @@ final class NetworkPathInfo {
             else { kind = .other }
             Task { @MainActor in self?.kind = kind }
         }
-        monitor.start(queue: DispatchQueue(label: "mixit.path"))
+        monitor.start(queue: DispatchQueue(label: "hollymixer.path"))
     }
 
     deinit { monitor.cancel() }

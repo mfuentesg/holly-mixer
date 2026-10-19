@@ -4,7 +4,10 @@ import SwiftUI
 struct DCAStripView: View {
     @Environment(Mixer.self) private var mixer
     let group: DCAGroup
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var isDragging = false
+
+    private var isCompact: Bool { verticalSizeClass == .compact }
 
     private var memberCount: Int {
         let bit = 1 << (group.number - 1)
@@ -13,7 +16,7 @@ struct DCAStripView: View {
 
     var body: some View {
         let muted = !group.isOn
-        VStack(spacing: 6) {
+        VStack(spacing: isCompact ? 4 : 6) {
             Rectangle()
                 .fill(group.color)
                 .opacity(muted ? 0.35 : 1)
@@ -29,17 +32,20 @@ struct DCAStripView: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.7)
-                Text(memberCount == 1 ? L("1 channel") : L("\(memberCount) channels"))
-                    .font(.system(size: 10))
-                    .foregroundStyle(Theme.textTertiary)
+                if !isCompact {
+                    Text(memberCount == 1 ? L("1 channel") : L("\(memberCount) channels"))
+                        .font(.system(size: 10))
+                        .foregroundStyle(Theme.textTertiary)
+                }
             }
-            .frame(height: 66)
+            .frame(height: isCompact ? 32 : 66, alignment: .top)
             FaderView(
                 value: group.fader,
                 lineColor: group.color,
                 capLineColor: group.color,
                 isMuted: muted,
                 label: L("\(group.displayName) fader"),
+                isCompact: isCompact,
                 isDragging: $isDragging,
                 onTouchingChanged: { mixer.beginDCA(group, touching: $0) },
                 onChange: { mixer.setDCALevel(group, to: $0) }
@@ -49,9 +55,9 @@ struct DCAStripView: View {
                 .font(Theme.mono(12))
                 .foregroundStyle(muted ? Theme.textMuted : Theme.textBright)
                 .frame(maxWidth: .infinity)
-                .frame(height: 24)
+                .frame(height: isCompact ? 20 : 24)
                 .background(Theme.background, in: RoundedRectangle(cornerRadius: 6))
-            StripButton(title: L("MUTE"), isOn: muted, style: .mute, height: 44,
+            StripButton(title: L("MUTE"), isOn: muted, style: .mute, height: isCompact ? 34 : 44,
                         accessibilityLabel: L("Mute \(group.displayName)")) {
                 mixer.toggleDCAMute(group)
             }

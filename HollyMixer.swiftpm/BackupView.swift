@@ -18,7 +18,7 @@ struct BackupBanner: View {
                         Text("The mixer's settings changed since your last session")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(Color(hex: 0xFFE4A0))
-                        Text("\(pending.changes.count) values differ from the backup of \(pending.backup.date.mixit(date: .abbreviated, time: .shortened)). If the mixer was switched off and on, it may have lost them.")
+                        Text("\(pending.changes.count) values differ from the backup of \(pending.backup.date.hollyMixer(date: .abbreviated, time: .shortened)). If the mixer was switched off and on, it may have lost them.")
                             .font(.system(size: 13))
                             .foregroundStyle(Color(hex: 0xE9D7A5))
                             .fixedSize(horizontal: false, vertical: true)
@@ -191,7 +191,7 @@ struct BackupView: View {
 
     private var subtitle: String {
         if let date = store.lastAutoSave {
-            return L("Last automatic save \(date.mixit(date: .omitted, time: .shortened)) · \(mixer.mixerName.isEmpty ? L("mixer") : mixer.mixerName)")
+            return L("Last automatic save \(date.hollyMixer(date: .omitted, time: .shortened)) · \(mixer.mixerName.isEmpty ? L("mixer") : mixer.mixerName)")
         }
         return mixer.fullStateReady || mixer.isDemo ? "Nothing saved yet" : "Reading the mixer…"
     }
@@ -207,7 +207,7 @@ struct BackupView: View {
     private func pendingCard(_ pending: PendingBackupDecision) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("THE MIXER LOOKS DIFFERENT").sectionLabelStyle(Theme.meterAmber)
-            Text("\(pending.changes.count) values differ from the automatic backup of \(pending.backup.date.mixit(date: .abbreviated, time: .shortened)).")
+            Text("\(pending.changes.count) values differ from the automatic backup of \(pending.backup.date.hollyMixer(date: .abbreviated, time: .shortened)).")
                 .font(.system(size: 15))
                 .foregroundStyle(Color(hex: 0xE9D7A5))
             HStack(spacing: 10) {
@@ -245,7 +245,7 @@ struct BackupView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Back up automatically")
                         .font(.system(size: 17, weight: .semibold))
-                    Text("Mixit saves the mixer's settings on this device a few seconds after every change. When you connect and the mixer has lost them, you can put them back.")
+                    Text("Holly Mixer saves the mixer's settings on this device a few seconds after every change. When you connect and the mixer has lost them, you can put them back.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -256,7 +256,7 @@ struct BackupView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Restore automatically")
                         .font(.system(size: 17, weight: .semibold))
-                    Text("If the mixer comes back reset, Mixit counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live.")
+                    Text("If the mixer comes back reset, Holly Mixer counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -304,7 +304,7 @@ struct BackupView: View {
                 Text(backup.isAuto ? L("Automatic backup") : backup.name)
                     .font(.system(size: 16, weight: .semibold))
                     .lineLimit(1)
-                Text("\(backup.date.mixit(date: .abbreviated, time: .shortened)) · \(backup.values.count) values")
+                Text("\(backup.date.hollyMixer(date: .abbreviated, time: .shortened)) · \(backup.values.count) values")
                     .font(Theme.mono(12, .regular))
                     .foregroundStyle(Theme.textTertiary)
                     .lineLimit(compact ? 2 : 1)

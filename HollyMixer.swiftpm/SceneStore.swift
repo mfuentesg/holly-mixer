@@ -123,7 +123,7 @@ final class SceneStore {
     var canUndo: Bool { undoState != nil }
 
     var lastSavedText: String {
-        show.savedAt.mixit(date: .omitted, time: .shortened)
+        show.savedAt.hollyMixer(date: .omitted, time: .shortened)
     }
 
     // MARK: - Capture

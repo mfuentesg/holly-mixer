@@ -399,7 +399,7 @@ struct ScenesView: View {
             Text("No scenes yet")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text("Set the mixer up for a part of the service, then save it as a scene. Mixit can preview and recall it later.")
+            Text("Set the mixer up for a part of the service, then save it as a scene. Holly Mixer can preview and recall it later.")
                 .font(.system(size: 14))
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)

@@ -16,7 +16,7 @@
 "THE MIXER LOOKS DIFFERENT" = "LA CONSOLA SE VE DISTINTA";
 "%lld values differ from the automatic backup of %@." = "%lld valores son distintos a la copia automática del %@.";
 "Back up automatically" = "Copia de seguridad automática";
-"Mixit saves the mixer's settings on this device a few seconds after every change. When you connect and the mixer has lost them, you can put them back." = "Mixit guarda los ajustes de la consola en este dispositivo unos segundos después de cada cambio. Si al conectar la consola los perdió, puedes devolverlos.";
+"Holly Mixer saves the mixer's settings on this device a few seconds after every change. When you connect and the mixer has lost them, you can put them back." = "Holly Mixer guarda los ajustes de la consola en este dispositivo unos segundos después de cada cambio. Si al conectar la consola los perdió, puedes devolverlos.";
 "SAVED SETTINGS" = "AJUSTES GUARDADOS";
 "Import" = "Importar";
 "Nothing saved yet. The first automatic backup is made right after the mixer has been read." = "Aún no hay nada guardado. La primera copia automática se hace justo después de leer la consola.";
@@ -39,7 +39,7 @@
 "Restored %lld values to the mixer." = "Se restauraron %lld valores en la consola.";
 "Kept the mixer's current settings." = "Se mantuvieron los ajustes actuales de la consola.";
 "Saved “%@”." = "Se guardó “%@”.";
-"That file isn't a Mixit backup." = "Ese archivo no es una copia de Mixit.";
+"That file isn't a Holly Mixer backup." = "Ese archivo no es una copia de Holly Mixer.";
 "Imported “%@”." = "Se importó “%@”.";
 "Saved " = "Guardado ";
 "preamp" = "preamp";
@@ -206,7 +206,7 @@
 "Last used" = "Último usado";
 "Check my network" = "Revisar mi red";
 "Why “Local Network” access?" = "¿Por qué pide acceso a la “Red local”?";
-"Mixit only talks to mixers in this building. If you tapped “Don't Allow”, turn it on in Settings › Privacy & Security › Local Network." = "Mixit solo habla con consolas de este edificio. Si tocaste “No permitir”, actívalo en Ajustes › Privacidad y seguridad › Red local.";
+"Holly Mixer only talks to mixers in this building. If you tapped “Don't Allow”, turn it on in Settings › Privacy & Security › Local Network." = "Holly Mixer solo habla con consolas de este edificio. Si tocaste “No permitir”, actívalo en Ajustes › Privacidad y seguridad › Red local.";
 "Open Settings" = "Abrir Ajustes";
 "Can't see the mixer?" = "¿No ves la consola?";
 "Guest Wi-Fi networks often block devices from seeing each other. Join the same network as the mixer (for example the staff network), then scan again." = "Las redes Wi-Fi de invitados suelen impedir que los dispositivos se vean entre sí. Conéctate a la misma red que la consola (por ejemplo la red del equipo) y vuelve a buscar.";
@@ -255,7 +255,7 @@
 "Recent changes" = "Cambios recientes";
 "Undo. %lld changes in history" = "Deshacer. %lld cambios en el historial";
 "Main LR level" = "Nivel de Main LR";
-"Mixit" = "Mixit";
+"Holly Mixer" = "Holly Mixer";
 "Faders are sends to " = "Los faders son envíos a ";
 "%@ · sends on faders" = "%@ · envíos en los faders";
 "Back to Main" = "Volver a Main";
@@ -304,7 +304,7 @@
 "ME (THE MUSICIAN'S OWN CHANNEL)" = "YO (EL CANAL DEL PROPIO MÚSICO)";
 "Ch %lld" = "Ch %lld";
 "Pairing QR code for %@" = "Código QR de vinculación para %@";
-"On the musician's iPhone open Mixit, then More > Pair as musician and scan this code." = "En el iPhone del músico abre Mixit, luego Más > Vincular como músico y escanea este código.";
+"On the musician's iPhone open Holly Mixer, then More > Pair as musician and scan this code." = "En el iPhone del músico abre Holly Mixer, luego Más > Vincular como músico y escanea este código.";
 "This mixer's address can't be put in a code. Check the connection." = "La dirección de esta consola no se puede poner en un código. Revisa la conexión.";
 "Mixer" = "Consola";
 "Pair as musician" = "Vincular como músico";
@@ -378,7 +378,7 @@
 "PREVIEWING" = "EN VISTA PREVIA";
 "DONE" = "HECHA";
 "UP NEXT" = "PRÓXIMA";
-"Set the mixer up for a part of the service, then save it as a scene. Mixit can preview and recall it later." = "Deja la consola lista para una parte del servicio y guárdala como escena. Mixit podrá mostrarte una vista previa y cargarla después.";
+"Set the mixer up for a part of the service, then save it as a scene. Holly Mixer can preview and recall it later." = "Deja la consola lista para una parte del servicio y guárdala como escena. Holly Mixer podrá mostrarte una vista previa y cargarla después.";
 "Save current…" = "Guardar actual…";
 "Recall safe…" = "Protegido al cargar…";
 "RECALL SAFE FOR THIS SHOW" = "PROTEGIDO AL CARGAR EN ESTE SHOW";
@@ -519,7 +519,7 @@
 "Restoring your settings in %lld s" = "Restaurando tus ajustes en %lld s";
 "Restoring your settings in %@ s" = "Restaurando tus ajustes en %@ s";
 "Restore automatically" = "Restaurar automáticamente";
-"If the mixer comes back reset, Mixit counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live." = "Si la consola vuelve reseteada, Mixit cuenta 10 s y devuelve tus últimos ajustes. Puedes cancelar cuando quieras. Espera si el sistema de sonido está en vivo.";
+"If the mixer comes back reset, Holly Mixer counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live." = "Si la consola vuelve reseteada, Holly Mixer cuenta 10 s y devuelve tus últimos ajustes. Puedes cancelar cuando quieras. Espera si el sistema de sonido está en vivo.";
 "Before %@" = "Antes de %@";
 "automatic restore" = "la restauración automática";
 "scene %@" = "la escena %@";
@@ -537,7 +537,7 @@
 "Mixer snapshots" = "Snapshots de la consola";
 "The 64 slots stored inside the mixer" = "Las 64 ranuras guardadas dentro de la consola";
 "Refresh" = "Actualizar";
-"Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. These commands follow the official app and still need to be checked on a real mixer." = "Cargar un snapshot cambia lo que cubra su alcance de carga, igual que en la consola. Mixit guarda antes una copia de seguridad. Estos comandos siguen a la app oficial y aún hay que comprobarlos en una consola real.";
+"Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Holly Mixer saves a safety copy first. These commands follow the official app and still need to be checked on a real mixer." = "Cargar un snapshot cambia lo que cubra su alcance de carga, igual que en la consola. Holly Mixer guarda antes una copia de seguridad. Estos comandos siguen a la app oficial y aún hay que comprobarlos en una consola real.";
 "Load snapshot %lld?" = "¿Cargar el snapshot %lld?";
 "Load snapshot %@?" = "¿Cargar el snapshot %@?";
 "Load snapshot" = "Cargar snapshot";
@@ -566,17 +566,17 @@
 "deleting snapshot %@" = "eliminar el snapshot %@";
 "The slot becomes empty on the mixer." = "La ranura queda vacía en la consola.";
 "Name (31 characters at most)" = "Nombre (31 caracteres como máximo)";
-"Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer." = "Cargar un snapshot cambia lo que cubra su alcance de carga, igual que en la consola. Mixit guarda antes una copia de seguridad. Los comandos siguen el documento oficial del protocolo y aún hay que comprobarlos en una consola real.";
+"Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Holly Mixer saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer." = "Cargar un snapshot cambia lo que cubra su alcance de carga, igual que en la consola. Holly Mixer guarda antes una copia de seguridad. Los comandos siguen el documento oficial del protocolo y aún hay que comprobarlos en una consola real.";
 "Locked" = "Bloqueado";
 "With PIN" = "Con PIN";
 "Free" = "Libre";
 "Changing return" = "Cambio de retorno";
 "CHANGING RETURN" = "CAMBIO DE RETORNO";
-"The mixer has no user accounts, so this limit lives in Mixit only. Locked: the musician can't change return. With PIN: needs the Service Mode PIN. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Mixit. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";
+"The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. With PIN: needs the Service Mode PIN. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Holly Mixer. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";
 "Change return" = "Cambiar de retorno";
 "In use" = "En uso";
 "Unused" = "Sin usar";
 "Show unused returns" = "Mostrar retornos sin usar";
 "Only the return changes. Your own channel stays the same." = "Solo cambia el retorno. Tu propio canal sigue igual.";
 "Return" = "Retorno";
-"The mixer has no user accounts, so this limit lives in Mixit only. Locked: the musician can't change return. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Mixit. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";
+"The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Holly Mixer. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";

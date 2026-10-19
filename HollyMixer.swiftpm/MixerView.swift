@@ -3,6 +3,7 @@ import SwiftUI
 struct MixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var bank = Bank.channels1to8
 
     var body: some View {
@@ -13,8 +14,8 @@ struct MixerView: View {
         let isReconnecting = mixer.status != .connected && !mixer.isDemo
 
         VStack(spacing: 0) {
-            MixerHeader(isCompact: sizeClass == .compact)
-            MixSelector()
+            MixerHeader(isCompact: sizeClass == .compact, isShort: verticalSizeClass == .compact)
+            MixSelector(isCompact: verticalSizeClass == .compact)
             if target != .main {
                 SendsBanner(master: master)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -59,12 +60,12 @@ struct MixerView: View {
                 ChannelStripView(strip: master, control: .fader, busColor: busColor, isMaster: true)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, verticalSizeClass == .compact ? 6 : 12)
             .opacity(isReconnecting ? 0.4 : 1)
             .saturation(isReconnecting ? 0.35 : 1)
             .allowsHitTesting(!isReconnecting)
 
-            MixerFooter(bank: $bank, isCompact: sizeClass == .compact)
+            MixerFooter(bank: $bank, isCompact: sizeClass == .compact, isShort: verticalSizeClass == .compact)
         }
         .background(Theme.background.ignoresSafeArea())
         .animation(.easeInOut(duration: 0.2), value: target)
@@ -106,10 +107,12 @@ enum Bank: String, CaseIterable, Identifiable {
 struct MixerHeader: View {
     @Environment(Mixer.self) private var mixer
     let isCompact: Bool
+    /// Landscape iPhone: a slimmer bar to leave room for the strips.
+    var isShort = false
 
     var body: some View {
         HStack(spacing: 12) {
-            MixitLogo(size: 20)
+            HollyMixerLogo(size: 20)
                 .frame(width: 36, height: 36)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 9))
                 .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color.white.opacity(0.08), lineWidth: 1))
@@ -204,7 +207,7 @@ struct MixerHeader: View {
             }
         }
         .padding(.horizontal, 16)
-        .frame(height: 64)
+        .frame(height: isShort ? 52 : 64)
         .background(Theme.surface)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Theme.border).frame(height: 1)
@@ -329,7 +332,7 @@ struct UndoButton: View {
         Menu {
             Section("Recent changes") {
                 ForEach(mixer.history.suffix(8).reversed()) { change in
-                    Text("\(change.date.mixit(date: .omitted, time: .shortened)) · \(change.label)")
+                    Text("\(change.date.hollyMixer(date: .omitted, time: .shortened)) · \(change.label)")
                 }
             }
         } label: {
@@ -413,8 +416,8 @@ struct IconButton: View {
     }
 }
 
-/// The Mixit mark: three fader tracks with orange caps.
-struct MixitLogo: View {
+/// The Holly Mixer mark: three fader tracks with orange caps.
+struct HollyMixerLogo: View {
     var size: CGFloat = 20
 
     var body: some View {
@@ -433,7 +436,7 @@ struct MixitLogo: View {
             }
         }
         .frame(width: size, height: size)
-        .accessibilityLabel("Mixit")
+        .accessibilityLabel("Holly Mixer")
     }
 }
 
@@ -442,6 +445,7 @@ struct MixitLogo: View {
 /// Chips for Main LR, Bus 1-6 and FX 1-4; the selected mix decides what the faders control.
 struct MixSelector: View {
     @Environment(Mixer.self) private var mixer
+    var isCompact = false
 
     private let targets: [MixTarget] = [.main]
         + (1...6).map { MixTarget.bus($0) }
@@ -459,7 +463,7 @@ struct MixSelector: View {
             }
             .padding(.horizontal, 16)
         }
-        .frame(height: 56)
+        .frame(height: isCompact ? 42 : 56)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
         }
@@ -486,7 +490,7 @@ struct MixSelector: View {
             }
             .padding(.leading, 12)
             .padding(.trailing, 14)
-            .frame(height: 40)
+            .frame(height: isCompact ? 32 : 40)
             .background(isSelected ? selectedColor.opacity(target == .main ? 0.16 : 0.24) : Theme.strip,
                         in: Capsule())
             .overlay(Capsule().stroke(isSelected ? selectedColor : Color.white.opacity(0.08), lineWidth: 1))
@@ -575,6 +579,7 @@ struct MixerFooter: View {
     @Environment(Mixer.self) private var mixer
     @Binding var bank: Bank
     let isCompact: Bool
+    var isShort = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -589,7 +594,7 @@ struct MixerFooter: View {
                             .foregroundStyle(isSelected ? .white : Theme.textSecondary)
                             .lineLimit(1)
                             .padding(.horizontal, isCompact ? 10 : 18)
-                            .frame(height: 44)
+                            .frame(height: isShort ? 34 : 44)
                             .background(isSelected ? Theme.controlSelected : .clear, in: RoundedRectangle(cornerRadius: 9))
                             .overlay(RoundedRectangle(cornerRadius: 9)
                                 .stroke(isSelected ? Theme.accent.opacity(0.7) : .clear, lineWidth: 1))
@@ -615,7 +620,7 @@ struct MixerFooter: View {
             }
         }
         .padding(.horizontal, 16)
-        .frame(height: 68)
+        .frame(height: isShort ? 46 : 68)
         .background(Theme.surface)
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 1)

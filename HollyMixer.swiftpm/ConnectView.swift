@@ -42,7 +42,7 @@ struct ConnectView: View {
     private var mainColumn: some View {
         VStack(alignment: .leading, spacing: 22) {
             HStack(spacing: 14) {
-                MixitLogo(size: 32)
+                HollyMixerLogo(size: 32)
                     .frame(width: 56, height: 56)
                     .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.08), lineWidth: 1))
@@ -308,7 +308,7 @@ struct ConnectView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Why “Local Network” access?")
                         .font(.system(size: 15, weight: .bold))
-                    Text("Mixit only talks to mixers in this building. If you tapped “Don't Allow”, turn it on in Settings › Privacy & Security › Local Network.")
+                    Text("Holly Mixer only talks to mixers in this building. If you tapped “Don't Allow”, turn it on in Settings › Privacy & Security › Local Network.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)

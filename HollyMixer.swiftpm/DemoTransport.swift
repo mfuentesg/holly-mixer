@@ -1,7 +1,7 @@
 import Foundation
 import Network
 
-/// An in-app stand-in for the church's XR18, for trying Mixit without the mixer.
+/// An in-app stand-in for the church's XR18, for trying Holly Mixer without the mixer.
 /// It answers queries like the real mixer, remembers changes, and sends animated meters.
 /// Channel names, colours, faders and mutes match the mixer as it was on 18 Oct 2026.
 final class DemoTransport: MixerTransport {

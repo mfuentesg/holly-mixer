@@ -82,7 +82,7 @@ func L(_ value: String.LocalizationValue) -> String {
 
 extension Date {
     /// Date and time in the app's language, not the device's.
-    func mixit(date: Date.FormatStyle.DateStyle = .omitted, time: Date.FormatStyle.TimeStyle = .omitted) -> String {
+    func hollyMixer(date: Date.FormatStyle.DateStyle = .omitted, time: Date.FormatStyle.TimeStyle = .omitted) -> String {
         formatted(Date.FormatStyle(date: date, time: time).locale(ActiveLanguage.locale))
     }
 }

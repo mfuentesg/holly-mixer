@@ -13,16 +13,16 @@ jobs:
       - uses: actions/checkout@v5
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Build Mixit.swiftpm for the iOS simulator
-        working-directory: Mixit.swiftpm
+      - name: Build HollyMixer.swiftpm for the iOS simulator
+        working-directory: HollyMixer.swiftpm
         run: |
           xcodebuild -list
           xcodebuild build -quiet \
-            -scheme Mixit \
+            -scheme HollyMixer \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/derived" \
             CODE_SIGNING_ALLOWED=NO
-          app=$(find "$RUNNER_TEMP/derived/Build/Products" -name 'Mixit.app' -type d | head -n 1)
-          test -n "$app" || { echo "::error::Mixit.app was not produced"; exit 1; }
+          app=$(find "$RUNNER_TEMP/derived/Build/Products" -name 'Holly Mixer.app' -type d | head -n 1)
+          test -n "$app" || { echo "::error::Holly Mixer.app was not produced"; exit 1; }
           echo "Built $app"
           ls "$app"

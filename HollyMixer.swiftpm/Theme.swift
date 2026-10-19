@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Tokens for the "graphite console" design system (see the Mixit design canvas).
+/// Tokens for the "graphite console" design system (see the Holly Mixer design canvas).
 enum Theme {
     // Surfaces
     static let background = Color(hex: 0x0B0C0F)

@@ -35,7 +35,7 @@ struct BackupValues: Codable, Equatable {
     }
 }
 
-/// A saved copy of everything Mixit knows about one mixer's settings.
+/// A saved copy of everything Holly Mixer knows about one mixer's settings.
 struct MixerBackup: Codable, Identifiable, Equatable {
     var id = UUID()
     var name: String
@@ -276,7 +276,7 @@ final class BackupStore {
     }
 
     /// Test hook: skip the "sound system is live" check.
-    private static var ignoreLive: Bool { ProcessInfo.processInfo.environment["MIXIT_IGNORE_LIVE"] != nil }
+    private static var ignoreLive: Bool { ProcessInfo.processInfo.environment["HOLLYMIXER_IGNORE_LIVE"] != nil }
 
     private func finishCountdown() async {
         guard let pending else { cancelCountdown(); return }
@@ -344,7 +344,7 @@ final class BackupStore {
         let access = fileURL.startAccessingSecurityScopedResource()
         defer { if access { fileURL.stopAccessingSecurityScopedResource() } }
         guard let data = try? Data(contentsOf: fileURL), var backup = Self.decode(data) else {
-            notice = L("That file isn't a Mixit backup.")
+            notice = L("That file isn't a Holly Mixer backup.")
             return
         }
         key = currentKey()
@@ -447,7 +447,7 @@ final class BackupStore {
     }
 
     private static func defaultName() -> String {
-        L("Saved ") + Date().mixit(date: .abbreviated, time: .shortened)
+        L("Saved ") + Date().hollyMixer(date: .abbreviated, time: .shortened)
     }
 }
 

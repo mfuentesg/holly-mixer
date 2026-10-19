@@ -1,6 +1,6 @@
-# Mixit — iPad & iPhone remote for Behringer X AIR (XR18 first) and X32
+# Holly Mixer — iPad & iPhone remote for Behringer X AIR (XR18 first) and X32
 
-> Working name: **Mixit**. Goal: a modern, maintained replacement for Behringer's X AIR app
+> Working name: **Holly Mixer**. Goal: a modern, maintained replacement for Behringer's X AIR app
 > that has full feature parity with it, and is much easier to use, especially for church
 > volunteers running a Sunday service.
 
@@ -189,7 +189,7 @@ iOS/iPadOS 17+. No third-party dependencies in the core (OSC is easy to implemen
 The same code runs on macOS via Catalyst / "Designed for iPad" for free.
 
 ```
-Mixit (app target)
+Holly Mixer (app target)
 ├── MixerKit (Swift package, no UI)
 │   ├── OSC/            encoder/decoder, bundles, blobs: pure, 100% unit-tested
 │   ├── Transport/      UDPTransport (NWConnection), keep-alive, reconnect, rate limiting
@@ -199,7 +199,7 @@ Mixit (app target)
 │   ├── Meters/         meter subscriptions, blob parsing, ring buffers (kept outside SwiftUI state)
 │   ├── Scenes/         snapshot I/O, .scn import/export, diff
 │   └── Simulator/      in-process fake mixer for tests, previews and demo mode
-├── MixitUI (Swift package)
+├── HollyMixerUI (Swift package)
 │   ├── Controls/       Fader, Knob, MeterView (Canvas/Metal), EQCurveView, GainReductionView
 │   ├── Screens/        Mixer, ChannelStrip, FXRack, Routing, Meters, Scenes, Setup
 │   └── Modes/          ServiceMode, MonitorMode, layout editor
@@ -301,7 +301,7 @@ Key decisions:
 | Trademark | Don't use "Behringer"/"X AIR" in the app name; describe compatibility only |
 
 Competitive note: **Mixing Station** (third-party, paid) already supports the XR18 well and is the
-quality bar. Mixit should win on simplicity, church-specific workflows (Service Mode, monitor QR,
+quality bar. Holly Mixer should win on simplicity, church-specific workflows (Service Mode, monitor QR,
 scene timeline, feedback assistant), undo, and a native iPad-first feel.
 
 ---

@@ -10,14 +10,18 @@ struct ChannelStripView: View {
     /// The wide strip pinned on the right: Main LR, or the selected bus.
     var isMaster = false
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var isDragging = false
+
+    /// Landscape iPhone: drop the extras so the fader and both buttons fit.
+    private var isCompact: Bool { verticalSizeClass == .compact }
 
     var body: some View {
         let level = strip.level(control)
         let muted = !strip.isOn
         let isSelected = !isMaster && mixer.selectedStrip == strip.kind
 
-        VStack(spacing: 6) {
+        VStack(spacing: isCompact ? 4 : 6) {
             Rectangle()
                 .fill(barColor)
                 .opacity(muted ? 0.35 : strip.isNamed || isMaster ? 1 : 0.5)
@@ -26,16 +30,18 @@ struct ChannelStripView: View {
 
             header(muted: muted)
 
-            StripEQThumbnail(strip: strip, width: isMaster ? 96 : 66)
+            if !isCompact {
+                StripEQThumbnail(strip: strip, width: isMaster ? 96 : 66)
+            }
 
-            if strip.isChannel {
+            if strip.isChannel && !isCompact {
                 processingPills
             }
-            if strip.hasPan && !isMaster {
+            if strip.hasPan && !isMaster && !isCompact {
                 PanArc(pan: strip.pan)
                     .frame(width: 66, height: 28)
             }
-            if isMaster {
+            if isMaster && !isCompact {
                 Text(strip.meterRight == nil ? L("MONO") : L("STEREO"))
                     .sectionLabelStyle()
                     .frame(height: 28)
@@ -49,12 +55,13 @@ struct ChannelStripView: View {
                     isMuted: muted,
                     capWidth: isMaster ? 44 : 38,
                     label: faderLabel,
+                    isCompact: isCompact,
                     isDragging: $isDragging,
                     onTouchingChanged: { mixer.setTouching(strip, control, $0) },
                     onChange: { mixer.setLevel(strip, control, to: $0) }
                 )
                 meters
-                    .padding(.vertical, 28)
+                    .padding(.vertical, isCompact ? 20 : 28)
             }
             .frame(maxHeight: .infinity)
 
@@ -62,7 +69,7 @@ struct ChannelStripView: View {
                 .font(Theme.mono(12))
                 .foregroundStyle(dbColor(muted: muted))
                 .frame(maxWidth: .infinity)
-                .frame(height: 24)
+                .frame(height: isCompact ? 20 : 24)
                 .background(Theme.background, in: RoundedRectangle(cornerRadius: 6))
                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(dbBorder, lineWidth: 1))
 
@@ -74,21 +81,17 @@ struct ChannelStripView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.textControl)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+                        .frame(height: isCompact ? 30 : 40)
                         .background(Theme.control, in: RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }
-            if strip.soloAddress != nil {
-                StripButton(title: L("SOLO"), isOn: strip.isSoloed, style: .solo, height: 40,
-                            accessibilityLabel: L("Solo \(strip.displayName)")) {
-                    mixer.toggleSolo(strip)
-                }
-            }
-            StripButton(title: L("MUTE"), isOn: muted, style: .mute, height: 44,
-                        accessibilityLabel: L("Mute \(strip.displayName)")) {
-                mixer.toggleMute(strip)
+            if isCompact {
+                HStack(spacing: 3) { soloButton; muteButton }
+            } else {
+                soloButton
+                muteButton
             }
         }
         .padding(.horizontal, isMaster ? 8 : 6)
@@ -125,6 +128,23 @@ struct ChannelStripView: View {
 
     // MARK: - Parts
 
+    @ViewBuilder
+    private var soloButton: some View {
+        if strip.soloAddress != nil {
+            StripButton(title: L("SOLO"), isOn: strip.isSoloed, style: .solo, height: isCompact ? 34 : 40,
+                        isCompact: isCompact, accessibilityLabel: L("Solo \(strip.displayName)")) {
+                mixer.toggleSolo(strip)
+            }
+        }
+    }
+
+    private var muteButton: some View {
+        StripButton(title: L("MUTE"), isOn: !strip.isOn, style: .mute, height: isCompact ? 34 : 44,
+                    isCompact: isCompact, accessibilityLabel: L("Mute \(strip.displayName)")) {
+            mixer.toggleMute(strip)
+        }
+    }
+
     private var barColor: Color {
         if isMaster, case .main = strip.kind { return Color(hex: 0xEBEBEB) }
         return busColor.map { isMaster ? $0 : strip.color } ?? strip.color
@@ -146,11 +166,11 @@ struct ChannelStripView: View {
                     .font(Theme.rounded(isMaster ? 14 : 13, isMaster ? .heavy : .bold))
                     .foregroundStyle(muted ? Theme.textMuted : strip.isNamed || isMaster ? Theme.textPrimary : Color(hex: 0x7C818B))
                     .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                    .lineLimit(isCompact ? 1 : 2)
                     .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 44, alignment: .top)
+            .frame(height: isCompact ? 32 : 44, alignment: .top)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -249,14 +269,17 @@ struct StripButton: View {
     let isOn: Bool
     let style: Style
     let height: CGFloat
+    var isCompact = false
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 11, weight: .heavy))
-                .tracking(0.8)
+                .font(.system(size: isCompact ? 9 : 11, weight: .heavy))
+                .tracking(isCompact ? 0 : 0.8)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .foregroundStyle(foreground)
                 .frame(maxWidth: .infinity)
                 .frame(height: height)

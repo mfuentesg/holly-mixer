@@ -11,14 +11,16 @@ struct FaderView: View {
     var isMuted = false
     var capWidth: CGFloat = 38
     var label = "Fader"
+    /// Shorter cap and travel margins for landscape iPhones.
+    var isCompact = false
     @Binding var isDragging: Bool
     var onTouchingChanged: (Bool) -> Void
     var onChange: (Float) -> Void
 
     static let unity: Float = 0.75
-    private let capHeight: CGFloat = 54
+    private var capHeight: CGFloat { isCompact ? 40 : 54 }
     /// Space above and below the travel so the cap can sit at the ends.
-    private let inset: CGFloat = 28
+    private var inset: CGFloat { isCompact ? 20 : 28 }
     private let tickColumn: CGFloat = 14
 
     /// Scale marks in dB; `nil` is -∞.
@@ -28,6 +30,8 @@ struct FaderView: View {
     ]
 
     @State private var dragStartValue: Float?
+    @State private var dragStartHeight: CGFloat = 0
+    @State private var isHorizontalSwipe = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -67,7 +71,7 @@ struct FaderView: View {
                 onTouchingChanged(false)
             }
         }
-        .frame(minHeight: 140)
+        .frame(minHeight: isCompact ? 90 : 140)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
         .accessibilityElement()
         .accessibilityLabel(label)
@@ -82,15 +86,26 @@ struct FaderView: View {
     private func drag(travel: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { gesture in
-                if dragStartValue == nil {
+                if dragStartValue == nil && !isHorizontalSwipe {
+                    // Wait for a clear vertical move: a sideways swipe across the strips only scrolls.
+                    let size = gesture.translation
+                    guard max(abs(size.width), abs(size.height)) >= 6 else { return }
+                    if abs(size.width) > abs(size.height) {
+                        isHorizontalSwipe = true
+                        return
+                    }
                     dragStartValue = value
+                    dragStartHeight = size.height
                     isDragging = true
                     onTouchingChanged(true)
                 }
-                let delta = Float(-gesture.translation.height / travel)
-                onChange(min(max((dragStartValue ?? value) + delta, 0), 1))
+                guard let start = dragStartValue else { return }
+                let delta = Float(-(gesture.translation.height - dragStartHeight) / travel)
+                onChange(min(max(start + delta, 0), 1))
             }
             .onEnded { _ in
+                isHorizontalSwipe = false
+                guard dragStartValue != nil else { return }
                 dragStartValue = nil
                 isDragging = false
                 onTouchingChanged(false)
