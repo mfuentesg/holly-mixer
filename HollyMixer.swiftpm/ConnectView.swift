@@ -5,6 +5,8 @@ struct ConnectView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Binding var host: String
+    /// Set on the iPhone: lets a musician pair before the phone has connected to anything.
+    var onPair: ((MonitorPairing) -> Void)?
     @AppStorage("recentMixers") private var recentJSON = "[]"
 
     @State private var found: [DiscoveredMixer] = []
@@ -12,6 +14,7 @@ struct ConnectView: View {
     @State private var check: NetworkCheck?
     @State private var isChecking = false
     @State private var path = NetworkPathInfo()
+    @State private var showsScanner = false
 
     var body: some View {
         let columns = sizeClass == .regular
@@ -90,6 +93,7 @@ struct ConnectView: View {
                     Text(isScanning ? L("Looking for mixers…") : L("No mixer answered. Check that this device is on the same network as the mixer, or type its IP address below."))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(18)
                     divider
@@ -184,6 +188,42 @@ struct ConnectView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.demo.opacity(0.55), lineWidth: 1))
             }
             .buttonStyle(.plain)
+
+            if onPair != nil {
+                Button {
+                    showsScanner = true
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "qrcode.viewfinder")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(Theme.textControl)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L("I'm a musician"))
+                                .font(.system(size: 16, weight: .bold))
+                            Text(L("Scan the code on the sound desk's iPad to control only your own monitor mix."))
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.textTertiary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 15, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .frame(minHeight: 64)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showsScanner) {
+                    MonitorPairingScannerSheet { pairing in
+                        showsScanner = false
+                        onPair?(pairing)
+                    }
+                }
+            }
         }
     }
 

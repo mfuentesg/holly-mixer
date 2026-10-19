@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Vertical fader with a dB scale on its left. Grab the cap and drag: it moves relative to
-/// where the finger started (no jumping to the touch). Double-tap anywhere returns it to 0 dB.
+/// where the finger started (no jumping to the touch). Double-tap the cap returns it to 0 dB (not from far below).
 struct FaderView: View {
     let value: Float
     /// Colour of the level line (channel colour, or the bus colour in sends mode).
@@ -61,17 +61,19 @@ struct FaderView: View {
                     .frame(width: max(trackWidth, capWidth), height: capHeight + 16)
                     .contentShape(Rectangle())
                     .gesture(drag(travel: travel))
+                    // Reset to 0 dB only from the cap, and never from far below it: a stray double tap must
+                    // not turn a quiet channel into a +30 dB jump.
+                    .simultaneousGesture(TapGesture(count: 2).onEnded {
+                        guard value >= decibelsToFader(-20) else { return }
+                        onTouchingChanged(true)
+                        onChange(Self.unity)
+                        onTouchingChanged(false)
+                    })
                     .position(x: centerX, y: capCenterY)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
-            .contentShape(Rectangle())
-            .onTapGesture(count: 2) {
-                onTouchingChanged(true)
-                onChange(Self.unity)
-                onTouchingChanged(false)
-            }
         }
-        .frame(minHeight: isCompact ? 90 : 140)
+        .frame(minHeight: isCompact ? 70 : 140)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
         .accessibilityElement()
         .accessibilityLabel(label)

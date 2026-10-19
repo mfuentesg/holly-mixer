@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct BackupBanner: View {
     @Environment(Mixer.self) private var mixer
     private let store = BackupStore.shared
+    @State private var reviewsPending = false
 
     var body: some View {
         if let pending = store.pending {
@@ -75,7 +76,7 @@ struct BackupBanner: View {
                 }
                 HStack(spacing: 10) {
                     Button {
-                        mixer.presentedScreen = .backups
+                        reviewsPending = true
                     } label: {
                         Text("Review and restore")
                             .font(.system(size: 14, weight: .bold))
@@ -104,6 +105,12 @@ struct BackupBanner: View {
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.meterAmber.opacity(0.45), lineWidth: 1))
             .padding(.horizontal, 16)
             .padding(.top, 8)
+            .sheet(isPresented: $reviewsPending) {
+                BackupReviewSheet(backup: pending.backup)
+                    .environment(mixer)
+                    .preferredColorScheme(.dark)
+                    .tint(Theme.accent)
+            }
         }
     }
 }
@@ -193,7 +200,7 @@ struct BackupView: View {
         if let date = store.lastAutoSave {
             return L("Last automatic save \(date.hollyMixer(date: .omitted, time: .shortened)) · \(mixer.mixerName.isEmpty ? L("mixer") : mixer.mixerName)")
         }
-        return mixer.fullStateReady || mixer.isDemo ? "Nothing saved yet" : "Reading the mixer…"
+        return mixer.fullStateReady || mixer.isDemo ? L("Nothing saved yet") : L("Reading the mixer…")
     }
 
     private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {

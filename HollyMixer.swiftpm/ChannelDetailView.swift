@@ -59,7 +59,10 @@ struct ChannelDetailView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 16)
+            .padding(.bottom, sizeClass == .compact ? 8 : 16)
+            if sizeClass == .compact {
+                CompactRideBar(strip: strip)
+            }
         }
         .background(Theme.background.ignoresSafeArea())
         .task(id: strip.id) {
@@ -117,17 +120,19 @@ struct ChannelDetailView: View {
             .disabled(mixer.history.isEmpty)
             .opacity(mixer.history.isEmpty ? 0.4 : 1)
             .accessibilityLabel("Undo")
-            Button {
-                mixer.presentedScreen = nil
-            } label: {
-                Text("Done")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(Theme.onAccent)
-                    .padding(.horizontal, 18)
-                    .frame(height: 44)
-                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+            if sizeClass != .compact {
+                Button {
+                    mixer.presentedScreen = nil
+                } label: {
+                    Text("Done")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Theme.onAccent)
+                        .padding(.horizontal, 18)
+                        .frame(height: 44)
+                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -184,33 +189,42 @@ struct ChannelDetailView: View {
     // MARK: Tabs
 
     private func tabBar(tabs: [ChannelDetailTab], current: ChannelDetailTab) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
-                ForEach(tabs) { tab in
-                    tabButton(tab, isCurrent: tab == current)
-                }
+        let buttons = HStack(spacing: 2) {
+            ForEach(tabs) { tab in
+                tabButton(tab, isCurrent: tab == current)
             }
-            .padding(3)
-            .background(Theme.strip, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
-            .padding(.horizontal, 16)
         }
-        .frame(height: 64)
+        .padding(3)
+        .background(Theme.strip, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
+        .padding(.horizontal, 16)
+        return Group {
+            if sizeClass == .compact {
+                // Every tab fits on a phone: no hidden Sends or Config behind a scroll.
+                buttons.frame(height: 56)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) { buttons }
+                    .frame(height: 64)
+            }
+        }
     }
 
     private func tabButton(_ tab: ChannelDetailTab, isCurrent: Bool) -> some View {
         Button {
             selectedTab = tab
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: sizeClass == .compact ? 3 : 8) {
                 Text(LocalizedStringKey(tab.rawValue))
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: sizeClass == .compact ? 12 : 14, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                 if isActive(tab) {
                     Circle().fill(Theme.meterGreen).frame(width: 6, height: 6)
                 }
             }
             .foregroundStyle(isCurrent ? Color.white : Theme.textSecondary)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, sizeClass == .compact ? 2 : 20)
+            .frame(maxWidth: sizeClass == .compact ? .infinity : nil)
             .frame(height: 44)
             .background(isCurrent ? Theme.controlSelected : Color.clear, in: RoundedRectangle(cornerRadius: 9))
             .overlay(RoundedRectangle(cornerRadius: 9)
@@ -218,7 +232,7 @@ struct ChannelDetailView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(tab.rawValue)
+        .accessibilityLabel(Text(LocalizedStringKey(tab.rawValue)))
         .accessibilityAddTraits(isCurrent ? .isSelected : [])
     }
 
@@ -294,5 +308,69 @@ private struct ChannelDetailSideFader: View {
         .padding(14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.border, lineWidth: 1))
+    }
+}
+
+
+/// iPhone: the channel's fader, MUTE, SOLO and previous/next, pinned under the editing pages.
+@MainActor
+private struct CompactRideBar: View {
+    @Environment(Mixer.self) private var mixer
+    let strip: Strip
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if let number = strip.channelNumber {
+                step(number - 1, symbol: "chevron.left", label: L("Previous channel"))
+                step(number + 1, symbol: "chevron.right", label: L("Next channel"))
+            }
+            PhoneToggleButton(title: "M", isOn: !strip.isOn, style: .mute, silencedBy: strip.isOn ? mixer.silencedBy(strip) : nil,
+                              accessibilityLabel: L("Mute \(strip.displayName)")) {
+                mixer.toggleMute(strip)
+            }
+            if strip.soloAddress != nil {
+                PhoneToggleButton(title: "S", isOn: strip.isSoloed, style: .solo,
+                                  accessibilityLabel: L("Solo \(strip.displayName)")) {
+                    mixer.toggleSolo(strip)
+                }
+            }
+            VStack(spacing: 0) {
+                Text(formatDecibels(strip.fader) + L(" dB"))
+                    .font(Theme.mono(12, .bold))
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                PhoneHorizontalFader(
+                    value: strip.fader, lineColor: strip.color, isMuted: !strip.isOn, meterStrip: strip,
+                    label: L("\(strip.displayName) fader"),
+                    onTouchingChanged: { mixer.setTouching(strip, .fader, $0) },
+                    onChange: { mixer.setLevel(strip, .fader, to: $0) }
+                )
+                .frame(height: 30)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .background(Theme.surface)
+        .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) }
+    }
+
+    private func step(_ target: Int, symbol: String, label: String) -> some View {
+        let exists = (1...16).contains(target)
+        return Button {
+            if exists {
+                mixer.selectedStrip = .channel(target)
+                mixer.presentedScreen = .channel(.channel(target))
+            }
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Theme.textControl)
+                .frame(width: 36, height: 44)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .disabled(!exists)
+        .opacity(exists ? 1 : 0.35)
+        .accessibilityLabel(label)
     }
 }

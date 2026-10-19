@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @main
 struct HollyMixerApp: App {
@@ -24,6 +25,7 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @AppStorage("mixerHost") private var host = ""
     @AppStorage("recentMixers") private var recentJSON = "[]"
+    @AppStorage(MonitorPairing.storageKey) private var pairingJSON = ""
     @State private var didAutoConnect = false
 
     var body: some View {
@@ -35,7 +37,8 @@ struct ContentView: View {
                     MixerView()
                 }
             } else {
-                ConnectView(host: $host)
+                ConnectView(host: $host,
+                            onPair: UIDevice.current.userInterfaceIdiom == .phone ? join : nil)
             }
         }
         .task {
@@ -72,6 +75,17 @@ struct ContentView: View {
         guard let match, match.ip != saved else { return }
         host = match.ip
         mixer.connect(host: match.ip)
+    }
+
+    /// A musician paired from the Connect screen: remember it and connect to its mixer.
+    private func join(_ pairing: MonitorPairing) {
+        pairingJSON = pairing.json
+        if pairing.isDemo {
+            mixer.startDemo()
+        } else {
+            host = pairing.host
+            mixer.connect(host: pairing.host)
+        }
     }
 
     /// Puts the connected mixer at the top of the recent list.

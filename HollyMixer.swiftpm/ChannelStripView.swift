@@ -18,7 +18,9 @@ struct ChannelStripView: View {
 
     var body: some View {
         let level = strip.level(control)
-        let muted = !strip.isOn
+        let isSendsMode: Bool = { if case .send = control { return true } else { return false } }()
+        let silencer = isSendsMode ? nil : mixer.silencedBy(strip)
+        let muted = isSendsMode ? mixer.isSendRemoved(strip, control) : !strip.isOn
         let isSelected = !isMaster && mixer.selectedStrip == strip.kind
 
         VStack(spacing: isCompact ? 4 : 6) {
@@ -28,7 +30,7 @@ struct ChannelStripView: View {
                 .frame(height: 4)
                 .padding(.horizontal, isMaster ? -8 : -6)
 
-            header(muted: muted)
+            header(muted: muted || silencer != nil)
 
             if !isCompact {
                 StripEQThumbnail(strip: strip, width: isMaster ? 96 : 66)
@@ -52,7 +54,7 @@ struct ChannelStripView: View {
                     value: level,
                     lineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textDim),
                     capLineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textTertiary),
-                    isMuted: muted,
+                    isMuted: muted || silencer != nil,
                     capWidth: isMaster ? 44 : strip.meterRight == nil ? 38 : 32,
                     label: faderLabel,
                     isCompact: isCompact,
@@ -81,7 +83,7 @@ struct ChannelStripView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.textControl)
                         .frame(maxWidth: .infinity)
-                        .frame(height: isCompact ? 30 : 40)
+                        .frame(height: isCompact ? 28 : 40)
                         .background(Theme.control, in: RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
                 }
@@ -138,10 +140,27 @@ struct ChannelStripView: View {
         }
     }
 
+    private var isSendsMode: Bool {
+        if case .send = control { return true }
+        return false
+    }
+
+    @ViewBuilder
     private var muteButton: some View {
-        StripButton(title: L("MUTE"), isOn: !strip.isOn, style: .mute, height: isCompact ? 34 : 44,
-                    isCompact: isCompact, accessibilityLabel: L("Mute \(strip.displayName)")) {
-            mixer.toggleMute(strip)
+        if isSendsMode {
+            // In a monitor mix the button takes the channel out of that mix; it never mutes the room.
+            let removed = mixer.isSendRemoved(strip, control)
+            StripButton(title: isCompact ? "✕" : (removed ? L("REMOVED") : L("REMOVE")), isOn: removed, style: .mute,
+                        height: isCompact ? 34 : 44, isCompact: isCompact,
+                        accessibilityLabel: L("Remove \(strip.displayName) from this mix")) {
+                mixer.toggleSendRemoved(strip, control)
+            }
+        } else {
+            StripButton(title: L("MUTE"), isOn: !strip.isOn, style: .mute, height: isCompact ? 34 : 44,
+                        isCompact: isCompact, silencedBy: strip.isOn ? mixer.silencedBy(strip) : nil,
+                        accessibilityLabel: L("Mute \(strip.displayName)")) {
+                mixer.toggleMute(strip)
+            }
         }
     }
 
@@ -152,10 +171,8 @@ struct ChannelStripView: View {
 
     private func header(muted: Bool) -> some View {
         Button {
-            if mixer.selectedStrip == strip.kind || isMaster {
-                mixer.presentedScreen = .channel(strip.kind)
-            }
             mixer.selectedStrip = strip.kind
+            mixer.presentedScreen = .channel(strip.kind)
         } label: {
             VStack(spacing: 2) {
                 Text(isMaster ? masterTag : strip.shortLabel)
@@ -175,8 +192,7 @@ struct ChannelStripView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isMaster ? L("Open \(strip.displayName) processing") : L("Select \(strip.displayName)"))
-        .accessibilityHint(isMaster ? "" : L("Tap again to open the channel"))
-    }
+            }
 
     private var masterTag: String {
         switch strip.kind {
@@ -191,7 +207,6 @@ struct ChannelStripView: View {
         HStack(spacing: 4) {
             Pill(text: "G", isOn: strip.gateOn, onColor: Theme.meterGreen, onText: Color(hex: 0x6FE597))
             Pill(text: "C", isOn: strip.compressorOn, onColor: Theme.meterAmber, onText: Theme.amberText)
-                .layoutPriority(1)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Gate \(strip.gateOn ? "on" : "off"), compressor \(strip.compressorOn ? "on" : "off")")
@@ -271,28 +286,39 @@ struct StripButton: View {
     let style: Style
     let height: CGFloat
     var isCompact = false
+    /// "G1" or "DCA2" when something else is silencing this strip while its own MUTE is off.
+    var silencedBy: String?
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
+        let silenced = silencedBy != nil && !isOn
         Button(action: action) {
-            Text(title)
-                .font(.system(size: isCompact ? 9 : 11, weight: .heavy))
-                .tracking(isCompact ? 0 : 0.8)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .foregroundStyle(foreground)
-                .frame(maxWidth: .infinity)
-                .frame(height: height)
-                .background(isOn ? onColor : Theme.control, in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(border, lineWidth: 1))
-                .shadow(color: isOn ? onColor.opacity(style == .mute ? 0.45 : 0.35) : .clear,
-                        radius: style == .mute ? 9 : 7)
+            VStack(spacing: 0) {
+                Text(title)
+                    .font(.system(size: isCompact ? 9 : (silenced ? 9 : 11), weight: .heavy))
+                    .tracking(isCompact ? 0 : 0.8)
+                if let silencedBy, silenced, !isCompact {
+                    Text(silencedBy)
+                        .font(Theme.mono(10, .bold))
+                        .foregroundStyle(Theme.mute)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .foregroundStyle(foreground)
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .background(isOn ? onColor : Theme.control, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8)
+                .stroke(silenced ? Theme.mute : border, lineWidth: silenced ? 1.5 : 1))
+            .shadow(color: isOn ? onColor.opacity(style == .mute ? 0.45 : 0.35) : .clear,
+                    radius: style == .mute ? 9 : 7)
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.impact(weight: .medium), trigger: isOn)
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityValue(isOn ? "on" : "off")
+        .accessibilityValue(isOn ? "on" : (silencedBy.map { L("silenced by \($0)") } ?? "off"))
     }
 
     private var onColor: Color { style == .mute ? Theme.mute : Theme.solo }

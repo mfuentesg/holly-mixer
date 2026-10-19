@@ -33,6 +33,7 @@ enum ScreenshotMode {
         case "mutegroups": mixer.presentedScreen = .muteGroups
         case "snapshots": mixer.presentedScreen = .snapshots
         case "pairing": mixer.presentedScreen = .monitorPairing
+        case "silenced": mixer.toggleMuteGroup(1)
         case "select": mixer.selectedStrip = .channel(3)
         default: break
         }

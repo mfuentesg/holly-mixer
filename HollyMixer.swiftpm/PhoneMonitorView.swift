@@ -12,6 +12,7 @@ struct PhoneMonitorView: View {
     @State private var showsAllInputs = false
     @State private var confirmsExit = false
     @State private var asksPIN = false
+    @State private var asksExitPIN = false
     @State private var picksReturn = false
 
     private var busMaster: Strip { mixer.master(for: .bus(pairing.bus)) }
@@ -49,12 +50,7 @@ struct PhoneMonitorView: View {
         .opacity(isReconnecting ? 0.5 : 1)
         .overlay(alignment: .top) {
             if isReconnecting {
-                Text("Reconnecting…")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.accentText)
-                    .padding(.horizontal, 12)
-                    .frame(height: 28)
-                    .background(Theme.accent.opacity(0.2), in: Capsule())
+                ReconnectingBanner()
             }
         }
         .background(Theme.background.ignoresSafeArea())
@@ -63,6 +59,13 @@ struct PhoneMonitorView: View {
             ServicePINSheet(store: ServiceLayoutStore.shared) {
                 asksPIN = false
                 picksReturn = true
+            }
+            .presentationDetents([.large])
+        }
+        .sheet(isPresented: $asksExitPIN) {
+            MusicianExitPINSheet(expectedHash: pairing.exitPinHash ?? "") {
+                asksExitPIN = false
+                onExit()
             }
             .presentationDetents([.large])
         }
@@ -75,7 +78,9 @@ struct PhoneMonitorView: View {
             .presentationDetents([.medium, .large])
         }
         .confirmationDialog("Leave musician mode?", isPresented: $confirmsExit, titleVisibility: .visible) {
-            Button("Exit musician mode", role: .destructive, action: onExit)
+            Button("Exit musician mode", role: .destructive) {
+                if pairing.exitPinHash != nil { asksExitPIN = true } else { onExit() }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This iPhone will stop being locked to \(busMaster.displayName).")

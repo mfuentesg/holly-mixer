@@ -11,13 +11,16 @@ tokens: "Graphite console", see the *System* board). The SwiftUI code is the sou
 |---|---|
 | iPad mixer: `MixerView.swift`, `ChannelStripView.swift`, `DCAViews.swift`, `FaderView.swift` | `Main.dc.html` (modes: main, sends, reconnecting, demo) · `Sends.dc.html` · `Reconnecting.dc.html` |
 | iPhone mixer: `PhoneMixerView.swift`, `PhoneHorizontalFader.swift` | `PhoneMixer.dc.html` |
+| iPhone channel page (`ChannelDetailView.swift`, compact) | `PhoneChannel.dc.html` |
 | Musician mode: `PhoneMonitorView.swift`, `PhoneViews.swift` (pairing) | `PhoneMonitor.dc.html` |
-| Channel page: `ChannelDetail*.swift` | `Channel.dc.html` |
+| Channel page: `ChannelDetail*.swift` | `Channel.dc.html` (EQ tab) · `ChannelConfig.dc.html` (Config tab: name, colour, DCA, mute groups, fader) |
 | Settings page: `SettingsHubView.swift` | `Settings.dc.html` |
 | Mute groups: `MuteGroupsView.swift`, footer/bottom bars | `MuteGroups.dc.html`, footer of `Main.dc.html`, bar of `PhoneMixer.dc.html` |
 | Connect: `ConnectView.swift` | `Connect.dc.html` |
-| Service Mode (hidden by `FeatureFlags.serviceMode`): `Service*.swift` | `Service.dc.html` |
+| Service Mode (hidden by `FeatureFlags.serviceMode`): `Service*.swift` | `Service.dc.html` (marked hidden in the board title) |
 | Tokens: `Theme.swift` | `System.dc.html` |
+| Alerts / confirmation dialogs (`confirmationDialog`, `.alert` in `ChannelDetailSections`, `ChannelDetailEQ`, `BackupView`, `SnapshotsView`, `PhoneMonitorView`) | `Alerts.dc.html` |
+| Banners, notices, connect/permission messages, inline help (`SendsBanner`, `ReconnectingBanner`, `BackupBanner`, `MixerBackup.notice`, `ConnectView`) | `Notices.dc.html` |
 
 Removed features (no board): Order of service / scenes.
 

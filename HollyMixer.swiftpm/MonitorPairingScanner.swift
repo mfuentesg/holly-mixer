@@ -1,3 +1,4 @@
+import CryptoKit
 import SwiftUI
 import UIKit
 import VisionKit
@@ -13,16 +14,24 @@ struct MonitorPairing: Codable, Equatable {
     /// How this iPhone may change its return: nil or "locked", "pin" or "free". The mixer has no user accounts, so
     /// this lives in the app only.
     var lock: String?
+    /// Hash of the PIN needed to leave musician mode, or nil when leaving only asks for a confirmation.
+    var exitPinHash: String?
+
+    /// A short hash, so the QR code and the stored pairing never carry the PIN itself.
+    static func hash(ofPIN pin: String) -> String {
+        SHA256.hash(data: Data(("holly-mixer-exit:" + pin).utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
+    }
 
     static let storageKey = "monitorPairing"
 
-    init?(host: String, bus: Int, me: Int, lock: String? = nil) {
+    init?(host: String, bus: Int, me: Int, lock: String? = nil, exitPinHash: String? = nil) {
         let trimmed = host.trimmingCharacters(in: .whitespacesAndNewlines)
         guard Self.isValidHost(trimmed), (1...6).contains(bus), (1...16).contains(me) else { return nil }
         self.host = trimmed
         self.bus = bus
         self.me = me
         self.lock = ["pin", "free"].contains(lock ?? "") ? lock : nil
+        self.exitPinHash = exitPinHash.flatMap { $0.count == 16 && $0.allSatisfy(\.isHexDigit) ? $0 : nil }
     }
 
     /// How this iPhone may change its return. A "pin" code scanned while Service Mode is off counts as locked.
@@ -41,7 +50,7 @@ struct MonitorPairing: Codable, Equatable {
         func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
         guard let host = value("host"), let bus = value("bus").flatMap({ Int($0) }),
               let me = value("me").flatMap({ Int($0) }) else { return nil }
-        self.init(host: host, bus: bus, me: me, lock: value("lock"))
+        self.init(host: host, bus: bus, me: me, lock: value("lock"), exitPinHash: value("pin"))
     }
 
     private static func isValidHost(_ host: String) -> Bool {
@@ -60,6 +69,7 @@ struct MonitorPairing: Codable, Equatable {
             URLQueryItem(name: "bus", value: String(bus)),
             URLQueryItem(name: "me", value: String(me)),
         ] + (lock.map { [URLQueryItem(name: "lock", value: $0)] } ?? [])
+          + (exitPinHash.map { [URLQueryItem(name: "pin", value: $0)] } ?? [])
         return components.string ?? "hollymixer://monitor?host=\(host)&bus=\(bus)&me=\(me)"
     }
 
@@ -73,7 +83,8 @@ struct MonitorPairing: Codable, Equatable {
     static func decode(_ json: String) -> MonitorPairing? {
         guard let data = json.data(using: .utf8), !data.isEmpty,
               let stored = try? JSONDecoder().decode(MonitorPairing.self, from: data) else { return nil }
-        return MonitorPairing(host: stored.host, bus: stored.bus, me: stored.me, lock: stored.lock)
+        return MonitorPairing(host: stored.host, bus: stored.bus, me: stored.me, lock: stored.lock,
+                              exitPinHash: stored.exitPinHash)
     }
 }
 
@@ -110,7 +121,6 @@ struct MonitorPairingScannerSheet: View {
     @State private var hostText = ""
     @State private var bus = 1
     @State private var me = 1
-    @State private var lock = MonitorSwitching.locked
     @State private var message: String?
     @State private var showsManualEntry = !QRScannerView.isAvailable
 
@@ -160,7 +170,7 @@ struct MonitorPairingScannerSheet: View {
                 if let pairing = MonitorPairing(code: code) {
                     onPair(pairing)
                 } else {
-                    message = "That isn't a Holly Mixer pairing code."
+                    message = L("That isn't a Holly Mixer pairing code.")
                 }
             }
             .frame(height: 300)
@@ -199,10 +209,6 @@ struct MonitorPairingScannerSheet: View {
                     .frame(minHeight: 44)
                 Stepper("My channel \(me)", value: $me, in: 1...16)
                     .frame(minHeight: 44)
-                Picker("Changing return", selection: $lock) {
-                    ForEach(MonitorSwitching.available) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
                 Button {
                     join()
                 } label: {
@@ -221,10 +227,10 @@ struct MonitorPairingScannerSheet: View {
     }
 
     private func join() {
-        if let pairing = MonitorPairing(host: hostText, bus: bus, me: me, lock: lock == .locked ? nil : lock.rawValue) {
+        if let pairing = MonitorPairing(host: hostText, bus: bus, me: me) {
             onPair(pairing)
         } else {
-            message = "Enter the mixer's address, like 192.168.1.2."
+            message = L("Enter the mixer's address, like 192.168.1.2.")
         }
     }
 }

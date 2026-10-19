@@ -20,8 +20,22 @@ struct PlaceholderScreen: View {
 }
 
 /// Top bar for full-screen pages: back to the mixer, title, optional trailing content.
+private struct BackTitleKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+extension EnvironmentValues {
+    /// Label of the back button in `ScreenTopBar`; pages pushed from Settings say "Settings".
+    var screenBackTitle: String? {
+        get { self[BackTitleKey.self] }
+        set { self[BackTitleKey.self] = newValue }
+    }
+}
+
 struct ScreenTopBar<Trailing: View>: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.screenBackTitle) private var backTitle
     let title: String
     var subtitle: String?
     @ViewBuilder var trailing: () -> Trailing
@@ -29,12 +43,12 @@ struct ScreenTopBar<Trailing: View>: View {
     var body: some View {
         HStack(spacing: 14) {
             Button {
-                mixer.presentedScreen = nil
+                dismiss()
             } label: {
                 HStack(spacing: 2) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .bold))
-                    Text("Mixer")
+                    Text(backTitle ?? L("Mixer"))
                         .font(.system(size: 15, weight: .semibold))
                 }
                 .foregroundStyle(Theme.accentText)

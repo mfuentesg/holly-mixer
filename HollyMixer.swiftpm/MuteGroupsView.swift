@@ -1,25 +1,31 @@
 import SwiftUI
 
 /// Settings page for the four mute groups: which strips belong to each, and a button to fire the group.
-/// The group buttons in the mixer's top bar silence every strip listed here.
+/// The group buttons in the mixer's bottom bar silence every strip listed here.
 struct MuteGroupsView: View {
     @Environment(Mixer.self) private var mixer
+    @State private var selected = 1
+    private let names = MuteGroupNames.shared
+    @State private var nameText = ""
+    @FocusState private var nameFocused: Bool
 
     private var members: [Strip] { mixer.channels + [mixer.auxIn] + mixer.fxReturns + mixer.buses }
+
+    private func count(in group: Int) -> Int {
+        let bit = 1 << (group - 1)
+        return members.filter { mixer.muteGroupMask(of: $0) & bit != 0 }.count
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             ScreenTopBar(title: L("Mute groups"),
-                         subtitle: L("Choose which channels each group silences. Then use the group buttons to mute them together."))
+                         subtitle: L("Pick a group, then tap the channels it should silence. Tap again to remove one."))
+            groupPicker
             ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(1...4, id: \.self) { number in
-                        groupCard(number)
-                    }
-                }
-                .padding(20)
-                .frame(maxWidth: 900)
-                .frame(maxWidth: .infinity)
+                groupCard(selected)
+                    .padding(20)
+                    .frame(maxWidth: 900)
+                    .frame(maxWidth: .infinity)
             }
         }
         .background(Theme.background.ignoresSafeArea())
@@ -27,34 +33,71 @@ struct MuteGroupsView: View {
         .task { mixer.request(members.map { "\($0.base)/grp/mute" }) }
     }
 
-    private func groupCard(_ number: Int) -> some View {
-        let bit = 1 << (number - 1)
-        let isOn = mixer.muteGroups[number - 1]
-        let count = members.filter { mixer.muteGroupMask(of: $0) & bit != 0 }.count
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L("Mute group \(number)")).font(.system(size: 17, weight: .bold))
-                    Text(count == 1 ? L("1 channel") : L("\(count) channels"))
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.textTertiary)
-                }
-                Spacer()
+    /// 1 2 3 4 with how many channels each group holds.
+    private var groupPicker: some View {
+        HStack(spacing: 8) {
+            ForEach(1...4, id: \.self) { number in
+                let isSelected = selected == number
                 Button {
-                    mixer.toggleMuteGroup(number)
+                    selected = number
                 } label: {
-                    Text(isOn ? L("Group is muted · tap to release") : L("Mute this group"))
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(isOn ? .white : Theme.textBright)
-                        .padding(.horizontal, 14)
-                        .frame(height: 44)
-                        .background(isOn ? Theme.mute : Theme.control, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(isOn ? Theme.muteBorder : Theme.borderStrong, lineWidth: 1))
+                    VStack(spacing: 2) {
+                        HStack(spacing: 5) {
+                            if mixer.muteGroups[number - 1] {
+                                Circle().fill(Theme.mute).frame(width: 8, height: 8)
+                            }
+                            Text(names.name(number).isEmpty ? L("Group \(number)") : names.name(number))
+                                .font(.system(size: 15, weight: .bold))
+                                .lineLimit(1)
+                        }
+                        Text(count(in: number) == 1 ? L("1 channel") : L("\(count(in: number)) channels"))
+                            .font(.system(size: 11))
+                            .foregroundStyle(isSelected ? Theme.textPrimary : Theme.textTertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(isSelected ? Theme.controlSelected : Theme.strip, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSelected ? Theme.accent.opacity(0.7) : Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], spacing: 8) {
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .frame(maxWidth: 940)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func groupCard(_ number: Int) -> some View {
+        let bit = 1 << (number - 1)
+        let included = members.filter { mixer.muteGroupMask(of: $0) & bit != 0 }
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("Channels in group \(number)")).font(.system(size: 17, weight: .bold))
+                    Text(included.isEmpty ? L("None yet") : included.map(\.displayName).joined(separator: " · "))
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(2)
+                }
+                Spacer(minLength: 8)
+                if !included.isEmpty {
+                    Button(L("Clear all")) {
+                        for strip in included { mixer.setMuteGroupMembership(strip, group: number, member: false) }
+                    }
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.textControl)
+                    .padding(.horizontal, 12)
+                    .frame(height: 44)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+                    .buttonStyle(.plain)
+                }
+            }
+            nameField(number)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(members) { strip in
                     chip(strip, group: number, bit: bit)
                 }
@@ -65,27 +108,59 @@ struct MuteGroupsView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.border, lineWidth: 1))
     }
 
+    /// The group's name, shown on the bottom bar buttons. Kept in the app: the XR18 has no names for mute groups.
+    private func nameField(_ number: Int) -> some View {
+        HStack(spacing: 10) {
+            Text(L("NAME")).sectionLabelStyle()
+            TextField(L("Name (e.g. Band)"), text: $nameText)
+                .focused($nameFocused)
+                .submitLabel(.done)
+                .autocorrectionDisabled()
+                .onChange(of: nameText) { _, text in
+                    if text.count > MuteGroupNames.limit { nameText = String(text.prefix(MuteGroupNames.limit)) }
+                    names.set(number, to: nameText)
+                }
+                .font(.system(size: 15, weight: .semibold))
+                .padding(.horizontal, 12)
+                .frame(height: 44)
+                .background(Theme.background, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10)
+                    .stroke(nameFocused ? Theme.accent : Theme.border, lineWidth: 1))
+            Text("\(nameText.count)/\(MuteGroupNames.limit)")
+                .font(Theme.mono(11, .regular))
+                .foregroundStyle(Theme.textMuted)
+        }
+        .onAppear { nameText = names.name(number) }
+        .onChange(of: selected) { _, newGroup in nameText = names.name(newGroup) }
+    }
+
+    /// One tap includes the channel in the group, another tap takes it out.
     private func chip(_ strip: Strip, group: Int, bit: Int) -> some View {
         let isMember = mixer.muteGroupMask(of: strip) & bit != 0
         return Button {
             mixer.setMuteGroupMembership(strip, group: group, member: !isMember)
         } label: {
             HStack(spacing: 6) {
+                Image(systemName: isMember ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 15))
+                    .foregroundStyle(isMember ? Theme.accent : Theme.textDim)
                 Circle().fill(strip.color).frame(width: 8, height: 8)
                 Text(strip.displayName)
                     .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                Spacer(minLength: 0)
             }
-            .foregroundStyle(isMember ? .white : Theme.textSecondary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 40)
-            .background(isMember ? Theme.mute.opacity(0.85) : Theme.control, in: RoundedRectangle(cornerRadius: 9))
+            .foregroundStyle(isMember ? Theme.textPrimary : Theme.textSecondary)
+            .padding(.horizontal, 10)
+            .frame(height: 44)
+            .background(isMember ? Theme.controlSelected : Theme.control, in: RoundedRectangle(cornerRadius: 9))
             .overlay(RoundedRectangle(cornerRadius: 9)
-                .stroke(isMember ? Theme.muteBorder : Color.white.opacity(0.08), lineWidth: 1))
+                .stroke(isMember ? Theme.accent.opacity(0.8) : Color.white.opacity(0.08), lineWidth: isMember ? 1.5 : 1))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(strip.displayName), \(L("Mute group \(group)"))")
         .accessibilityValue(isMember ? L("yes") : L("no"))
+        .accessibilityAddTraits(isMember ? .isSelected : [])
     }
 }

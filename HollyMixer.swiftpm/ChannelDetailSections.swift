@@ -29,6 +29,7 @@ private struct CardTitle: View {
 @MainActor
 struct ChannelDetailInputTab: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.horizontalSizeClass) private var sizeClass
     let strip: Strip
 
     @State private var confirmPhantom = false
@@ -59,11 +60,40 @@ struct ChannelDetailInputTab: View {
                 }
             }
             .frame(maxWidth: .infinity)
+            if sizeClass == .compact {
+                // Exact 1 dB steps next to the dial: no need to drag it on a phone.
+                HStack(spacing: 12) {
+                    gainStep(-1, number: number)
+                    gainStep(1, number: number)
+                }
+            }
             Text("−12 to +60 dB. Drag the knob up or down.")
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textTertiary)
         }
         .detailCard()
+    }
+
+    private func gainStep(_ delta: Float, number: Int) -> some View {
+        let address = XR18Params.headamp(number, "gain")
+        return Button {
+            let range = XR18Params.preampGain
+            guard let stored = mixer.param(address).float else { return }
+            let next = min(max(range.value(stored) + delta, range.value(0)), range.value(1))
+            mixer.beginEdit(address)
+            mixer.setContinuous(address, range.normalized(next))
+            mixer.endEdit(address, label: L("\(strip.displayName) gain") + " " + ParamFormat.signed(next) + " dB")
+        } label: {
+            Text(delta < 0 ? "−1 dB" : "+1 dB")
+                .font(Theme.mono(14, .bold))
+                .foregroundStyle(Theme.textBright)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(delta < 0 ? L("Lower gain 1 dB") : L("Raise gain 1 dB"))
     }
 
     private func phantomCard(_ number: Int) -> some View {
@@ -177,12 +207,8 @@ struct ChannelLevelSlider: View {
             .onChanged { gesture in
                 if startLevel == nil {
                     mixer.setTouching(strip, control, true)
-                    // Grab the thumb where it is; touching the track elsewhere jumps there.
-                    if abs(gesture.startLocation.x - thumbX) > thumbWidth / 2 + 8 {
-                        startLevel = min(max(Float((gesture.startLocation.x - thumbWidth / 2) / travel), 0), 1)
-                    } else {
-                        startLevel = level
-                    }
+                    // Relative drag, like the strip faders: touching the track never makes the level jump.
+                    startLevel = level
                 }
                 let moved = Float(gesture.translation.width / travel)
                 mixer.setLevel(strip, control, to: min(max((startLevel ?? level) + moved, 0), 1))
@@ -253,6 +279,7 @@ private struct SendRow: View {
 @MainActor
 struct ChannelDetailConfigTab: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.horizontalSizeClass) private var sizeClass
     let strip: Strip
 
     @State private var text = ""
@@ -267,7 +294,8 @@ struct ChannelDetailConfigTab: View {
             colorCard
             dcaCard
             muteGroupCard
-            faderCard
+            // The side fader already shows level and MUTE on wide screens.
+            if sizeClass == .compact { faderCard }
         }
         .onAppear { text = strip.name }
         .onChange(of: strip.name) { _, newName in
@@ -411,7 +439,7 @@ struct ChannelDetailConfigTab: View {
                     .accessibilityValue(isMember ? L("yes") : L("no"))
                 }
             }
-            Text("Pressing a mute group in the top bar silences every channel in it at once.")
+            Text("Pressing a mute group in the bottom bar silences every channel in it at once.")
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textTertiary)
         }

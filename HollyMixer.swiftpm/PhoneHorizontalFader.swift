@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Horizontal fader for the iPhone layouts. Grab the cap and drag: it moves relative to where
-/// the finger started (no jumping to the touch). Double-tap anywhere returns it to 0 dB.
+/// the finger started (no jumping to the touch). Double-tap the cap returns it to 0 dB (not from far below).
 /// Only the cap takes drags, so vertical swipes elsewhere still scroll the list.
 struct PhoneHorizontalFader: View {
     let value: Float
@@ -23,6 +23,8 @@ struct PhoneHorizontalFader: View {
     private static let marks: [Float] = [10, 5, 0, -5, -10, -20, -30, -40, -50]
 
     @State private var dragStartValue: Float?
+    @State private var dragStartWidth: CGFloat = 0
+    @State private var isVerticalSwipe = false
     @State private var isDragging = false
 
     var body: some View {
@@ -42,15 +44,17 @@ struct PhoneHorizontalFader: View {
                     .frame(width: hitWidth, height: geometry.size.height)
                     .contentShape(Rectangle())
                     .gesture(drag(travel: travel))
+                    // Reset to 0 dB only from the cap, and never from far below it: a stray double tap must
+                    // not turn a quiet channel into a +30 dB jump.
+                    .simultaneousGesture(TapGesture(count: 2).onEnded {
+                        guard value >= decibelsToFader(-20) else { return }
+                        onTouchingChanged(true)
+                        onChange(Self.unity)
+                        onTouchingChanged(false)
+                    })
                     .position(x: capX, y: geometry.size.height / 2)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
-            .contentShape(Rectangle())
-            .onTapGesture(count: 2) {
-                onTouchingChanged(true)
-                onChange(Self.unity)
-                onTouchingChanged(false)
-            }
         }
         .frame(minHeight: 36)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
@@ -69,15 +73,26 @@ struct PhoneHorizontalFader: View {
     private func drag(travel: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { gesture in
-                if dragStartValue == nil {
+                if dragStartValue == nil && !isVerticalSwipe {
+                    // Wait for a clear sideways move: a vertical swipe that starts on a cap scrolls the list.
+                    let size = gesture.translation
+                    guard max(abs(size.width), abs(size.height)) >= 6 else { return }
+                    if abs(size.height) > abs(size.width) {
+                        isVerticalSwipe = true
+                        return
+                    }
                     dragStartValue = value
+                    dragStartWidth = size.width
                     isDragging = true
                     onTouchingChanged(true)
                 }
-                let delta = Float(gesture.translation.width / travel)
-                onChange(min(max((dragStartValue ?? value) + delta, 0), 1))
+                guard let start = dragStartValue else { return }
+                let delta = Float((gesture.translation.width - dragStartWidth) / travel)
+                onChange(min(max(start + delta, 0), 1))
             }
             .onEnded { _ in
+                isVerticalSwipe = false
+                guard dragStartValue != nil else { return }
                 dragStartValue = nil
                 isDragging = false
                 onTouchingChanged(false)

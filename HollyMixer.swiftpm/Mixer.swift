@@ -27,6 +27,10 @@ final class Mixer {
     /// True once the mixer has answered in this session; the mixer view stays up
     /// across short drop-outs instead of falling back to the connect screen.
     private(set) var hasSession = false
+    /// Shown for a moment after an undo, so the volunteer sees what was reverted.
+    var undoToast: UndoToast?
+    @ObservationIgnored private var removedSendLevels: [String: Float] = [:]
+    private static let unityLevel: Float = 0.75
     /// Set by the Settings page on iPhone to open the musician pairing scanner.
     var showsPairingScanner = false
     private(set) var host = ""
@@ -562,7 +566,7 @@ final class Mixer {
         record(address, .int(strip.isOn ? 1 : 0))
         connection.send(OSCMessage(address, .int(strip.isOn ? 1 : 0)))
         record(Change(address: address, old: .int(old ? 1 : 0), new: .int(strip.isOn ? 1 : 0),
-                      label: "\(strip.displayName) \(strip.isOn ? "unmuted" : "muted")"))
+                      label: strip.isOn ? L("\(strip.displayName) unmuted") : L("\(strip.displayName) muted")))
     }
 
     func toggleMuteGroup(_ number: Int) {
@@ -697,6 +701,42 @@ final class Mixer {
             label: L("\(strip.displayName) in mute group \(number): \(member ? L("yes") : L("no"))"))
     }
 
+    /// How many strips belong to a mute group.
+    func muteGroupCount(_ number: Int) -> Int {
+        let bit = 1 << (number - 1)
+        return allStrips.filter { muteGroupMask(of: $0) & bit != 0 }.count
+    }
+
+    /// What silences a strip besides its own MUTE: an active mute group ("G1") or a muted DCA ("DCA2").
+    func silencedBy(_ strip: Strip) -> String? {
+        let groupMask = muteGroupMask(of: strip)
+        for number in 1...4 where groupMask & (1 << (number - 1)) != 0 && muteGroups[number - 1] {
+            return "G\(number)"
+        }
+        let mask = dcaMask(of: strip)
+        for group in dcas where mask & (1 << (group.number - 1)) != 0 && !group.isOn {
+            return "DCA\(group.number)"
+        }
+        return nil
+    }
+
+    /// In a monitor mix the strip button takes the channel out of that mix (send to -inf) instead of muting the
+    /// room. The previous level is kept so a second tap puts it back.
+    func isSendRemoved(_ strip: Strip, _ control: LevelControl) -> Bool { strip.level(control) <= 0.001 }
+
+    func toggleSendRemoved(_ strip: Strip, _ control: LevelControl) {
+        let key = strip.address(control)
+        let level = strip.level(control)
+        setTouching(strip, control, true)
+        if level > 0.001 {
+            removedSendLevels[key] = level
+            setLevel(strip, control, to: 0)
+        } else {
+            setLevel(strip, control, to: removedSendLevels[key] ?? Self.unityLevel)
+        }
+        setTouching(strip, control, false)
+    }
+
     // MARK: - Any parameter
 
     /// The observable value of an OSC address, e.g. "/ch/01/eq/1/f". Ask the mixer for it with `request`.
@@ -779,10 +819,17 @@ final class Mixer {
     /// Reverts the newest change made from this app.
     func undo() {
         guard let change = history.popLast() else { return }
+        undoToast = UndoToast(text: L("Undone: \(change.label)"))
         let message = OSCMessage(change.address, change.old)
         route(message, fromMixer: false)
         connection.send(message)
     }
+}
+
+/// A short message after an undo.
+struct UndoToast: Equatable, Identifiable {
+    let id = UUID()
+    let text: String
 }
 
 /// Pages shown full screen over the mixer.

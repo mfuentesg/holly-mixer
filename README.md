@@ -17,9 +17,17 @@ Everything in the Holly Mixer design canvas:
 - **Service Mode:** (hidden for now, see below)
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
   SOLO and MUTE side by side) so every control fits; musician "My mix" mode paired by QR code from the iPad
+- **Safety on a live system:** a channel silenced by a mute group or a muted DCA shows "G1" / "DCA2" on its MUTE
+  button; mute groups can be named and show how many channels they hold; in a monitor mix the strip button takes the
+  channel out of that mix instead of muting the room; a double-tap resets a fader only from its cap, and never from
+  far below; undo shows what it reverted; disconnect asks first; a musician's phone can require a PIN to leave
+- **Mix selector:** Main LR and the six monitor buses; the effects (FX 1–4) are hidden by default and can be shown
+  with a Settings switch (each channel's Sends tab always has its FX sends)
 - **Simple navigation:** no strip banks. The iPad shows every strip in one scrolling row and the iPhone one scrolling
   list (channels, aux/FX, buses, DCA); the four mute groups sit in the bottom bar; a visible **Settings** button
   opens one page with mute groups (and which channels are in each), backups, snapshots, pairing and language
+- **iPhone:** Main LR pinned under the list, a banner and a back button in monitor mixes, the solo pill, the channel
+  page with a pinned fader/mute/solo bar, and a "I'm a musician" card on the Connect screen
 - **Faders:** only a clear vertical drag on the cap moves a fader, so swiping sideways across the strips scrolls
   without touching levels; stereo strips keep the cap clear of the meters
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer. No address is

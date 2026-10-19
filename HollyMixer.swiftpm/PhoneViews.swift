@@ -39,10 +39,13 @@ struct MonitorPairingView: View {
     @State private var bus = 1
     @State private var me = 1
     @State private var lock = MonitorSwitching.locked
+    /// Four digits the musician must type to leave musician mode; empty = just a confirmation.
+    @AppStorage("musicianExitPIN") private var exitPIN = ""
 
     private var pairing: MonitorPairing? {
         MonitorPairing(host: mixer.isDemo ? "demo" : mixer.host, bus: bus, me: me,
-                       lock: lock == .locked ? nil : lock.rawValue)
+                       lock: lock == .locked ? nil : lock.rawValue,
+                       exitPinHash: exitPIN.count == 4 ? MonitorPairing.hash(ofPIN: exitPIN) : nil)
     }
 
     var body: some View {
@@ -74,7 +77,7 @@ struct MonitorPairingView: View {
     private var pickers: some View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("BUS").sectionLabelStyle()
+                Text(L("MONITOR")).sectionLabelStyle()
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                     ForEach(1...6, id: \.self) { number in
                         busChip(number)
@@ -88,6 +91,23 @@ struct MonitorPairingView: View {
                 }
                 .pickerStyle(.segmented)
                 Text("The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L("EXIT PIN (OPTIONAL)")).sectionLabelStyle()
+                TextField(L("4 digits"), text: $exitPIN)
+                    .keyboardType(.numberPad)
+                    .font(Theme.mono(18, .semibold))
+                    .padding(.horizontal, 12)
+                    .frame(height: 48)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                    .onChange(of: exitPIN) { _, text in
+                        let digits = text.filter(\.isNumber)
+                        if digits != text || digits.count > 4 { exitPIN = String(digits.prefix(4)) }
+                    }
+                Text(L("With a PIN, the musician must type it to leave musician mode. Without one, holding Exit and confirming is enough."))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -153,14 +173,14 @@ struct MonitorPairingView: View {
                     .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
                     .frame(maxWidth: 360)
                     .accessibilityLabel("Pairing QR code for \(mixer.master(for: .bus(bus)).displayName)")
-                Text("On the musician's iPhone open Holly Mixer, then More > Pair as musician and scan this code.")
+                Text("On the musician's iPhone open Holly Mixer, then Settings > Pair as musician and scan this code.")
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
                 VStack(alignment: .leading, spacing: 6) {
-                    detailLine("Mixer", pairing.host)
-                    detailLine("Bus", String(pairing.bus))
-                    detailLine("Me", String(pairing.me))
+                    detailLine(L("Mixer"), pairing.host)
+                    detailLine(L("Monitor"), String(pairing.bus))
+                    detailLine(L("My channel"), String(pairing.me))
                     Text(pairing.code)
                         .font(Theme.mono(12, .regular))
                         .foregroundStyle(Theme.textTertiary)

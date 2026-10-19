@@ -89,7 +89,7 @@ De arriba hacia abajo:
 ┌───────────────────────────────────────────────────────────────────────┐
 │  CABECERA  (conexión · deshacer · AJUSTES · medidor)                  │
 ├───────────────────────────────────────────────────────────────────────┤
-│  MEZCLA   [Main LR] [Bus 1] … [Bus 6] [FX 1] … [FX 4]                 │
+│  MEZCLA   [Main LR] [Bus 1] … [Bus 6]   (+ FX 1–4 si se activan)      │
 ├───────────────────────────────────────────────────────────────────────┤
 │  (franjas de aviso: envíos / reconectando / copia de seguridad)       │
 ├───────────────────────────────────────────────────────────┬───────────┤
@@ -109,15 +109,16 @@ De izquierda a derecha:
 | **Nombre de la consola** y debajo **modelo · fw · IP** | Identifica a qué consola estás conectado (o «demo»). |
 | **Indicador de conexión** | Verde «Conectado · 12 ms» = todo bien (la cifra es la latencia). Naranja «Reconectando…» = se perdió la consola. Azul/violeta «Consola demo» = simulación. |
 | **SOLO · canal · Quitar** (solo aparece si hay solo) | Avisa de que hay canales en solo (escuchas en auriculares/monitor de sala, según la consola). Tócalo para **quitar todos los solos** de golpe. |
-| **Deshacer (↶)** | Revierte el último cambio hecho desde la app. Un punto naranja indica que hay cambios por deshacer. **Mantén pulsado** para ver la lista de los últimos 8 cambios con su hora. Guarda hasta 100 cambios. |
+| **Deshacer (↶)** | Revierte el último cambio hecho desde la app. Un punto naranja indica que hay cambios por deshacer. Tras deshacer aparece un aviso de 3 segundos («Deshecho: …») que dice qué se revirtió. **Mantén pulsado** para ver la lista de los últimos 8 cambios con su hora. Guarda hasta 100 cambios. |
 | **Ajustes (⚙)** | Botón siempre visible con la rueda dentada y el texto «Ajustes»: abre la página con todo lo que no es un fader (ver 2.2). |
 | **Medidor Main L/R** | Dos barritas con el nivel de la salida principal. |
-| **Apagar (⏻)** / **Salir de la demo** | Desconecta de la consola y vuelve a la pantalla de conexión. |
 
 En pantallas estrechas (iPad en multitarea, iPhone horizontal) se ocultan los grupos de mute y el
 medidor para ganar espacio.
 
 ### 2.2 Ajustes (⚙)
+
+Las páginas que abres desde Ajustes tienen su botón **‹ Ajustes** para volver a Ajustes.
 
 El botón **Ajustes** (rueda dentada) está **siempre visible en la barra superior**, en iPad y en iPhone. Abre una sola
 página que reúne todo lo que no es un fader, con una descripción debajo de cada elemento:
@@ -126,12 +127,12 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 
 | Sección | Opción | Para qué sirve |
 |---|---|---|
-| **MEZCLA** | **Grupos de mute** | Pantalla para elegir **qué canales pertenecen a cada uno de los 4 grupos de mute**. Cada grupo muestra todos los canales; toca un canal para sumarlo o quitarlo (rojo = pertenece). El botón **Silenciar este grupo** lo activa o suelta. |
+| **MEZCLA** | **Mostrar efectos en el selector de mezcla** (interruptor) | Añade FX 1–4 junto a las mezclas de monitor. Apagado por defecto: los efectos casi nunca se tocan en vivo. Si lo apagas estando en una mezcla FX, la app vuelve a Main LR. |
+| | **Grupos de mute** | Elige **qué canales pertenecen a cada grupo** y **ponle nombre** (hasta 12 letras, p. ej. «Banda»; el nombre sale en el botón del pie). Arriba eliges el grupo (1–4, con su nombre y cuántos canales tiene); debajo ves todos los canales con un círculo: **toca un canal para incluirlo (contorno naranja con ✓) y vuelve a tocarlo para quitarlo**. **Quitar todos** vacía el grupo. El rojo solo marca un grupo que está silenciado ahora; para silenciarlo usa el pie. |
 | **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
-| | **Snapshots de la consola** | Las 64 memorias internas de la consola ([sección 8](#8-snapshots-de-la-consola)). |
 | **MÚSICOS** | **Vincular el iPhone de un músico** (iPad) / **Vincular como músico…** (iPhone) | En el iPad muestra un código QR; en el iPhone abre la cámara para escanearlo ([sección 6](#6-modo-músico-mi-mezcla)). |
 | **IDIOMA** | Sistema / English / Español | Cambia el idioma de la app. |
-| | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión. |
+| | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión (pide confirmación; la consola sigue funcionando). Ya no hay botón de apagado en la barra superior. |
 
 > *Iniciar / Editar Modo Servicio* existen en el código pero están **ocultos en esta versión**.
 
@@ -143,12 +144,12 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 
 <p align="center"><img src="manual/ipad-bus.jpg" alt="Mezcla de un bus: los faders son envíos" width="420"></p>
 
-Una fila de píldoras: **Main LR**, **Bus 1 … Bus 6** y **FX 1 … FX 4**. Decide **qué controlan los faders**:
+Una fila de píldoras: **Main LR** y **Bus 1 … Bus 6**. (Los efectos **FX 1 … FX 4** solo aparecen si activas *Ajustes → Mostrar efectos en el selector de mezcla*; está **apagado por defecto**.) Decide **qué controlan los faders**:
 
 - **Main LR**: los faders son los niveles normales de cada canal hacia la salida principal.
 - **Un bus (1–6)**: los faders pasan a ser **envíos** de cada canal a ese bus. Es la forma de armar la mezcla de
   monitor / retorno de un músico. El bus elegido se pinta con su color.
-- **FX 1–4**: igual, pero hacia los efectos.
+- **FX 1–4** (opcional): igual, pero hacia los efectos. Aunque estén ocultos, cada canal sigue teniendo sus envíos a FX en su página, pestaña **Envíos**.
 
 Cuando eliges un bus aparece una franja de color: **«Los faders son envíos a …»** con el botón **Volver a Main**.
 
@@ -163,12 +164,15 @@ Cuando eliges un bus aparece una franja de color: **«Los faders son envíos a �
 ### 2.5 Pie de página: grupos de mute
 
 No hay selector de bancos: **todas las tiras están en una sola fila que se desplaza hacia los lados**, en este
-orden: canales 1–16, entrada aux, retornos FX, buses, envíos FX y los 4 DCA (con la mezcla *Main LR*). Con la mezcla de
-un bus o de FX solo se ven las entradas, más el master a la derecha.
+orden: canales 1–16, entrada aux, retornos FX, buses y envíos FX. Con la mezcla *Main LR* los **4 DCA** (Banda, Voces,
+Pastor, Playback…) quedan **fijos a la derecha, junto al master**, siempre a la vista; en pantallas más estrechas van
+al **principio** de la fila. Con la mezcla de un bus o de FX solo se ven las entradas, más el master a la derecha.
 
-En el pie están los botones **GRUPOS DE MUTE · 1 2 3 4**: un toque silencia (rojo) o reactiva a la vez todos los
-canales del grupo. **Dónde se configura qué canales forman cada grupo:** *Ajustes → Grupos de mute* (ver 2.2), o en la
-página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2).
+En el pie están los botones **GRUPOS DE MUTE 1 2 3 4**. Cada botón muestra el **nombre** del grupo y **cuántos canales**
+tiene («Banda · 7 canales»; «Vacío» si no tiene ninguno). Un toque silencia (rojo) o reactiva a la vez todos los
+canales del grupo. **Qué canales forman cada grupo y su nombre:** *Ajustes → Grupos de mute* (ver 2.2), o en la
+página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2). Los nombres se guardan en este
+dispositivo: la XR18 no puede guardarlos.
 
 ---
 
@@ -179,15 +183,16 @@ Cada canal es una columna. De arriba a abajo:
 | Parte | Qué es / qué hace |
 |---|---|
 | **Barra de color** | El color del canal (se cambia en la página del canal). Se atenúa si el canal está en mute. |
-| **Número y nombre** | Ej. `1 · Pulpito`. **Un toque** selecciona el canal (borde naranja). **Un segundo toque** (ya seleccionado) abre su página de detalle. Los canales sin nombre se ven más apagados. |
+| **Número y nombre** | Ej. `1 · Pulpito`. **Un toque** abre la página del canal (el último canal abierto queda con borde naranja). Los canales sin nombre se ven más apagados. |
 | **Miniatura de EQ** | Dibujo pequeño de la curva de ecualización actual. |
-| **G / C** | Indicadores de **G**ate y **C**ompresor. Encendidos (verde / ámbar) = ese procesador está activo. Son solo informativos. |
+| **G / C** | Indicadores de **G**ate y **C**ompresor. Encendidos (verde / ámbar) = ese procesador está activo. Son solo informativos. Los dos se ven siempre. |
 | **Arco de pan** | Posición estéreo: `C` = centro, `L39` = 39 % a la izquierda, `R29` = 29 % a la derecha. Solo informativo (se edita en la consola). |
 | **Fader** | Control de volumen. Ver 3.1. |
 | **Medidor LED** | Nivel de señal: verde = normal, ámbar = alto, rojo = cerca de saturar. La marca fija arriba es el **pico**. En canales estéreo hay dos columnas (L y R). |
 | **Lectura en dB** | Valor actual, ej. `-6.0`. Se pone naranja mientras mueves el fader. «−∞» = silencio total. |
 | **SOLO** | Pone el canal en solo. Se enciende en ámbar. No todos los elementos lo tienen. |
 | **MUTE** | Silencia el canal. Se enciende en rojo. Vuelve a tocarlo para reactivar. El botón vibra levemente al pulsar. |
+| **MUTE con «G1» o «DCA2»** | Si el canal está silenciado **por un grupo de mute o por un DCA silenciado** (aunque su propio MUTE esté apagado), la tira se atenúa y el botón MUTE se rodea de rojo con la etiqueta del grupo que lo silencia. Así sabes *por qué* no suena. |
 | **Borde blanco + ↻** | Aviso de **«Cambiado en otro dispositivo»**: otra persona (otro iPad, la consola o X AIR Edit) movió ese canal hace un instante. |
 
 ### 3.1 El fader
@@ -228,8 +233,13 @@ pan; **SOLO y MUTE van lado a lado** y las barras se hacen más delgadas para qu
 
 <p align="center"><img src="manual/ipad-canal-EQ.jpg" alt="Página de un canal, pestaña EQ" width="420"></p>
 
-**Cómo abrirla:** selecciona el canal y toca otra vez su nombre (o, en el master, toca **EQ · Din**). En iPhone,
-toca el nombre en la fila o desliza hacia la izquierda.
+**Cómo abrirla:** toca el nombre del canal (o, en el master, **EQ · Din**). En iPhone, toca el nombre en la fila o
+desliza hacia la izquierda.
+
+> **En iPhone** la página del canal tiene una **barra fija abajo** con ‹ › (canal anterior / siguiente), **M**, **S** y el
+> fader del canal, para ajustar el volumen mientras editas. Las seis pestañas caben en la pantalla (sin desplazarse). Las
+> perillas giran solo si las **mantienes pulsadas un instante** antes de arrastrar (así deslizar la página no las mueve), y
+> la ganancia del preamp tiene botones **−1 dB / +1 dB**.
 
 ### 4.1 Barra superior
 
@@ -334,7 +344,7 @@ La cabecera tiene:
 | Elemento | Qué hace |
 |---|---|
 | **Indicador de conexión** | Igual que en el iPad. |
-| **Nombre de la mezcla ▾** (grande, ej. «Main LR») | Menú para elegir la mezcla: Main LR, Bus 1–6, FX 1–4. Decide qué controlan los faders. |
+| **Nombre de la mezcla ▾** (grande, ej. «Main LR») | Menú para elegir la mezcla: Main LR, Bus 1–6 (y FX 1–4 si están activados en Ajustes). Decide qué controlan los faders. |
 | **Deshacer (↶)** | Revierte el último cambio. |
 | **Ajustes (⚙)** | Abre la página de Ajustes: grupos de mute, copia de ajustes, snapshots, vincular como músico, idioma y desconectar. |
 
@@ -347,9 +357,16 @@ Cada **fila de canal** tiene:
 - Un **fader horizontal** con medidor integrado. Se arrastra de la misma manera que el vertical.
 
 **Todo en una sola lista que se desplaza** (sin bancos), con un título pequeño por tipo: **CANALES**, **AUX · FX**,
-**BUSES · ENVÍOS FX** y **DCA** (con la mezcla *Main LR*); en la mezcla de un bus, al final aparece **MASTER**.
+**BUSES · ENVÍOS FX** y **DCA** (con la mezcla *Main LR*); 
 
-**Barra inferior:** **GRUPOS DE MUTE · 1 2 3 4**, para silenciar o reactivar cada grupo con un toque.
+**Main LR siempre a mano:** debajo de la lista hay una fila fija con el fader y el mute de **Main LR** (en la mezcla de un
+bus, es el master de ese bus). Cuando hay un solo activo aparece junto a la conexión un botón **SOLO · … ✕** para quitarlo.
+
+**En la mezcla de un bus** aparece una franja «Envíos a IEM Batería» con el botón **Main LR** para volver, y el botón de
+cada fila pasa de **M** a **✕**: *quita el canal de esa mezcla* (envío a −∞) sin silenciarlo en la sala; vuelve a tocarlo
+para devolverlo a su nivel anterior. (En el iPad el botón se llama **QUITAR / QUITADO**.)
+
+**Barra inferior:** **GRUPOS DE MUTE 1 2 3 4** con nombre y número de canales, para silenciar o reactivar cada grupo con un toque.
 
 ### 5.2 Horizontal
 
@@ -371,13 +388,14 @@ Permite que **cada músico regule su propio monitor desde su iPhone**, sin poder
 |---|---|
 | **BUS** | Elige el bus de monitor de ese músico (el retorno que escucha). |
 | **YO (EL CANAL DEL PROPIO MÚSICO)** | Elige el canal del propio músico para destacarlo en su mezcla. |
+| **PIN DE SALIDA (opcional)** | 4 dígitos que el músico debe escribir para salir del modo músico (tres fallos bloquean el teclado 30 s). Sin PIN, basta mantener Salir y confirmar. El QR lleva solo una huella del PIN. |
 | **CAMBIO DE RETORNO** | Define si el músico puede cambiar de retorno: **Bloqueado** (no puede) o **Libre** (un toque, pensado para el responsable de sonido). Explica que esta limitación existe solo dentro de Holly Mixer, porque la consola no tiene cuentas de usuario. |
 | **Código QR** | Se muestra a la derecha, junto con los datos escritos debajo. |
 
 ### 6.2 Vincular (en el iPhone del músico)
 
-*Ajustes → Vincular como músico…* Apunta la cámara al QR del iPad. Si la cámara no funciona, toca **Escribir a mano**
-y rellena la dirección de la consola, el bus y el canal, luego **Unirse**.
+*Ajustes → Vincular como músico…* (o, desde la pantalla de conexión, **Soy músico**: no hace falta conectarse antes). Apunta la cámara al QR del iPad. Si la cámara no funciona, toca **Escribir a mano**
+y rellena la dirección de la consola, el bus y el canal, luego **Unirse**. La vinculación manual siempre es **Bloqueada**.
 
 ### 6.3 La pantalla del músico
 
@@ -387,7 +405,7 @@ y rellena la dirección de la consola, el bus y el canal, luego **Unirse**.
 |---|---|
 | **MI MEZCLA** y nombre del bus | Indica qué mezcla estás controlando. |
 | **Solo el bus N** (candado) o **Retorno** | Si está bloqueado, muestra el candado. Si es libre, **Retorno** abre una lista para elegir otro bus: marca cada retorno como *En uso* o *Sin usar* y tiene el interruptor **Mostrar retornos sin usar**. Solo cambia el retorno: tu canal sigue igual. |
-| **Mantén para salir** | Para salir del modo músico hay que **mantener pulsado dos segundos** y luego confirmar (evita salidas accidentales). |
+| **Mantén para salir** | Para salir del modo músico hay que **mantener pulsado dos segundos**, confirmar y, si el responsable de sonido puso un PIN, escribirlo. |
 | **YO** | Tu propio canal, fijado arriba, con su fader (cuánto te oyes en tus oídos). |
 | **Otras entradas** | Un fader por cada canal activo para subir o bajar a los demás en **tu** mezcla. **Mostrar todas las entradas / Ocultar entradas sin usar** muestra u oculta las que no tienen nombre. |
 | **EN MIS OÍDOS** | Fader maestro del bus: el volumen total de tu mezcla. |
@@ -432,7 +450,9 @@ Cada copia muestra su nombre (o «Copia automática»), fecha y número de valor
 
 ---
 
-## 8. Snapshots de la consola
+## 8. Snapshots de la consola (oculto en esta versión)
+
+> Esta pantalla está **desactivada** hasta comprobar los comandos en una consola real; no aparece en Ajustes.
 
 <p align="center"><img src="manual/ipad-snapshots.jpg" alt="Snapshots de la consola" width="420"></p>
 

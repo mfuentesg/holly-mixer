@@ -5,6 +5,7 @@ struct PhoneMixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(Localization.self) private var localization
     @State private var showScanner = false
+    @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
     var onPair: (MonitorPairing) -> Void
 
     var body: some View {
@@ -15,25 +16,34 @@ struct PhoneMixerView: View {
 
         VStack(spacing: 0) {
             header(master: master, busColor: busColor)
+            if target != .main {
+                SendsBanner(master: master, isCompact: true)
+            }
             if isReconnecting {
-                Text("Reconnecting to the mixer…")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.accentText)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 28)
-                    .background(Theme.accent.opacity(0.13))
+                ReconnectingBanner()
             }
             BackupBanner()
             rows(target: target, busColor: busColor)
                 .opacity(isReconnecting ? 0.4 : 1)
                 .saturation(isReconnecting ? 0.35 : 1)
                 .allowsHitTesting(!isReconnecting)
+            // Main LR (or the selected bus) is always at hand, as on the iPad.
+            PhoneChannelRow(strip: master, busColor: busColor, control: .fader)
+                .padding(.horizontal, 12)
+                .padding(.top, 6)
+                .background(Theme.background)
+                .opacity(isReconnecting ? 0.4 : 1)
+                .allowsHitTesting(!isReconnecting)
             muteGroupBar
         }
         .background(Theme.background.ignoresSafeArea())
         .foregroundStyle(Theme.textPrimary)
+        .overlay(alignment: .bottom) { UndoToastView() }
         .fullScreenCover(item: Bindable(mixer).presentedScreen) { screen in
             PresentedScreenView(screen: screen)
+        }
+        .onChange(of: showsEffects) { _, shows in
+            if !shows, case .fxSend = mixer.selectedMix { mixer.selectedMix = .main }
         }
         .onChange(of: mixer.showsPairingScanner) { _, wanted in
             if wanted {
@@ -54,7 +64,25 @@ struct PhoneMixerView: View {
     private func header(master: Strip, busColor: Color?) -> some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 4) {
-                ConnectionPill()
+                HStack(spacing: 6) {
+                    ConnectionPill()
+                    if let soloed = mixer.soloedStrips.first {
+                        Button {
+                            mixer.clearSolo()
+                        } label: {
+                            Text(L("SOLO · \(mixer.soloedStrips.count > 1 ? L("\(mixer.soloedStrips.count) channels") : soloed.displayName)") + " ✕")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Theme.amberText)
+                                .lineLimit(1)
+                                .padding(.horizontal, 10)
+                                .frame(height: 30)
+                                .background(Theme.solo.opacity(0.14), in: Capsule())
+                                .overlay(Capsule().stroke(Theme.solo.opacity(0.45), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Solo active. Clear solo")
+                    }
+                }
                 mixMenu(master: master, busColor: busColor)
             }
             Spacer(minLength: 0)
@@ -73,8 +101,10 @@ struct PhoneMixerView: View {
                 ForEach(1...6, id: \.self) { number in
                     Text(mixer.master(for: .bus(number)).displayName).tag(MixTarget.bus(number))
                 }
-                ForEach(1...4, id: \.self) { number in
-                    Text(mixer.master(for: .fxSend(number)).displayName).tag(MixTarget.fxSend(number))
+                if showsEffects {
+                    ForEach(1...4, id: \.self) { number in
+                        Text(mixer.master(for: .fxSend(number)).displayName).tag(MixTarget.fxSend(number))
+                    }
                 }
             }
             .pickerStyle(.inline)
@@ -128,9 +158,6 @@ struct PhoneMixerView: View {
                     rows(mixer.buses + mixer.fxSends)
                     heading("DCA")
                     ForEach(mixer.dcas) { group in PhoneDCARow(group: group) }
-                } else {
-                    heading(L("MASTER"))
-                    rows([mixer.master(for: target)])
                 }
             }
             .padding(.horizontal, 12)
@@ -156,20 +183,27 @@ struct PhoneMixerView: View {
                 .frame(width: 70, alignment: .leading)
             ForEach(1...4, id: \.self) { number in
                 let isOn = mixer.muteGroups[number - 1]
+                let name = MuteGroupNames.shared.name(number)
+                let count = mixer.muteGroupCount(number)
                 Button {
                     mixer.toggleMuteGroup(number)
                 } label: {
-                    Text("\(number)")
-                        .font(Theme.mono(15, .bold))
-                        .foregroundStyle(isOn ? .white : Theme.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(isOn ? Theme.mute : Theme.strip, in: RoundedRectangle(cornerRadius: 10))
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(isOn ? Theme.muteBorder : Theme.border, lineWidth: 1))
+                    VStack(spacing: 0) {
+                        Text("\(number)").font(Theme.mono(15, .bold))
+                        Text(name.isEmpty ? (count == 0 ? L("Empty") : L("\(count) ch")) : name)
+                            .font(.system(size: 10, weight: .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    .foregroundStyle(isOn ? .white : (count == 0 ? Theme.textMuted : Theme.textSecondary))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(isOn ? Theme.mute : Theme.strip, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10)
+                        .stroke(isOn ? Theme.muteBorder : Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(L("Mute group \(number)"))
+                .accessibilityLabel("\(L("Mute group \(number)")) \(name), \(count)")
                 .accessibilityValue(isOn ? "on" : "off")
             }
         }
@@ -188,16 +222,18 @@ struct PhoneChannelRow: View {
     let control: LevelControl
 
     var body: some View {
-        let isMuted = !strip.isOn
+        let isSendsMode: Bool = { if case .send = control { return true } else { return false } }()
+        let silencer = isSendsMode ? nil : mixer.silencedBy(strip)
+        let isMuted = isSendsMode ? mixer.isSendRemoved(strip, control) : !strip.isOn
         let isSelected = mixer.selectedStrip == strip.kind
         let level = strip.level(control)
 
         HStack(spacing: 8) {
-            buttons(isMuted: isMuted)
+            buttons(isMuted: isMuted, isSendsMode: isSendsMode, silencedBy: silencer)
             VStack(spacing: 2) {
-                titleLine(isMuted: isMuted, level: level)
+                titleLine(isMuted: isMuted || silencer != nil, level: level)
                 PhoneHorizontalFader(
-                    value: level, lineColor: busColor ?? strip.color, isMuted: isMuted, meterStrip: strip,
+                    value: level, lineColor: busColor ?? strip.color, isMuted: isMuted || silencer != nil, meterStrip: strip,
                     label: control == .fader ? L("\(strip.displayName) fader") : L("\(strip.displayName) send"),
                     onTouchingChanged: { mixer.setTouching(strip, control, $0) },
                     onChange: { mixer.setLevel(strip, control, to: $0) }
@@ -216,11 +252,19 @@ struct PhoneChannelRow: View {
         .opacity(strip.isNamed ? 1 : 0.7)
     }
 
-    private func buttons(isMuted: Bool) -> some View {
+    private func buttons(isMuted: Bool, isSendsMode: Bool, silencedBy: String?) -> some View {
         HStack(spacing: 8) {
-            PhoneToggleButton(title: "M", isOn: isMuted, style: .mute,
-                              accessibilityLabel: L("Mute \(strip.displayName), \(isMuted ? L("on") : L("off"))")) {
-                mixer.toggleMute(strip)
+            if isSendsMode {
+                // In a monitor mix the button takes the channel out of that mix; it never mutes the room.
+                PhoneToggleButton(title: "✕", isOn: isMuted, style: .mute,
+                                  accessibilityLabel: L("Remove \(strip.displayName) from this mix")) {
+                    mixer.toggleSendRemoved(strip, control)
+                }
+            } else {
+                PhoneToggleButton(title: "M", isOn: isMuted, style: .mute, silencedBy: isMuted ? nil : silencedBy,
+                                  accessibilityLabel: L("Mute \(strip.displayName), \(isMuted ? L("on") : L("off"))")) {
+                    mixer.toggleMute(strip)
+                }
             }
             if strip.soloAddress != nil {
                 PhoneToggleButton(title: "S", isOn: strip.isSoloed, style: .solo,
@@ -280,21 +324,27 @@ struct PhoneToggleButton: View {
     let title: String
     let isOn: Bool
     let style: Style
+    /// "G1" or "DCA2" when something else is silencing this strip while its own mute is off.
+    var silencedBy: String?
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
+        let silenced = silencedBy != nil && !isOn
         Button(action: action) {
-            Text(title)
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(foreground)
+            Text(silenced ? (silencedBy ?? title) : title)
+                .font(silenced ? Theme.mono(11, .heavy) : .system(size: 13, weight: .heavy))
+                .foregroundStyle(silenced ? Theme.mute : foreground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(width: 44, height: 44)
                 .background(background, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(border, lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(silenced ? Theme.mute : border, lineWidth: silenced ? 1.5 : 1))
                 .shadow(color: isOn && style == .mute ? Theme.mute.opacity(0.45) : .clear, radius: 7)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityValue(silencedBy.map { L("silenced by \($0)") } ?? "")
     }
 
     private var foreground: Color {

@@ -84,17 +84,21 @@ struct ParamKnob: View {
         }
     }
 
+    /// A knob only turns after a short press, so a swipe that starts on it still scrolls the page.
     private func drag(from position: Float) -> some Gesture {
-        DragGesture(minimumDistance: 2)
-            .onChanged { gesture in
+        LongPressGesture(minimumDuration: 0.15)
+            .sequenced(before: DragGesture(minimumDistance: 0))
+            .onChanged { value in
+                guard case .second(true, let drag?) = value else { return }
                 if startPosition == nil {
                     startPosition = position
                     mixer.beginEdit(address)
                 }
-                let delta = Float(-gesture.translation.height / dragLength)
+                let delta = Float(-drag.translation.height / dragLength)
                 mixer.setContinuous(address, min(max((startPosition ?? position) + delta, 0), 1))
             }
             .onEnded { _ in
+                guard startPosition != nil else { return }
                 startPosition = nil
                 endLabel()
             }

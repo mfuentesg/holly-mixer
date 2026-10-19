@@ -19,8 +19,8 @@ enum Theme {
     static let textControl = Color(hex: 0xC9CCD2)
     static let textSecondary = Color(hex: 0xA4A8B0)
     static let textTertiary = Color(hex: 0x8A8F99)
-    static let textMuted = Color(hex: 0x6E737D)
-    static let textDim = Color(hex: 0x5A5F69)
+    static let textMuted = Color(hex: 0x8A8F99)
+    static let textDim = Color(hex: 0x747985)
 
     // Accent and status
     static let accent = Color(hex: 0xFF8A1F)
