@@ -135,10 +135,12 @@ struct PhoneMixerView: View {
             } label: {
                 Label("Pair as musician…", systemImage: "qrcode.viewfinder")
             }
-            Button {
-                mixer.presentedScreen = .serviceMode
-            } label: {
-                Label("Start Service Mode", systemImage: "lock")
+            if FeatureFlags.serviceMode {
+                Button {
+                    mixer.presentedScreen = .serviceMode
+                } label: {
+                    Label("Start Service Mode", systemImage: "lock")
+                }
             }
             Button {
                 mixer.presentedScreen = .backups

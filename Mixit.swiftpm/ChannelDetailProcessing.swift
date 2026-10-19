@@ -116,20 +116,32 @@ struct ChannelTransferCurve: View {
     }
 }
 
-/// Gain-reduction meter. The mixer's reduction meter isn't read yet, so it shows no value.
+/// Gain-reduction meter, fed by `/meters/6`: how many dB the gate or compressor is pulling the signal down.
 struct GainReductionMeter: View {
+    /// dB of reduction, 0 or more.
+    let reduction: Float
+
+    private static let span: Float = 24
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text("GAIN REDUCTION").sectionLabelStyle()
                 Spacer()
-                Text("—")
+                Text(reduction >= 0.5 ? "−\(String(format: "%.0f", reduction)) dB" : "0 dB")
                     .font(Theme.mono(13, .bold))
-                    .foregroundStyle(Theme.textMuted)
+                    .foregroundStyle(reduction >= 0.5 ? Theme.amberText : Theme.textMuted)
             }
             RoundedRectangle(cornerRadius: 3)
                 .fill(Theme.well)
                 .frame(height: 8)
+                .overlay(alignment: .leading) {
+                    GeometryReader { proxy in
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Theme.meterAmber)
+                            .frame(width: proxy.size.width * CGFloat(min(reduction, Self.span) / Self.span))
+                    }
+                }
                 .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color.white.opacity(0.06), lineWidth: 1))
             HStack {
                 ForEach(["0", "6", "12", "18", "24"], id: \.self) { tick in
@@ -140,7 +152,7 @@ struct GainReductionMeter: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Gain reduction")
-        .accessibilityValue("not available")
+        .accessibilityValue("\(Int(reduction)) dB")
     }
 }
 
@@ -214,7 +226,7 @@ struct ChannelDetailGateTab: View {
             ChannelTransferCurve(range: -80...0, gridStep: 20, threshold: threshold) { input in
                 ChannelDetailCurves.gate(input: input, mode: mode, threshold: threshold, range: reduction)
             }
-            GainReductionMeter()
+            GainReductionMeter(reduction: strip.gateReduction)
         }
         .detailCard()
     }
@@ -292,7 +304,7 @@ struct ChannelDetailDynamicsTab: View {
             ChannelTransferCurve(range: -60...0, gridStep: 10, threshold: shape.threshold) { input in
                 shape.output(for: input)
             }
-            GainReductionMeter()
+            GainReductionMeter(reduction: strip.dynReduction)
         }
         .detailCard()
     }

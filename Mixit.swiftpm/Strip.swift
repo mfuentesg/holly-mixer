@@ -62,6 +62,9 @@ final class Strip: Identifiable {
     var pan: Float = 0.5
     var gateOn = false
     var compressorOn = false
+    /// Gain reduction of the gate and of the compressor in dB (0 = none), from `/meters/6`.
+    var gateReduction: Float = 0
+    var dynReduction: Float = 0
     var isSoloed = false
     /// Latest meter level in dBFS (left, or mono).
     var meter: Float = -90

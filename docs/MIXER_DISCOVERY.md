@@ -70,8 +70,10 @@ list of parameters Mixit should request for the same page.
 
 ### 2d. Things in Mixit that follow the official app and still need hardware proof
 
-- Mixer snapshots: `/-snap/NN/name` (read), `/-snap/load ,i N`, `/-snap/save ,i N`, `/-snap/index`. While the official
-  app loads or saves a snapshot, run `xr18_dump.py listen` and compare the addresses it logs with these.
+- Mixer snapshots: the official protocol document (`docs/XAIR_PROTOCOL_NOTES.md`) lists `/snap/NN/name`,
+  `/snap/name`, `/snap/index`, `/snap/load N`, `/snap/save N`, `/snap/delete N` and `/snap/NN/scope`. The official app's
+  binary also holds `/-snap`; Mixit asks for both and uses the one the mixer answers to. While the official app loads
+  or saves a snapshot, run `xr18_dump.py listen` to confirm which spelling your firmware uses.
 - DCA: `/dca/N/on`, `/dca/N/fader`, `/dca/N/config/name|color`, and `/ch/NN/grp/dca` as a bit mask (bit 0 = DCA 1).
   Move a DCA and add a channel to it in the official app and check the values in the log.
 

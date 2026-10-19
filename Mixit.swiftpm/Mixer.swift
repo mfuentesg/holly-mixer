@@ -51,8 +51,10 @@ final class Mixer {
     let main: Strip
     /// Names of the mixer's 64 snapshot slots (index 0 = slot 1); empty means unused or not read yet.
     private(set) var snapshotNames = Array(repeating: "", count: 64)
-    /// The slot last loaded or saved, as reported by the mixer (`/-snap/index`), if known.
+    /// The slot last loaded or saved, as reported by the mixer (`/snap/index`), if known.
     private(set) var currentSnapshot: Int?
+    /// "/snap" as in the official protocol document; "/-snap" if that is what the mixer answers to.
+    private(set) var snapshotPrefix = "/snap"
     /// The four DCA groups.
     let dcas = (1...4).map { DCAGroup(number: $0) }
     /// Mute groups 1-4: true when the group is engaged.
@@ -227,6 +229,7 @@ final class Mixer {
     private func subscribe() {
         connection.send(OSCMessage("/xremote"))
         connection.send(OSCMessage("/meters", .string("/meters/1")))
+        connection.send(OSCMessage("/meters", .string("/meters/6")))
     }
 
     private func requestState() {
@@ -332,6 +335,10 @@ final class Mixer {
         switch message.address {
         case "/xinfo":
             handleInfo(message.arguments)
+        case "/meters/6":
+            if case .blob(let bytes)? = message.arguments.first {
+                handleDynamicsMeters(bytes)
+            }
         case "/meters/1":
             if case .blob(let bytes)? = message.arguments.first {
                 handleMeters(bytes)
@@ -362,6 +369,26 @@ final class Mixer {
         transportProblemSince = nil
         subscribe()
         requestState()
+    }
+
+    /// `/meters/6` on X AIR (official protocol document): 16 gate, 16 channel dynamics, 6 bus dynamics and Main dynamics
+    /// as int16 in 1/256 dB. Values are gain changes, so a reduction is a negative number; shown here as dB of reduction.
+    private func handleDynamicsMeters(_ bytes: [UInt8]) {
+        guard bytes.count >= 4 else { return }
+        func reduction(_ index: Int) -> Float {
+            let offset = 4 + index * 2
+            guard offset + 1 < bytes.count else { return 0 }
+            let raw = Int16(bitPattern: UInt16(bytes[offset]) | UInt16(bytes[offset + 1]) << 8)
+            return max(0, -Float(raw) / 256)
+        }
+        for (index, strip) in channels.enumerated() {
+            strip.gateReduction = reduction(index)
+            strip.dynReduction = reduction(16 + index)
+        }
+        for (index, strip) in buses.enumerated() {
+            strip.dynReduction = reduction(32 + index)
+        }
+        main.dynReduction = reduction(38)
     }
 
     /// `/meters/1` on X AIR: 40 int16 values in 1/256 dB, little-endian, after an int32 count:
@@ -417,12 +444,14 @@ final class Mixer {
             channels[number - 1].isSoloed = value != 0
             return
         }
-        if parts.count == 3, parts[0] == "-snap", parts[2] == "name", let slot = Int(parts[1]), (1...64).contains(slot),
-           case .string(let value)? = message.arguments.first {
+        if parts.count == 3, parts[0] == "snap" || parts[0] == "-snap", parts[2] == "name", let slot = Int(parts[1]),
+           (1...64).contains(slot), case .string(let value)? = message.arguments.first {
             snapshotNames[slot - 1] = value
+            snapshotPrefix = "/" + parts[0]
             return
         }
-        if parts.count == 2, parts[0] == "-snap", parts[1] == "index", case .int(let value)? = message.arguments.first {
+        if parts.count == 2, parts[0] == "snap" || parts[0] == "-snap", parts[1] == "index",
+           case .int(let value)? = message.arguments.first {
             currentSnapshot = Int(value)
             return
         }
@@ -451,7 +480,8 @@ final class Mixer {
 
     /// Keeps the newest value of an address for the settings backup.
     private func record(_ address: String, _ value: OSCArgument?) {
-        guard let value, !address.hasPrefix("/-stat"), !address.hasPrefix("/meters") else { return }
+        guard let value, !address.hasPrefix("/-stat"), !address.hasPrefix("/meters"),
+              !address.hasPrefix("/snap"), !address.hasPrefix("/-snap") else { return }
         switch value {
         case .blob: return
         default: break
@@ -556,11 +586,18 @@ final class Mixer {
         }
     }
 
-    // MARK: - Mixer snapshots (/-snap, unverified on hardware: see docs/MIXER_DISCOVERY.md)
+    // MARK: - Mixer snapshots
+    // Official protocol (X AIR Remote Control Protocol, fw 1.11+): `/snap/name` and `/snap/index` fill a temporary
+    // buffer, `/snap/load N`, `/snap/save N` and `/snap/delete N` act on slot N, `/snap/NN/name` reads or renames
+    // a slot. The official app's binary also contains "/-snap", so both spellings are asked and the one the
+    // mixer answers to is used.
 
     /// Asks the mixer for the names of all 64 snapshot slots.
     func requestSnapshotNames() {
-        let addresses = (1...64).map { String(format: "/-snap/%02d/name", $0) } + ["/-snap/index"]
+        var addresses = ["/snap/index", "/-snap/index"]
+        for prefix in ["/snap", "/-snap"] {
+            addresses += (1...64).map { String(format: "\(prefix)/%02d/name", $0) }
+        }
         Task {
             for (index, address) in addresses.enumerated() {
                 connection.send(OSCMessage(address))
@@ -572,7 +609,7 @@ final class Mixer {
     /// Recalls one of the mixer's own snapshots. Everything the snapshot's recall scope covers changes at once.
     func loadSnapshot(_ slot: Int) {
         guard (1...64).contains(slot) else { return }
-        connection.send(OSCMessage("/-snap/load", .int(Int32(slot))))
+        connection.send(OSCMessage("\(snapshotPrefix)/load", .int(Int32(slot))))
         currentSnapshot = slot
         // The mixer pushes the new values; read them again to be sure the screen matches.
         Task {
@@ -581,14 +618,35 @@ final class Mixer {
         }
     }
 
-    /// Stores the current state of the mixer in a snapshot slot, with a name.
+    /// Stores the current state of the mixer in a snapshot slot. The name (31 characters at most) goes through the
+    /// mixer's temporary buffer first, then `save` writes it.
     func saveSnapshot(_ slot: Int, name: String) {
         guard (1...64).contains(slot) else { return }
-        let address = String(format: "/-snap/%02d/name", slot)
-        connection.send(OSCMessage(address, .string(name)))
-        connection.send(OSCMessage("/-snap/save", .int(Int32(slot))))
-        snapshotNames[slot - 1] = name
+        let clean = String(name.prefix(31))
+        connection.send(OSCMessage("\(snapshotPrefix)/name", .string(clean)))
+        connection.send(OSCMessage("\(snapshotPrefix)/save", .int(Int32(slot))))
+        snapshotNames[slot - 1] = clean
         currentSnapshot = slot
+    }
+
+    /// Empties a snapshot slot.
+    func deleteSnapshot(_ slot: Int) {
+        guard (1...64).contains(slot) else { return }
+        connection.send(OSCMessage("\(snapshotPrefix)/delete", .int(Int32(slot))))
+        snapshotNames[slot - 1] = ""
+        if currentSnapshot == slot { currentSnapshot = nil }
+    }
+
+    // MARK: - Returns in use
+
+    /// A return (bus 1-6) looks in use when its master is up and not muted, and it has its own name or colour or at
+    /// least one channel sends to it. The mixer has no "active" flag, so this is read from its own settings.
+    func isReturnActive(_ number: Int) -> Bool {
+        guard (1...6).contains(number) else { return false }
+        let bus = buses[number - 1]
+        let send = LevelControl.send(number - 1)
+        let hasSends = inputs.contains { $0.hasControl(send) && $0.level(send) > 0.02 }
+        return bus.isOn && bus.fader > 0.02 && (bus.isNamed || hasSends)
     }
 
     // MARK: - DCA groups

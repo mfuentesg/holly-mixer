@@ -109,9 +109,9 @@ final class DemoTransport: MixerTransport {
             values["\(base)/on"] = .int(1)
         }
         for (slot, name) in ["Domingo AM", "Domingo PM", "Jóvenes", "Ensayo", "Pasos de sonido"].enumerated() {
-            values[String(format: "/-snap/%02d/name", slot + 1)] = .string(name)
+            values[String(format: "/snap/%02d/name", slot + 1)] = .string(name)
         }
-        values["/-snap/index"] = .int(1)
+        values["/snap/index"] = .int(1)
         for (index, channel) in channels.enumerated() {
             let base = String(format: "/ch/%02d", index + 1)
             strip(base, name: channel.name, color: channel.color, db: channel.db, isOn: channel.isOn, sends: 10)
@@ -183,6 +183,19 @@ final class DemoTransport: MixerTransport {
             appendLittleEndian(UInt16(bitPattern: raw), to: &bytes)
         }
         onMessage?(OSCMessage("/meters/1", .blob(bytes)))
+
+        // `/meters/6`: gate and compressor gain reduction (negative dB): 16 + 16 + 6 + 1 values.
+        var reductions = [Float](repeating: 0, count: 39)
+        for (index, channel) in Self.channels.enumerated() {
+            if channel.gate { reductions[index] = -max(0, Self.animated(-8, time: time, seed: index) + 8) * 1.2 }
+            if channel.compressor { reductions[16 + index] = -max(0, Self.animated(-4, time: time, seed: index + 5) + 8) * 0.9 }
+        }
+        var dyn = [UInt8]()
+        appendLittleEndian(UInt32(reductions.count), to: &dyn)
+        for value in reductions {
+            appendLittleEndian(UInt16(bitPattern: Int16(max(min(value, 0), -60) * 256)), to: &dyn)
+        }
+        onMessage?(OSCMessage("/meters/6", .blob(dyn)))
     }
 
     /// Phrase-like movement around a base level: a slow swell plus a little flutter.

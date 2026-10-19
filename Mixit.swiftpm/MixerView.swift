@@ -251,15 +251,17 @@ struct MoreMenu: View {
             } label: {
                 Label("Order of service", systemImage: "list.bullet.rectangle")
             }
-            Button {
-                mixer.presentedScreen = .serviceMode
-            } label: {
-                Label("Start Service Mode", systemImage: "lock")
-            }
-            Button {
-                mixer.presentedScreen = .serviceEditor
-            } label: {
-                Label("Edit Service Mode", systemImage: "slider.horizontal.3")
+            if FeatureFlags.serviceMode {
+                Button {
+                    mixer.presentedScreen = .serviceMode
+                } label: {
+                    Label("Start Service Mode", systemImage: "lock")
+                }
+                Button {
+                    mixer.presentedScreen = .serviceEditor
+                } label: {
+                    Label("Edit Service Mode", systemImage: "slider.horizontal.3")
+                }
             }
             Button {
                 mixer.presentedScreen = .monitorPairing
@@ -338,14 +340,13 @@ struct UndoButton: View {
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
                 .overlay(alignment: .topTrailing) {
+                    // A dot says "something was changed and can be undone"; the list shows how much.
                     if count > 0 {
-                        Text("\(count)")
-                            .font(Theme.mono(10, .heavy))
-                            .foregroundStyle(Theme.onAccent)
-                            .padding(.horizontal, 4)
-                            .frame(minWidth: 18, minHeight: 18)
-                            .background(Theme.accent, in: Capsule())
-                            .offset(x: 5, y: -5)
+                        Circle()
+                            .fill(Theme.accent)
+                            .frame(width: 10, height: 10)
+                            .overlay(Circle().stroke(Theme.background, lineWidth: 2))
+                            .offset(x: 3, y: -3)
                     }
                 }
         } primaryAction: {

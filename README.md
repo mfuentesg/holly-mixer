@@ -14,7 +14,7 @@ Everything in the Mixit design canvas:
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
 - **Order of service:** scenes captured by the app, grouped Pre-service → Post, recall preview showing
   every change, live-signal warning, hold to recall, optional 2 s fade, recall safes, undo recall
-- **Service Mode:** locked volunteer layout with big faders and min/max limits, PIN to exit, and an editor
+- **Service Mode:** (hidden for now, see below)
 - **iPhone:** portrait mixer with horizontal faders; musician "My mix" mode paired by QR code from the iPad
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer
 - **Settings backup:** Mixit saves every level, mute, name, EQ, gate and dynamics value on the device a few
@@ -26,7 +26,8 @@ Everything in the Mixit design canvas:
 - **DCA groups:** the four DCAs as faders (iPad bank "DCA", iPhone bank "DCA") and DCA membership per channel
   (channel page, Config tab)
 - **Mixer snapshots:** list, load and save the mixer's own 64 snapshot slots (commands to be verified on a real mixer)
-- **Service Mode footer:** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
+- **Service Mode** (hidden in this version, `FeatureFlags.serviceMode`): the locked volunteer layout, its editor and the PIN to leave it. Its NOW → NEXT footer and "Call sound lead" button come with it
+- **Service Mode footer (hidden with Service Mode):** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
 - **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be
   changed with the globe button on the Connect screen or in the `…` menu. Texts live in
   `Mixit.swiftpm/es.lproj/Localizable.strings` (English text = key)

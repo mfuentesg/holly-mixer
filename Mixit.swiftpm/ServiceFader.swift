@@ -35,8 +35,23 @@ struct ServiceFader: View {
                     .position(x: trackX, y: y(value, travel: travel))
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
-            .contentShape(Rectangle())
-            .gesture(drag(travel: travel))
+            // Only vertical drags move the fader, so a horizontal swipe over it still scrolls the page.
+            .overlay(
+                VerticalPanArea(
+                    onBegan: {
+                        dragStartValue = value
+                        onTouchingChanged(true)
+                    },
+                    onChanged: { translation in
+                        let delta = Float(-translation / travel)
+                        onChange(clamp((dragStartValue ?? value) + delta))
+                    },
+                    onEnded: {
+                        dragStartValue = nil
+                        onTouchingChanged(false)
+                    }
+                )
+            )
         }
         .frame(minHeight: isShort ? 70 : 200)
         .accessibilityElement()
@@ -60,21 +75,6 @@ struct ServiceFader: View {
         capSize.height / 2 + CGFloat(1 - min(max(position, 0), 1)) * travel
     }
 
-    private func drag(travel: CGFloat) -> some Gesture {
-        DragGesture(minimumDistance: 0)
-            .onChanged { gesture in
-                if dragStartValue == nil {
-                    dragStartValue = value
-                    onTouchingChanged(true)
-                }
-                let delta = Float(-gesture.translation.height / travel)
-                onChange(clamp((dragStartValue ?? value) + delta))
-            }
-            .onEnded { _ in
-                dragStartValue = nil
-                onTouchingChanged(false)
-            }
-    }
 
     private func track(travel: CGFloat, trackX: CGFloat) -> some View {
         let top = y(upper, travel: travel)
@@ -139,5 +139,58 @@ struct ServiceFader: View {
 
     private var grip: some View {
         Rectangle().fill(Color.white.opacity(0.26)).frame(width: 48, height: 1)
+    }
+}
+
+/// A pan recognizer that only starts for mostly vertical movement. A horizontal swipe fails here and goes to the
+/// scroll view behind it, which a plain SwiftUI `DragGesture` would block.
+struct VerticalPanArea: UIViewRepresentable {
+    var onBegan: () -> Void
+    var onChanged: (CGFloat) -> Void
+    var onEnded: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handle(_:)))
+        pan.delegate = context.coordinator
+        pan.maximumNumberOfTouches = 1
+        view.addGestureRecognizer(pan)
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        context.coordinator.parent = self
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var parent: VerticalPanArea
+
+        init(_ parent: VerticalPanArea) {
+            self.parent = parent
+        }
+
+        @objc func handle(_ pan: UIPanGestureRecognizer) {
+            switch pan.state {
+            case .began:
+                // Count movement from here, so the fader doesn't jump by the distance used to recognise the drag.
+                pan.setTranslation(.zero, in: pan.view)
+                parent.onBegan()
+            case .changed:
+                parent.onChanged(pan.translation(in: pan.view).y)
+            case .ended, .cancelled, .failed:
+                parent.onEnded()
+            default:
+                break
+            }
+        }
+
+        func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
+            guard let pan = recognizer as? UIPanGestureRecognizer else { return true }
+            let velocity = pan.velocity(in: pan.view)
+            return abs(velocity.y) > abs(velocity.x)
+        }
     }
 }

@@ -20,7 +20,7 @@ Automatic restore with countdown, safety copies before risky actions, DCA groups
 7. **DCA groups** (`/dca/1..4`) and channel-to-DCA/mute-group assignment (`/ch/NN/grp`): see the X-AIR-Edit gap analysis.
 8. **Copy and paste channel settings** (EQ, gate, dynamics) between channels, and channel presets
    ("Male vocal", "Acoustic guitar") that can be applied from the channel page.
-9. **RTA / spectrum view** under the EQ (needs hardware: the XR18 sends RTA data through `/meters/15`).
+9. **RTA / spectrum view** under the EQ: `/meters/4` returns 100 RTA bins (official protocol document). Also DCA meters (`/meters/8`) and recorder meters (`/meters/9`).
 10. **FX page**: the 4 FX slots with type and parameters, and their returns.
 11. **Routing and USB**: input source, USB return and bus-to-main assignments.
 12. **Talkback / monitor and headphones level** from the iPad.

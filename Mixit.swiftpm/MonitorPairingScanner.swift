@@ -10,15 +10,25 @@ struct MonitorPairing: Codable, Equatable {
     let bus: Int
     /// The musician's own input channel, 1-16.
     let me: Int
+    /// How this iPhone may change its return: nil or "locked", "pin" or "free". The mixer has no user accounts, so
+    /// this lives in the app only.
+    var lock: String?
 
     static let storageKey = "monitorPairing"
 
-    init?(host: String, bus: Int, me: Int) {
+    init?(host: String, bus: Int, me: Int, lock: String? = nil) {
         let trimmed = host.trimmingCharacters(in: .whitespacesAndNewlines)
         guard Self.isValidHost(trimmed), (1...6).contains(bus), (1...16).contains(me) else { return nil }
         self.host = trimmed
         self.bus = bus
         self.me = me
+        self.lock = ["pin", "free"].contains(lock ?? "") ? lock : nil
+    }
+
+    /// How this iPhone may change its return. A "pin" code scanned while Service Mode is off counts as locked.
+    var switching: MonitorSwitching {
+        let mode = MonitorSwitching(rawValue: lock ?? "") ?? .locked
+        return MonitorSwitching.available.contains(mode) ? mode : .locked
     }
 
     /// Parses `mixit://monitor?host=<host>&bus=<n>&me=<n>`; nil for anything else.
@@ -31,7 +41,7 @@ struct MonitorPairing: Codable, Equatable {
         func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
         guard let host = value("host"), let bus = value("bus").flatMap({ Int($0) }),
               let me = value("me").flatMap({ Int($0) }) else { return nil }
-        self.init(host: host, bus: bus, me: me)
+        self.init(host: host, bus: bus, me: me, lock: value("lock"))
     }
 
     private static func isValidHost(_ host: String) -> Bool {
@@ -49,7 +59,7 @@ struct MonitorPairing: Codable, Equatable {
             URLQueryItem(name: "host", value: host),
             URLQueryItem(name: "bus", value: String(bus)),
             URLQueryItem(name: "me", value: String(me)),
-        ]
+        ] + (lock.map { [URLQueryItem(name: "lock", value: $0)] } ?? [])
         return components.string ?? "mixit://monitor?host=\(host)&bus=\(bus)&me=\(me)"
     }
 
@@ -63,7 +73,32 @@ struct MonitorPairing: Codable, Equatable {
     static func decode(_ json: String) -> MonitorPairing? {
         guard let data = json.data(using: .utf8), !data.isEmpty,
               let stored = try? JSONDecoder().decode(MonitorPairing.self, from: data) else { return nil }
-        return MonitorPairing(host: stored.host, bus: stored.bus, me: stored.me)
+        return MonitorPairing(host: stored.host, bus: stored.bus, me: stored.me, lock: stored.lock)
+    }
+}
+
+/// Whether and how an iPhone in musician mode may change which return (bus) it controls.
+enum MonitorSwitching: String, CaseIterable, Identifiable {
+    /// Fixed to one bus; leaving needs a long press (and re-pairing to change).
+    case locked
+    /// Changing needs the Service Mode PIN.
+    case pin
+    /// Changing is one tap, for the sound lead.
+    case free
+
+    var id: String { rawValue }
+
+    /// The options to offer: the PIN one needs Service Mode's PIN, which is off in this version.
+    static var available: [MonitorSwitching] {
+        allCases.filter { $0 != .pin || FeatureFlags.serviceMode }
+    }
+
+    var title: String {
+        switch self {
+        case .locked: return L("Locked")
+        case .pin: return L("With PIN")
+        case .free: return L("Free")
+        }
     }
 }
 
@@ -75,6 +110,7 @@ struct MonitorPairingScannerSheet: View {
     @State private var hostText = ""
     @State private var bus = 1
     @State private var me = 1
+    @State private var lock = MonitorSwitching.locked
     @State private var message: String?
     @State private var showsManualEntry = !QRScannerView.isAvailable
 
@@ -163,6 +199,10 @@ struct MonitorPairingScannerSheet: View {
                     .frame(minHeight: 44)
                 Stepper("My channel \(me)", value: $me, in: 1...16)
                     .frame(minHeight: 44)
+                Picker("Changing return", selection: $lock) {
+                    ForEach(MonitorSwitching.available) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
                 Button {
                     join()
                 } label: {
@@ -181,7 +221,7 @@ struct MonitorPairingScannerSheet: View {
     }
 
     private func join() {
-        if let pairing = MonitorPairing(host: hostText, bus: bus, me: me) {
+        if let pairing = MonitorPairing(host: hostText, bus: bus, me: me, lock: lock == .locked ? nil : lock.rawValue) {
             onPair(pairing)
         } else {
             message = "Enter the mixer's address, like 192.168.1.2."

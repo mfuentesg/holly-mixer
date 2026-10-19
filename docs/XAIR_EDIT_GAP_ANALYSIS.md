@@ -49,6 +49,13 @@ meters (bank 1); scenes stored in the app; settings backup and restore.
 9. **RTA (`/-stat/rta`, `/-prefs/rta`)** and meter banks other than bank 1.
 10. **Mixer preferences (`/-prefs`)**: the mixer's name and its network settings.
 
+## Update from the official protocol document
+
+`docs/XAIR_PROTOCOL_NOTES.md` summarises the manufacturer's X AIR Remote Control Protocol (fw 1.11+). It confirms
+that the mixer holds the DCA and snapshot parameters above and adds details (snapshot commands, meter banks). It also
+says that a separate "Parameters.txt" lists every OSC path and range; with it most of the items above become
+mechanical to implement.
+
 ## How to confirm
 
 - Open the official app against the demo or a real XR18 and compare the page list with the families above.

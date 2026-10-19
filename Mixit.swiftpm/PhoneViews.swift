@@ -12,7 +12,7 @@ struct PhoneRootView: View {
 
     var body: some View {
         if let pairing = MonitorPairing.decode(pairingJSON) {
-            PhoneMonitorView(pairing: pairing) { pairingJSON = "" }
+            PhoneMonitorView(pairing: pairing, onSwitch: { pairingJSON = $0.json }) { pairingJSON = "" }
         } else if verticalSizeClass == .compact {
             MixerView()
         } else {
@@ -38,9 +38,11 @@ struct MonitorPairingView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var bus = 1
     @State private var me = 1
+    @State private var lock = MonitorSwitching.locked
 
     private var pairing: MonitorPairing? {
-        MonitorPairing(host: mixer.isDemo ? "demo" : mixer.host, bus: bus, me: me)
+        MonitorPairing(host: mixer.isDemo ? "demo" : mixer.host, bus: bus, me: me,
+                       lock: lock == .locked ? nil : lock.rawValue)
     }
 
     var body: some View {
@@ -78,6 +80,17 @@ struct MonitorPairingView: View {
                         busChip(number)
                     }
                 }
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                Text("CHANGING RETURN").sectionLabelStyle()
+                Picker("Changing return", selection: $lock) {
+                    ForEach(MonitorSwitching.available) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text("The mixer has no user accounts, so this limit lives in Mixit only. Locked: the musician can't change return. Free: one tap, for the sound lead.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             VStack(alignment: .leading, spacing: 10) {
                 Text("ME (THE MUSICIAN'S OWN CHANNEL)").sectionLabelStyle()

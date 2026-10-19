@@ -6,10 +6,13 @@ struct PhoneMonitorView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     let pairing: MonitorPairing
+    var onSwitch: (MonitorPairing) -> Void = { _ in }
     var onExit: () -> Void
 
     @State private var showsAllInputs = false
     @State private var confirmsExit = false
+    @State private var asksPIN = false
+    @State private var picksReturn = false
 
     private var busMaster: Strip { mixer.master(for: .bus(pairing.bus)) }
     private var sendControl: LevelControl { .send(pairing.bus - 1) }
@@ -56,6 +59,21 @@ struct PhoneMonitorView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .foregroundStyle(Theme.textPrimary)
+        .sheet(isPresented: $asksPIN) {
+            ServicePINSheet(store: ServiceLayoutStore.shared) {
+                asksPIN = false
+                picksReturn = true
+            }
+            .presentationDetents([.large])
+        }
+        .sheet(isPresented: $picksReturn) {
+            ReturnPickerSheet(pairing: pairing) { newPairing in
+                picksReturn = false
+                onSwitch(newPairing)
+            }
+            .environment(mixer)
+            .presentationDetents([.medium, .large])
+        }
         .confirmationDialog("Leave musician mode?", isPresented: $confirmsExit, titleVisibility: .visible) {
             Button("Exit musician mode", role: .destructive, action: onExit)
             Button("Cancel", role: .cancel) {}
@@ -71,14 +89,29 @@ struct PhoneMonitorView: View {
             HStack(spacing: 8) {
                 Text("MY MIX").sectionLabelStyle()
                 Spacer()
-                Label("Bus \(pairing.bus) only", systemImage: "lock.fill")
-                    .labelStyle(.titleAndIcon)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.horizontal, 10)
-                    .frame(height: 26)
-                    .background(Theme.card, in: Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                if pairing.switching == .locked {
+                    Label("Bus \(pairing.bus) only", systemImage: "lock.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 10)
+                        .frame(height: 26)
+                        .background(Theme.card, in: Capsule())
+                        .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+                } else {
+                    Button {
+                        if pairing.switching == .pin { asksPIN = true } else { picksReturn = true }
+                    } label: {
+                        Label("Return", systemImage: pairing.switching == .pin ? "lock.open" : "arrow.left.arrow.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Theme.accentText)
+                            .padding(.horizontal, 12)
+                            .frame(height: 36)
+                            .background(Theme.accent.opacity(0.14), in: Capsule())
+                            .overlay(Capsule().stroke(Theme.accent.opacity(0.45), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
                 HoldToExitButton { confirmsExit = true }
             }
             HStack(spacing: 10) {
@@ -239,5 +272,69 @@ struct HoldToExitButton: View {
             .accessibilityHint("Touch and hold for two seconds")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction(.default, onConfirm)
+    }
+}
+
+/// The six returns (buses), with the ones that look in use first. A return counts as active when it has a name or
+/// a colour of its own, or someone sends to it, and its master is up and not muted.
+struct ReturnPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(Mixer.self) private var mixer
+    let pairing: MonitorPairing
+    var onPick: (MonitorPairing) -> Void
+
+    @State private var showsUnused = false
+
+    private var numbers: [Int] {
+        let all = Array(1...6)
+        let visible = all.filter { showsUnused || mixer.isReturnActive($0) || $0 == pairing.bus }
+        return visible.sorted { (mixer.isReturnActive($0) ? 0 : 1, $0) < (mixer.isReturnActive($1) ? 0 : 1, $1) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(numbers, id: \.self) { number in
+                        let master = mixer.master(for: .bus(number))
+                        Button {
+                            if let next = MonitorPairing(host: pairing.host, bus: number, me: pairing.me, lock: pairing.lock) {
+                                onPick(next)
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                RoundedRectangle(cornerRadius: 2).fill(master.color).frame(width: 4, height: 28)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(master.displayName).font(Theme.rounded(17))
+                                    Text(mixer.isReturnActive(number) ? L("In use") : L("Unused"))
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(mixer.isReturnActive(number) ? Theme.greenText : Theme.textTertiary)
+                                }
+                                Spacer()
+                                Text("Bus \(number)").font(Theme.mono(12, .regular)).foregroundStyle(Theme.textTertiary)
+                                if number == pairing.bus {
+                                    Image(systemName: "checkmark").foregroundStyle(Theme.accentText)
+                                }
+                            }
+                            .frame(minHeight: 48)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(Theme.card)
+                    }
+                } footer: {
+                    Text("Only the return changes. Your own channel stays the same.")
+                }
+                Section {
+                    Toggle("Show unused returns", isOn: $showsUnused)
+                        .listRowBackground(Theme.card)
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Theme.background)
+            .navigationTitle("Change return")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+        }
+        .preferredColorScheme(.dark)
     }
 }

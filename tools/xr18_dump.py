@@ -233,9 +233,13 @@ def known_addresses(snapshots: bool = False) -> list:
     add("/info")
     add("/status")
     if snapshots:
-        add("/-snap/index")
-        for number in range(1, 65):
-            add(f"/-snap/{number:02d}/name")
+        # Official protocol document: /snap/...; the official app's binary also holds "/-snap", so ask for both.
+        for prefix in ("/snap", "/-snap"):
+            add(f"{prefix}/index")
+            add(f"{prefix}/name")
+            for number in range(1, 65):
+                add(f"{prefix}/{number:02d}/name")
+                add(f"{prefix}/{number:02d}/scope")
     return out
 
 

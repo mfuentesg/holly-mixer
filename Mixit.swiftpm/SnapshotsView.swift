@@ -9,6 +9,7 @@ struct SnapshotsView: View {
 
     @State private var loading: Int?
     @State private var saving: Int?
+    @State private var deleting: Int?
     @State private var saveName = ""
 
     var body: some View {
@@ -33,7 +34,7 @@ struct SnapshotsView: View {
                             .listRowBackground(Theme.card)
                     }
                 } footer: {
-                    Text("Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. These commands follow the official app and still need to be checked on a real mixer.")
+                    Text("Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Mixit saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer.")
                 }
             }
             .scrollContentBackground(.hidden)
@@ -53,9 +54,24 @@ struct SnapshotsView: View {
         } message: {
             Text("Faders, mutes and settings can jump. Don't do this while the band is playing.")
         }
+        .confirmationDialog(deleting.map { L("Delete snapshot \($0)?") } ?? "", isPresented: Binding(
+            get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                if let slot = deleting {
+                    backups.saveSafety(reason: L("deleting snapshot \(slot)"))
+                    mixer.deleteSnapshot(slot)
+                }
+                deleting = nil
+            }
+        } message: {
+            Text("The slot becomes empty on the mixer.")
+        }
         .alert(saving.map { L("Save into slot \($0)") } ?? "", isPresented: Binding(
             get: { saving != nil }, set: { if !$0 { saving = nil } })) {
-            TextField("Name", text: $saveName)
+            TextField("Name (31 characters at most)", text: $saveName)
+                .onChange(of: saveName) { _, text in
+                    if text.count > 31 { saveName = String(text.prefix(31)) }
+                }
             Button("Save") {
                 if let slot = saving { mixer.saveSnapshot(slot, name: saveName) }
                 saving = nil
@@ -84,6 +100,18 @@ struct SnapshotsView: View {
                 }
             }
             Spacer()
+            if !name.isEmpty {
+                Button {
+                    deleting = slot
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.textMuted)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Delete snapshot \(slot)")
+            }
             Button {
                 saveName = name
                 saving = slot
