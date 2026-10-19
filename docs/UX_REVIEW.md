@@ -182,5 +182,7 @@ Snapshots behind `FeatureFlags.snapshots` (off), #21 undo toast, #23 "I'm a musi
 #26 and #27 (Config fader card only on phones, relative drag in sliders), #29 contrast (`textMuted`, `textDim`), and
 the copy fixes in (e) that applied.
 
-Not built: #22 beyond keeping iPhone landscape fitting, #25 (merging the strip chrome), #28 (EQ band fade), Dynamic
-Type in #29, #30 in-app help, and deleting the leftover scene strings (hidden Service Mode still uses some).
+Built later: #25 (G, C and pan in one row; EQ thumbnail and pan arc removed), #28 (EQ band fade) and #30 (Help page in
+Settings).
+
+Not built: #22 beyond keeping iPhone landscape fitting, Dynamic Type in #29, and deleting the leftover scene strings (hidden Service Mode still uses some).

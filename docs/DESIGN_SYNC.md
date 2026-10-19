@@ -15,6 +15,7 @@ tokens: "Graphite console", see the *System* board). The SwiftUI code is the sou
 | Musician mode: `PhoneMonitorView.swift`, `PhoneViews.swift` (pairing) | `PhoneMonitor.dc.html` |
 | Channel page: `ChannelDetail*.swift` | `Channel.dc.html` (EQ tab) · `ChannelConfig.dc.html` (Config tab: name, colour, DCA, mute groups, fader) |
 | Settings page: `SettingsHubView.swift` | `Settings.dc.html` |
+| Help: `HelpView.swift` | `Help.dc.html` |
 | Mute groups: `MuteGroupsView.swift`, footer/bottom bars | `MuteGroups.dc.html`, footer of `Main.dc.html`, bar of `PhoneMixer.dc.html` |
 | Connect: `ConnectView.swift` | `Connect.dc.html` |
 | Service Mode (hidden by `FeatureFlags.serviceMode`): `Service*.swift` | `Service.dc.html` (marked hidden in the board title) |

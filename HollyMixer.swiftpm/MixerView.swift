@@ -177,6 +177,8 @@ struct PresentedScreenView: View {
             MuteGroupsView()
         case .settings:
             SettingsHubView()
+        case .help:
+            HelpView()
         }
     }
 }

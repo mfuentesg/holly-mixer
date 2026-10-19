@@ -842,6 +842,7 @@ enum Screen: Identifiable, Hashable {
     case snapshots
     case muteGroups
     case settings
+    case help
 
     var id: Self { self }
 }

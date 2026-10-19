@@ -36,12 +36,8 @@ struct ChannelStripView: View {
                 StripEQThumbnail(strip: strip, width: isMaster ? 96 : 66)
             }
 
-            if strip.isChannel && !isCompact {
-                processingPills
-            }
-            if strip.hasPan && !isMaster && !isCompact {
-                PanArc(pan: strip.pan)
-                    .frame(width: 66, height: 28)
+            if !isCompact && !isMaster && (strip.isChannel || strip.hasPan) {
+                statusRow
             }
             if isMaster && !isCompact {
                 Text(strip.meterRight == nil ? L("MONO") : L("STEREO"))
@@ -201,6 +197,32 @@ struct ChannelStripView: View {
         case .fxSend(let number): return L("FX \(number)")
         default: return strip.shortLabel
         }
+    }
+
+    /// One slim row for what used to take three: gate and compressor pills, and the pan as a number.
+    private var statusRow: some View {
+        HStack(spacing: 3) {
+            if strip.isChannel {
+                Pill(text: "G", isOn: strip.gateOn, onColor: Theme.meterGreen, onText: Color(hex: 0x6FE597))
+                Pill(text: "C", isOn: strip.compressorOn, onColor: Theme.meterAmber, onText: Theme.amberText)
+            }
+            if strip.hasPan {
+                Text(PanArc.label(for: strip.pan))
+                    .font(Theme.mono(9, .semibold))
+                    .foregroundStyle(Theme.textTertiary)
+                    .frame(maxWidth: strip.isChannel ? 26 : .infinity)
+            }
+        }
+        .frame(height: 18)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(statusLabel)
+    }
+
+    private var statusLabel: String {
+        let processing = strip.isChannel
+            ? L("Gate \(strip.gateOn ? L("on") : L("off")), compressor \(strip.compressorOn ? L("on") : L("off")))") + ", "
+            : ""
+        return processing + (strip.hasPan ? L("Pan") + " " + PanArc.label(for: strip.pan) : "")
     }
 
     private var processingPills: some View {
@@ -376,7 +398,10 @@ struct PanArc: View {
         .accessibilityValue(label)
     }
 
-    private var label: String {
+    private var label: String { Self.label(for: pan) }
+
+    /// "C", "L39" or "R29".
+    static func label(for pan: Float) -> String {
         let amount = Int((Double(pan) * 2 - 1) * 100)
         if amount == 0 { return "C" }
         return (amount < 0 ? "L" : "R") + "\(abs(amount))"

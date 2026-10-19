@@ -58,6 +58,10 @@ struct SettingsHubView: View {
                     }
                     group(L("SAFETY"), rows: safetyRows)
                     group(L("MUSICIANS"), rows: [pairRow])
+                    group(L("HELP"), rows: [
+                        row("questionmark.circle", L("Help"),
+                            L("Why a channel is silent, mixing for a musician, mute groups and restoring settings."), .help),
+                    ])
                     VStack(alignment: .leading, spacing: 8) {
                         Text(L("LANGUAGE")).sectionLabelStyle()
                         Picker("Language", selection: Bindable(localization).language) {

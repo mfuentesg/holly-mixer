@@ -88,6 +88,13 @@ struct ChannelDetailEQTab: View {
                 }
             }
         }
+        .overlay(alignment: .trailing) {
+            // A fade at the edge says there are more bands to scroll to.
+            LinearGradient(colors: [Theme.background.opacity(0), Theme.background],
+                           startPoint: .leading, endPoint: .trailing)
+                .frame(width: 36)
+                .allowsHitTesting(false)
+        }
         .frame(height: 188)
     }
 

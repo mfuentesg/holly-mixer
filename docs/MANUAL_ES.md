@@ -131,6 +131,7 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 | | **Grupos de mute** | Elige **qué canales pertenecen a cada grupo** y **ponle nombre** (hasta 12 letras, p. ej. «Banda»; el nombre sale en el botón del pie). Arriba eliges el grupo (1–4, con su nombre y cuántos canales tiene); debajo ves todos los canales con un círculo: **toca un canal para incluirlo (contorno naranja con ✓) y vuelve a tocarlo para quitarlo**. **Quitar todos** vacía el grupo. El rojo solo marca un grupo que está silenciado ahora; para silenciarlo usa el pie. |
 | **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
 | **MÚSICOS** | **Vincular el iPhone de un músico** (iPad) / **Vincular como músico…** (iPhone) | En el iPad muestra un código QR; en el iPhone abre la cámara para escanearlo ([sección 6](#6-modo-músico-mi-mezcla)). |
+| **AYUDA** | **Ayuda** | Una guía corta con las cuatro preguntas habituales durante un servicio: por qué un canal no suena, cambiar lo que oye un músico, grupos de mute y restaurar ajustes. |
 | **IDIOMA** | Sistema / English / Español | Cambia el idioma de la app. |
 | | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión (pide confirmación; la consola sigue funcionando). Ya no hay botón de apagado en la barra superior. |
 
@@ -184,9 +185,7 @@ Cada canal es una columna. De arriba a abajo:
 |---|---|
 | **Barra de color** | El color del canal (se cambia en la página del canal). Se atenúa si el canal está en mute. |
 | **Número y nombre** | Ej. `1 · Pulpito`. **Un toque** abre la página del canal (el último canal abierto queda con borde naranja). Los canales sin nombre se ven más apagados. |
-| **Miniatura de EQ** | Dibujo pequeño de la curva de ecualización actual. |
-| **G / C** | Indicadores de **G**ate y **C**ompresor. Encendidos (verde / ámbar) = ese procesador está activo. Son solo informativos. Los dos se ven siempre. |
-| **Arco de pan** | Posición estéreo: `C` = centro, `L39` = 39 % a la izquierda, `R29` = 29 % a la derecha. Solo informativo (se edita en la consola). |
+| **G · C · pan** | Una sola fila con los indicadores de **G**ate y **C**ompresor (encendidos = verde / ámbar) y el **pan** como número: `C` = centro, `L39` = 39 % a la izquierda, `R29` = 29 % a la derecha. Solo informativo (se edita en la consola). |
 | **Fader** | Control de volumen. Ver 3.1. |
 | **Medidor LED** | Nivel de señal: verde = normal, ámbar = alto, rojo = cerca de saturar. La marca fija arriba es el **pico**. En canales estéreo hay dos columnas (L y R). |
 | **Lectura en dB** | Valor actual, ej. `-6.0`. Se pone naranja mientras mueves el fader. «−∞» = silencio total. |
@@ -346,7 +345,7 @@ La cabecera tiene:
 | **Indicador de conexión** | Igual que en el iPad. |
 | **Nombre de la mezcla ▾** (grande, ej. «Main LR») | Menú para elegir la mezcla: Main LR, Bus 1–6 (y FX 1–4 si están activados en Ajustes). Decide qué controlan los faders. |
 | **Deshacer (↶)** | Revierte el último cambio. |
-| **Ajustes (⚙)** | Abre la página de Ajustes: grupos de mute, copia de ajustes, snapshots, vincular como músico, idioma y desconectar. |
+| **Ajustes (⚙)** | Abre la página de Ajustes: grupos de mute, copia de ajustes, vincular como músico, ayuda, idioma y desconectar. |
 
 <p align="center"><img src="manual/iphone-canal.jpg" alt="Página de canal en iPhone" width="260"> <img src="manual/iphone-bus.jpg" alt="Mezcla de un bus en iPhone" width="260"></p>
 
