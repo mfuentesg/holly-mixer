@@ -190,7 +190,7 @@ final class BackupStore {
             self?.restoreProgress = done
         }
         isRestoring = false
-        notice = "Restored \(chosen.count) values to the mixer."
+        notice = L("Restored \(chosen.count) values to the mixer.")
         pending = nil
         dirty = true
     }
@@ -214,7 +214,7 @@ final class BackupStore {
         if let latest = pending?.backup { archive(latest) }
         pending = nil
         if isAutoBackupOn { writeAuto(from: mixer) }
-        notice = "Kept the mixer's current settings."
+        notice = L("Kept the mixer's current settings.")
     }
 
     // MARK: - Manual backups
@@ -228,7 +228,7 @@ final class BackupStore {
                                  values: BackupValues(mixer.liveValues))
         write(backup, file: "manual-\(backup.id.uuidString).json")
         reload()
-        notice = "Saved “\(backup.name)”."
+        notice = L("Saved “\(backup.name)”.")
         return backup
     }
 
@@ -254,7 +254,7 @@ final class BackupStore {
         let access = fileURL.startAccessingSecurityScopedResource()
         defer { if access { fileURL.stopAccessingSecurityScopedResource() } }
         guard let data = try? Data(contentsOf: fileURL), var backup = Self.decode(data) else {
-            notice = "That file isn't a Mixit backup."
+            notice = L("That file isn't a Mixit backup.")
             return
         }
         key = currentKey()
@@ -262,7 +262,7 @@ final class BackupStore {
         backup.isAuto = false
         write(backup, file: "manual-\(backup.id.uuidString).json")
         reload()
-        notice = "Imported “\(backup.name)”."
+        notice = L("Imported “\(backup.name)”.")
     }
 
     // MARK: - Automatic saving
@@ -278,7 +278,7 @@ final class BackupStore {
     private func writeAuto(from mixer: Mixer) {
         dirty = false
         key = currentKey()
-        let backup = MixerBackup(name: "Automatic backup", date: Date(), isAuto: true,
+        let backup = MixerBackup(name: L("Automatic backup"), date: Date(), isAuto: true,
                                  mixerName: mixer.mixerName, firmware: mixer.firmware,
                                  values: BackupValues(mixer.liveValues))
         write(backup, file: "auto.json")
@@ -357,7 +357,7 @@ final class BackupStore {
     }
 
     private static func defaultName() -> String {
-        "Saved " + Date().formatted(date: .abbreviated, time: .shortened)
+        L("Saved ") + Date().mixit(date: .abbreviated, time: .shortened)
     }
 }
 
@@ -397,19 +397,19 @@ extension BackupStore {
     }
 
     static func topic(of address: String) -> String {
-        if address.contains("/headamp/") || address.contains("/preamp/") { return "preamp" }
-        if address.contains("/eq/") { return "EQ" }
-        if address.contains("/gate/") { return "gate" }
-        if address.contains("/dyn/") { return "dynamics" }
-        if address.contains("/config/name") || address.contains("/config/color") || address.contains("/config/icon") { return "name & color" }
-        if address.contains("/config/") { return "config" }
-        if address.contains("/mix/on") { return "mute" }
-        if address.contains("/mix/fader") { return "fader" }
-        if address.contains("/mix/") { return "sends & pan" }
-        return "other"
+        if address.contains("/headamp/") || address.contains("/preamp/") { return L("preamp") }
+        if address.contains("/eq/") { return L("EQ") }
+        if address.contains("/gate/") { return L("gate") }
+        if address.contains("/dyn/") { return L("dynamics") }
+        if address.contains("/config/name") || address.contains("/config/color") || address.contains("/config/icon") { return L("name & color") }
+        if address.contains("/config/") { return L("config") }
+        if address.contains("/mix/on") { return L("mute") }
+        if address.contains("/mix/fader") { return L("fader") }
+        if address.contains("/mix/") { return L("sends & pan") }
+        return L("other")
     }
 
     private static func readable(_ owner: String) -> String {
-        owner == "/config" ? "Mute groups & config" : owner
+        owner == "/config" ? L("Mute groups & config") : owner
     }
 }

@@ -45,8 +45,8 @@ struct MonitorPairingView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenTopBar(title: "Pair a musician's iPhone",
-                         subtitle: "Locks the iPhone to one bus: the musician only mixes their own monitor.")
+            ScreenTopBar(title: L("Pair a musician's iPhone"),
+                         subtitle: L("Locks the iPhone to one bus: the musician only mixes their own monitor."))
             ScrollView {
                 if sizeClass == .regular {
                     HStack(alignment: .top, spacing: 32) {
@@ -93,12 +93,12 @@ struct MonitorPairingView: View {
     private func busChip(_ number: Int) -> some View {
         let master = mixer.master(for: .bus(number))
         return chip(isSelected: bus == number, color: master.color, title: master.displayName,
-                    detail: "Bus \(number)") { bus = number }
+                    detail: L("Bus \(number)")) { bus = number }
     }
 
     private func channelChip(_ strip: Strip, number: Int) -> some View {
         chip(isSelected: me == number, color: strip.color, title: strip.displayName,
-             detail: "Ch \(number)") { me = number }
+             detail: L("Ch \(number)")) { me = number }
     }
 
     private func chip(isSelected: Bool, color: Color, title: String, detail: String,

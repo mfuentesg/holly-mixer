@@ -156,7 +156,7 @@ private struct ProcessingHeader: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
-            ParamSwitch(address: onAddress, title: "On", undoLabel: undoLabel)
+            ParamSwitch(address: onAddress, title: L("On"), undoLabel: undoLabel)
                 .frame(width: 100)
         }
     }
@@ -223,27 +223,27 @@ struct ChannelDetailGateTab: View {
         let base = strip.base
         let name = "\(strip.displayName) gate"
         return VStack(alignment: .leading, spacing: 14) {
-            ProcessingHeader(title: "Gate", onAddress: XR18Params.gate(base, "on"), undoLabel: name)
-            CaptionedControl(caption: "MODE") {
+            ProcessingHeader(title: L("Gate"), onAddress: XR18Params.gate(base, "on"), undoLabel: name)
+            CaptionedControl(caption: L("MODE")) {
                 ParamMenu(address: XR18Params.gate(base, "mode"), options: XR18Params.gateModes,
-                          title: "Gate mode", undoLabel: "\(name) mode")
+                          title: L("Gate mode"), undoLabel: L("\(name) mode"))
             }
             LazyVGrid(columns: knobColumns, spacing: 12) {
-                ParamKnob(address: XR18Params.gate(base, "thr"), title: "THRESH",
+                ParamKnob(address: XR18Params.gate(base, "thr"), title: L("THRESH"),
                           range: XR18Params.gateThreshold, format: { ParamFormat.plain($0) + " dB" },
-                          undoLabel: "\(name) threshold", tint: Theme.accent, width: 76)
-                ParamKnob(address: XR18Params.gate(base, "range"), title: "RANGE",
+                          undoLabel: L("\(name) threshold"), tint: Theme.accent, width: 76)
+                ParamKnob(address: XR18Params.gate(base, "range"), title: L("RANGE"),
                           range: XR18Params.gateRange, format: { String(format: "%.0f dB", $0) },
-                          undoLabel: "\(name) range", width: 76)
-                ParamKnob(address: XR18Params.gate(base, "attack"), title: "ATTACK",
+                          undoLabel: L("\(name) range"), width: 76)
+                ParamKnob(address: XR18Params.gate(base, "attack"), title: L("ATTACK"),
                           range: XR18Params.gateAttack, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) attack", width: 76)
-                ParamKnob(address: XR18Params.gate(base, "hold"), title: "HOLD",
+                          undoLabel: L("\(name) attack"), width: 76)
+                ParamKnob(address: XR18Params.gate(base, "hold"), title: L("HOLD"),
                           range: XR18Params.gateHold, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) hold", width: 76)
-                ParamKnob(address: XR18Params.gate(base, "release"), title: "RELEASE",
+                          undoLabel: L("\(name) hold"), width: 76)
+                ParamKnob(address: XR18Params.gate(base, "release"), title: L("RELEASE"),
                           range: XR18Params.gateRelease, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) release", width: 76)
+                          undoLabel: L("\(name) release"), width: 76)
             }
         }
         .detailCard()
@@ -301,49 +301,49 @@ struct ChannelDetailDynamicsTab: View {
         let base = strip.base
         let name = "\(strip.displayName) dynamics"
         return VStack(alignment: .leading, spacing: 14) {
-            ProcessingHeader(title: "Dynamics", onAddress: XR18Params.dyn(base, "on"), undoLabel: name)
+            ProcessingHeader(title: L("Dynamics"), onAddress: XR18Params.dyn(base, "on"), undoLabel: name)
             HStack(spacing: 12) {
-                CaptionedControl(caption: "MODE") {
+                CaptionedControl(caption: L("MODE")) {
                     ParamMenu(address: XR18Params.dyn(base, "mode"), options: XR18Params.dynModes,
-                              title: "Dynamics mode", undoLabel: "\(name) mode")
+                              title: L("Dynamics mode"), undoLabel: L("\(name) mode"))
                 }
-                CaptionedControl(caption: "DETECTOR") {
+                CaptionedControl(caption: L("DETECTOR")) {
                     ParamMenu(address: XR18Params.dyn(base, "det"), options: XR18Params.detectors,
-                              title: "Detector", undoLabel: "\(name) detector")
+                              title: L("Detector"), undoLabel: L("\(name) detector"))
                 }
-                CaptionedControl(caption: "ENVELOPE") {
+                CaptionedControl(caption: L("ENVELOPE")) {
                     ParamMenu(address: XR18Params.dyn(base, "env"), options: XR18Params.envelopes,
-                              title: "Envelope", undoLabel: "\(name) envelope")
+                              title: L("Envelope"), undoLabel: L("\(name) envelope"))
                 }
-                CaptionedControl(caption: "RATIO") {
+                CaptionedControl(caption: L("RATIO")) {
                     ParamMenu(address: XR18Params.dyn(base, "ratio"), options: XR18Params.dynRatioLabels,
-                              title: "Ratio", undoLabel: "\(name) ratio")
+                              title: L("Ratio"), undoLabel: L("\(name) ratio"))
                 }
             }
             LazyVGrid(columns: knobColumns, spacing: 12) {
-                ParamKnob(address: XR18Params.dyn(base, "thr"), title: "THRESH",
+                ParamKnob(address: XR18Params.dyn(base, "thr"), title: L("THRESH"),
                           range: XR18Params.dynThreshold, format: { ParamFormat.plain($0) + " dB" },
-                          undoLabel: "\(name) threshold", tint: Theme.accent, width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "knee"), title: "KNEE",
+                          undoLabel: L("\(name) threshold"), tint: Theme.accent, width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "knee"), title: L("KNEE"),
                           range: XR18Params.dynKnee, format: { String(format: "%.1f", $0) },
-                          undoLabel: "\(name) knee", width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "mgain"), title: "MAKEUP",
+                          undoLabel: L("\(name) knee"), width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "mgain"), title: L("MAKEUP"),
                           range: XR18Params.dynMakeup, format: { ParamFormat.signed($0) + " dB" },
-                          undoLabel: "\(name) make-up gain", width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "attack"), title: "ATTACK",
+                          undoLabel: L("\(name) make-up gain"), width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "attack"), title: L("ATTACK"),
                           range: XR18Params.dynAttack, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) attack", width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "hold"), title: "HOLD",
+                          undoLabel: L("\(name) attack"), width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "hold"), title: L("HOLD"),
                           range: XR18Params.dynHold, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) hold", width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "release"), title: "RELEASE",
+                          undoLabel: L("\(name) hold"), width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "release"), title: L("RELEASE"),
                           range: XR18Params.dynRelease, format: { ParamFormat.time($0) },
-                          undoLabel: "\(name) release", width: 76)
-                ParamKnob(address: XR18Params.dyn(base, "mix"), title: "MIX",
+                          undoLabel: L("\(name) release"), width: 76)
+                ParamKnob(address: XR18Params.dyn(base, "mix"), title: L("MIX"),
                           range: XR18Params.dynMix, format: { String(format: "%.0f %%", $0) },
-                          undoLabel: "\(name) mix", width: 76)
+                          undoLabel: L("\(name) mix"), width: 76)
             }
-            ParamSwitch(address: XR18Params.dyn(base, "auto"), title: "Auto time", undoLabel: "\(name) auto time")
+            ParamSwitch(address: XR18Params.dyn(base, "auto"), title: L("Auto time"), undoLabel: L("\(name) auto time"))
         }
         .detailCard()
     }

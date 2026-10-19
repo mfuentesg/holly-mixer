@@ -9,6 +9,7 @@ import AppleProductTypes
 
 let package = Package(
     name: "Mixit",
+    defaultLocalization: "en",
     platforms: [
         .iOS("17.0")
     ],
@@ -41,7 +42,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "AppModule",
-            path: "."
+            path: ".",
+            resources: [.process("es.lproj")]
         )
     ]
 )

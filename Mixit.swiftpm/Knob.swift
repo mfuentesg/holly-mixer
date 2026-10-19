@@ -77,7 +77,7 @@ struct ParamKnob: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title.capitalized)
-        .accessibilityValue(stored == nil ? "unknown" : format(range.value(position)))
+        .accessibilityValue(stored == nil ? L("unknown") : format(range.value(position)))
         .accessibilityAdjustableAction { direction in
             let step: Float = 0.02
             commit(min(max(position + (direction == .increment ? step : -step), 0), 1))
@@ -145,7 +145,7 @@ struct ParamSwitch: View {
             if !isOn, let confirmTurnOn {
                 confirmTurnOn()
             } else {
-                mixer.set(address, .int(isOn ? 0 : 1), label: "\(undoLabel) \(isOn ? "off" : "on")")
+                mixer.set(address, .int(isOn ? 0 : 1), label: L("\(undoLabel) \(isOn ? L("off") : L("on"))"))
             }
         } label: {
             HStack(spacing: 10) {
@@ -161,7 +161,7 @@ struct ParamSwitch: View {
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: isOn)
         .accessibilityLabel(title)
-        .accessibilityValue(isOn ? "on" : "off")
+        .accessibilityValue(isOn ? L("on") : L("off"))
     }
 }
 

@@ -22,6 +22,9 @@ Everything in the Mixit design canvas:
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
 - **Service Mode footer:** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
+- **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be
+  changed with the globe button on the Connect screen or in the `…` menu. Texts live in
+  `Mixit.swiftpm/es.lproj/Localizable.strings` (English text = key)
 - App icon from the design
 
 No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the

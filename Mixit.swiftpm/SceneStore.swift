@@ -57,7 +57,7 @@ final class SceneStore {
 
     private static func showName(for mixer: Mixer) -> String {
         if mixer.isDemo { return "Demo" }
-        return mixer.mixerName.isEmpty ? "Mixer" : mixer.mixerName
+        return mixer.mixerName.isEmpty ? L("Mixer") : mixer.mixerName
     }
 
     // MARK: - Reading
@@ -123,7 +123,7 @@ final class SceneStore {
     var canUndo: Bool { undoState != nil }
 
     var lastSavedText: String {
-        show.savedAt.formatted(date: .omitted, time: .shortened)
+        show.savedAt.mixit(date: .omitted, time: .shortened)
     }
 
     // MARK: - Capture
@@ -191,8 +191,8 @@ final class SceneStore {
             let engaged = snapshot.muteGroups[safe: number - 1] ?? false
             guard mixer.muteGroups[number - 1] != engaged else { continue }
             result.changes.append(SceneChange(
-                id: "mg:\(number)", group: .mutes, name: "Mute group \(number)", color: Theme.textTertiary,
-                from: engaged ? "off" : "on", to: engaged ? "on" : "off",
+                id: "mg:\(number)", group: .mutes, name: L("Mute group \(number)"), color: Theme.textTertiary,
+                from: engaged ? L("off") : L("on"), to: engaged ? L("on") : L("off"),
                 tone: engaged ? .muted : .onAir, action: .muteGroup(number: number, isOn: engaged)))
         }
         return result
@@ -210,7 +210,7 @@ final class SceneStore {
         if strip.isOn != target.isOn {
             found.append(SceneChange(
                 id: "mute:\(strip.base)", group: .mutes, name: strip.displayName, color: strip.color,
-                from: strip.isOn ? "on air" : "MUTED", to: target.isOn ? "on air" : "MUTED",
+                from: strip.isOn ? L("on air") : L("MUTED"), to: target.isOn ? L("on air") : L("MUTED"),
                 tone: target.isOn ? .onAir : .muted, action: .mute(base: strip.base, isOn: target.isOn)))
         }
         if strip.hasPan, let pan = target.pan, Self.differs(strip.pan, pan) {
@@ -232,11 +232,11 @@ final class SceneStore {
             case .fader(let changeBase, let from, let to):
                 guard to <= 0.0005, from > 0.0005 else { continue }
                 base = changeBase
-                action = "pulls it to −∞"
+                action = L("pulls it to −∞")
             case .mute(let changeBase, let isOn):
                 guard !isOn else { continue }
                 base = changeBase
-                action = "mutes it"
+                action = L("mutes it")
             default:
                 continue
             }

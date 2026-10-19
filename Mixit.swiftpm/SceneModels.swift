@@ -82,10 +82,10 @@ enum SceneChangeGroup: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .faders: return "FADERS"
-        case .mutes: return "MUTES"
-        case .sends: return "SENDS"
-        case .pan: return "PAN"
+        case .faders: return L("FADERS")
+        case .mutes: return L("MUTES")
+        case .sends: return L("SENDS")
+        case .pan: return L("PAN")
         }
     }
 }

@@ -57,8 +57,8 @@ struct ChannelDetailEQTab: View {
 
     private var header: some View {
         HStack(spacing: 16) {
-            ParamSwitch(address: XR18Params.eqOn(strip.base), title: "EQ in",
-                        undoLabel: "\(strip.displayName) EQ")
+            ParamSwitch(address: XR18Params.eqOn(strip.base), title: L("EQ in"),
+                        undoLabel: L("\(strip.displayName) EQ"))
                 .frame(width: 130)
             Spacer()
             Button("Flatten…") { confirmFlatten = true }
@@ -95,7 +95,7 @@ struct ChannelDetailEQTab: View {
         let zero = XR18Params.eqGain.normalized(0)
         for band in 1...strip.eqBandCount {
             mixer.set(XR18Params.eq(strip.base, band: band, "g"), .float(zero),
-                      label: "\(strip.displayName) EQ flattened")
+                      label: L("\(strip.displayName) EQ flattened"))
         }
     }
 }
@@ -126,15 +126,15 @@ private struct EQBandCard: View {
                 Spacer()
             }
             ParamMenu(address: XR18Params.eq(strip.base, band: number, "type"),
-                      options: EQBandType.names, title: "Band \(number) type", undoLabel: "\(name) type")
+                      options: EQBandType.names, title: L("Band \(number) type"), undoLabel: L("\(name) type"))
             HStack(spacing: 0) {
-                ParamKnob(address: XR18Params.eq(strip.base, band: number, "f"), title: "FREQ",
+                ParamKnob(address: XR18Params.eq(strip.base, band: number, "f"), title: L("FREQ"),
                           range: XR18Params.eqFrequency, format: { ParamFormat.frequency($0) },
-                          undoLabel: "\(name) frequency", tint: tint, dialSize: 40, width: 54)
+                          undoLabel: L("\(name) frequency"), tint: tint, dialSize: 40, width: 54)
                 if band.type.hasGain {
-                    ParamKnob(address: XR18Params.eq(strip.base, band: number, "g"), title: "GAIN",
+                    ParamKnob(address: XR18Params.eq(strip.base, band: number, "g"), title: L("GAIN"),
                               range: XR18Params.eqGain, format: { ParamFormat.signed($0) },
-                              undoLabel: "\(name) gain", tint: tint, bipolar: true,
+                              undoLabel: L("\(name) gain"), tint: tint, bipolar: true,
                               resetPosition: 0.5, dialSize: 40, width: 54)
                 }
                 if band.type.hasQ {
@@ -173,12 +173,12 @@ private struct LowCutCard: View {
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
             }
-            ParamSwitch(address: XR18Params.preamp(strip.base, "hpon"), title: "On",
-                        undoLabel: "\(strip.displayName) low cut")
+            ParamSwitch(address: XR18Params.preamp(strip.base, "hpon"), title: L("On"),
+                        undoLabel: L("\(strip.displayName) low cut"))
             HStack {
-                ParamKnob(address: XR18Params.preamp(strip.base, "hpf"), title: "FREQ",
+                ParamKnob(address: XR18Params.preamp(strip.base, "hpf"), title: L("FREQ"),
                           range: XR18Params.lowCut, format: { ParamFormat.frequency($0) },
-                          undoLabel: "\(strip.displayName) low cut frequency", tint: tint,
+                          undoLabel: L("\(strip.displayName) low cut frequency"), tint: tint,
                           dialSize: 40, width: 54)
                 Spacer()
                 Text("12 dB/oct")
@@ -278,7 +278,7 @@ private struct ChannelEQGraph: View {
                            lowCutOn: Bool, lowCutHz: Float) -> [EQNode] {
         var nodes: [EQNode] = []
         if strip.hasPreamp {
-            nodes.append(EQNode(selection: .lowCut, label: "LC",
+            nodes.append(EQNode(selection: .lowCut, label: L("LC"),
                                 point: CGPoint(x: layout.x(Double(lowCutHz)), y: layout.y(-3)),
                                 isDimmed: !lowCutOn))
         }
@@ -335,11 +335,11 @@ private struct ChannelEQGraph: View {
     private func accessibilityLabel(_ node: EQSelection, bands: [EQBand]) -> String {
         switch node {
         case .lowCut:
-            return "Low cut, \(ParamFormat.frequency(EQModel.lowCutFrequency(mixer, strip))) Hz"
+            return L("Low cut, \(ParamFormat.frequency(EQModel.lowCutFrequency(mixer, strip))) Hz")
         case .band(let index):
-            guard bands.indices.contains(index) else { return "Band" }
+            guard bands.indices.contains(index) else { return L("Band") }
             let band = bands[index]
-            return "Band \(index + 1), \(ParamFormat.frequency(band.frequency)) Hz, "
+            return L("Band \(index + 1), \(ParamFormat.frequency(band.frequency)) Hz, ")
                 + "\(ParamFormat.signed(band.gain)) dB"
         }
     }
@@ -394,7 +394,7 @@ private struct ChannelEQGraph: View {
         self.drag = nil
         switch drag.selection {
         case .lowCut:
-            mixer.endEdit(XR18Params.preamp(strip.base, "hpf"), label: "\(strip.displayName) low cut moved")
+            mixer.endEdit(XR18Params.preamp(strip.base, "hpf"), label: L("\(strip.displayName) low cut moved"))
         case .band(let index):
             let number = index + 1
             let label = "\(strip.displayName) EQ \(number) moved"
@@ -410,9 +410,9 @@ private struct ChannelEQGraph: View {
         let number = index + 1
         let name = "\(strip.displayName) EQ \(number)"
         mixer.set(XR18Params.eq(strip.base, band: number, "g"), .float(XR18Params.eqGain.normalized(0)),
-                  label: "\(name) reset")
+                  label: L("\(name) reset"))
         mixer.set(XR18Params.eq(strip.base, band: number, "q"), .float(XR18Params.eqQ.normalized(1)),
-                  label: "\(name) reset")
+                  label: L("\(name) reset"))
     }
 
     /// VoiceOver adjust: gain for bands, frequency for the low cut.
@@ -422,13 +422,13 @@ private struct ChannelEQGraph: View {
             let address = XR18Params.preamp(strip.base, "hpf")
             let position = mixer.param(address).float ?? 0
             mixer.set(address, .float(min(max(position + (up ? 0.03 : -0.03), 0), 1)),
-                      label: "\(strip.displayName) low cut frequency")
+                      label: L("\(strip.displayName) low cut frequency"))
         case .band(let index):
             guard bands.indices.contains(index), bands[index].type.hasGain else { return }
             let address = XR18Params.eq(strip.base, band: index + 1, "g")
             let position = mixer.param(address).float ?? 0.5
             mixer.set(address, .float(min(max(position + (up ? 1 : -1) / 30, 0), 1)),
-                      label: "\(strip.displayName) EQ \(index + 1) gain")
+                      label: L("\(strip.displayName) EQ \(index + 1) gain"))
         }
     }
 
@@ -443,7 +443,7 @@ private struct ChannelEQGraph: View {
                     let address = XR18Params.eq(strip.base, band: index + 1, "q")
                     mixer.beginEdit(address)
                     pinch = PinchState(address: address, startQ: bands[index].q,
-                                       label: "\(strip.displayName) EQ \(index + 1) Q")
+                                       label: L("\(strip.displayName) EQ \(index + 1) Q"))
                 }
                 guard let pinch else { return }
                 let q = min(max(pinch.startQ * Float(value.magnification), 0.3), 10)

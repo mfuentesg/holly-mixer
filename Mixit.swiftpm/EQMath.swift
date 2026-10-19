@@ -8,12 +8,12 @@ enum EQBandType: Int, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
-        case .lowCut: return "Low cut"
-        case .lowShelf: return "Low shelf"
-        case .parametric: return "Peak (PEQ)"
-        case .vintage: return "Vintage (VEQ)"
-        case .highShelf: return "High shelf"
-        case .highCut: return "High cut"
+        case .lowCut: return L("Low cut")
+        case .lowShelf: return L("Low shelf")
+        case .parametric: return L("Peak (PEQ)")
+        case .vintage: return L("Vintage (VEQ)")
+        case .highShelf: return L("High shelf")
+        case .highCut: return L("High cut")
         }
     }
 

@@ -100,12 +100,12 @@ struct PhoneMonitorView: View {
             HStack {
                 Text("IN MY EARS").sectionLabelStyle()
                 Spacer()
-                Text(formatDecibels(level) + " dB")
+                Text(formatDecibels(level) + L(" dB"))
                     .font(Theme.mono(18, .bold))
             }
             PhoneHorizontalFader(
                 value: level, lineColor: busMaster.color, capSize: CGSize(width: 40, height: 32),
-                trackHeight: 6, meterStrip: busMaster, label: "\(busMaster.displayName) master",
+                trackHeight: 6, meterStrip: busMaster, label: L("\(busMaster.displayName) master"),
                 onTouchingChanged: { mixer.setTouching(busMaster, .fader, $0) },
                 onChange: { mixer.setLevel(busMaster, .fader, to: $0) }
             )
@@ -143,7 +143,7 @@ struct PhoneMonitorView: View {
             }
             PhoneHorizontalFader(
                 value: level, lineColor: busMaster.color, capSize: CGSize(width: 44, height: 40),
-                trackHeight: 6, meterStrip: strip, label: "\(strip.displayName), me, in my mix",
+                trackHeight: 6, meterStrip: strip, label: L("\(strip.displayName), me, in my mix"),
                 onTouchingChanged: { mixer.setTouching(strip, sendControl, $0) },
                 onChange: { mixer.setLevel(strip, sendControl, to: $0) }
             )
@@ -163,7 +163,7 @@ struct PhoneMonitorView: View {
             Button {
                 showsAllInputs.toggle()
             } label: {
-                Text(showsAllInputs ? "Hide unused inputs" : "Show all inputs")
+                Text(showsAllInputs ? L("Hide unused inputs") : L("Show all inputs"))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity)
@@ -190,7 +190,7 @@ struct PhoneMonitorView: View {
             }
             PhoneHorizontalFader(
                 value: level, lineColor: busMaster.color, capSize: CGSize(width: 40, height: 32),
-                meterStrip: strip, label: "\(strip.displayName) in my mix",
+                meterStrip: strip, label: L("\(strip.displayName) in my mix"),
                 onTouchingChanged: { mixer.setTouching(strip, sendControl, $0) },
                 onChange: { mixer.setLevel(strip, sendControl, to: $0) }
             )

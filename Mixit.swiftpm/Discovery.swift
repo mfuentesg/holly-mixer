@@ -193,21 +193,21 @@ final class NetworkPathInfo {
 
     var title: String {
         switch kind {
-        case .wifi: return "Wi-Fi"
-        case .ethernet: return "Ethernet"
-        case .cellular: return "Mobile data only"
-        case .other: return "Network"
-        case .none: return "Offline"
+        case .wifi: return L("Wi-Fi")
+        case .ethernet: return L("Ethernet")
+        case .cellular: return L("Mobile data only")
+        case .other: return L("Network")
+        case .none: return L("Offline")
         }
     }
 
     var hint: String {
         switch kind {
-        case .wifi: return "Connected to Wi-Fi. Use the same network as the mixer."
-        case .ethernet: return "Connected over a wired adapter."
-        case .cellular: return "Not on Wi-Fi: the mixer can't be reached over mobile data."
-        case .other: return "Connected."
-        case .none: return "No network. Join the mixer's Wi-Fi or plug in Ethernet."
+        case .wifi: return L("Connected to Wi-Fi. Use the same network as the mixer.")
+        case .ethernet: return L("Connected over a wired adapter.")
+        case .cellular: return L("Not on Wi-Fi: the mixer can't be reached over mobile data.")
+        case .other: return L("Connected.")
+        case .none: return L("No network. Join the mixer's Wi-Fi or plug in Ethernet.")
         }
     }
 

@@ -8,8 +8,8 @@ enum PhoneBank: CaseIterable, Hashable {
         switch self {
         case .first: return "1–9"
         case .second: return "10–16"
-        case .fx: return "FX"
-        case .buses: return isMain ? "Buses" : "Master"
+        case .fx: return L("FX")
+        case .buses: return isMain ? L("Buses") : L("Master")
         }
     }
 
@@ -30,6 +30,7 @@ enum PhoneBank: CaseIterable, Hashable {
 /// iPhone mixer in portrait: a list of horizontal faders for the selected mix.
 struct PhoneMixerView: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(Localization.self) private var localization
     @State private var bank = PhoneBank.first
     @State private var showScanner = false
     var onPair: (MonitorPairing) -> Void
@@ -80,7 +81,7 @@ struct PhoneMixerView: View {
             }
             Spacer(minLength: 0)
             UndoButton()
-            IconButton(systemName: "rectangle.split.1x2", accessibilityLabel: "Scenes") {
+            IconButton(systemName: "rectangle.split.1x2", accessibilityLabel: L("Scenes")) {
                 mixer.presentedScreen = .scenes
             }
             moreMenu
@@ -137,6 +138,11 @@ struct PhoneMixerView: View {
                 mixer.presentedScreen = .backups
             } label: {
                 Label("Settings backup", systemImage: "clock.arrow.circlepath")
+            }
+            Picker("Language", selection: Bindable(localization).language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
+                }
             }
             Button {
                 mixer.disconnect()
@@ -225,7 +231,7 @@ struct PhoneChannelRow: View {
                 titleLine(isMuted: isMuted, level: level)
                 PhoneHorizontalFader(
                     value: level, lineColor: busColor ?? strip.color, isMuted: isMuted, meterStrip: strip,
-                    label: "\(strip.displayName) \(control == .fader ? "fader" : "send")",
+                    label: control == .fader ? L("\(strip.displayName) fader") : L("\(strip.displayName) send"),
                     onTouchingChanged: { mixer.setTouching(strip, control, $0) },
                     onChange: { mixer.setLevel(strip, control, to: $0) }
                 )
@@ -246,12 +252,12 @@ struct PhoneChannelRow: View {
     private func buttons(isMuted: Bool) -> some View {
         HStack(spacing: 8) {
             PhoneToggleButton(title: "M", isOn: isMuted, style: .mute,
-                              accessibilityLabel: "Mute \(strip.displayName), \(isMuted ? "on" : "off")") {
+                              accessibilityLabel: L("Mute \(strip.displayName), \(isMuted ? L("on") : L("off"))")) {
                 mixer.toggleMute(strip)
             }
             if strip.soloAddress != nil {
                 PhoneToggleButton(title: "S", isOn: strip.isSoloed, style: .solo,
-                                  accessibilityLabel: "Solo \(strip.displayName), \(strip.isSoloed ? "on" : "off")") {
+                                  accessibilityLabel: L("Solo \(strip.displayName), \(strip.isSoloed ? L("on") : L("off"))")) {
                     mixer.toggleSolo(strip)
                 }
             } else {

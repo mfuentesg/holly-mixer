@@ -28,13 +28,13 @@ struct ScenesView: View {
 
     private var subtitle: String {
         let count = store.allScenes.count
-        let scenes = count == 1 ? "1 scene" : "\(count) scenes"
-        return "\(scenes) · show file “\(store.show.name)” · last saved \(store.lastSavedText)"
+        let scenes = count == 1 ? L("1 scene") : L("\(count) scenes")
+        return L("\(scenes) · show file “\(store.show.name)” · last saved \(store.lastSavedText)")
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenTopBar(title: "Order of service", subtitle: subtitle) {
+            ScreenTopBar(title: L("Order of service"), subtitle: subtitle) {
                 topBarButtons
             }
             GeometryReader { proxy in
@@ -56,7 +56,7 @@ struct ScenesView: View {
                 deleting = nil
             }
         } message: {
-            Text(deleting.map { "“\($0.name)” will be removed from the show." } ?? "")
+            Text(deleting.map { L("“\($0.name)” will be removed from the show.") } ?? "")
         }
     }
 
@@ -103,9 +103,9 @@ struct ScenesView: View {
 
     private var topBarButtons: some View {
         HStack(spacing: 10) {
-            barButton("Recall safe…") { sheet = .safe }
-            barButton("All scenes") { sheet = .all }
-            barButton("Save current…", primary: true) { sheet = .save }
+            barButton(L("Recall safe…")) { sheet = .safe }
+            barButton(L("All scenes")) { sheet = .all }
+            barButton(L("Save current…"), primary: true) { sheet = .save }
         }
     }
 
@@ -143,7 +143,7 @@ struct ScenesView: View {
             stepButton(-1)
             VStack(alignment: .leading, spacing: 2) {
                 Text("NOW").sectionLabelStyle()
-                Text(store.currentScene.map { store.label(of: $0) } ?? (store.allScenes.isEmpty ? "No scenes yet" : "No scene live"))
+                Text(store.currentScene.map { store.label(of: $0) } ?? (store.allScenes.isEmpty ? L("No scenes yet") : L("No scene live")))
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
@@ -182,7 +182,7 @@ struct ScenesView: View {
         .buttonStyle(.plain)
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.4)
-        .accessibilityLabel(forward ? "Next scene, preview before recall" : "Previous scene, preview before recall")
+        .accessibilityLabel(forward ? L("Next scene, preview before recall") : L("Previous scene, preview before recall"))
     }
 
     // MARK: Undo
@@ -195,7 +195,7 @@ struct ScenesView: View {
                     .font(.system(size: 20))
                     .foregroundStyle(Theme.meterGreen)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(store.isFading ? "Recalling \(undo.sceneLabel)…" : "Recalled \(undo.sceneLabel)")
+                    Text(store.isFading ? L("Recalling \(undo.sceneLabel)…") : L("Recalled \(undo.sceneLabel)"))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Theme.textPrimary)
                     Text("Undo is available for 10 minutes after any recall.")
@@ -265,7 +265,7 @@ struct ScenesView: View {
                     .frame(height: 2)
             }
             .frame(height: 16)
-            Text(section.title)
+            Text(LocalizedStringKey(section.title))
                 .font(.system(size: 13, weight: .bold))
                 .tracking(0.4)
                 .foregroundStyle(titleColor(state))
@@ -352,12 +352,12 @@ struct ScenesView: View {
 
     private func cardTag(_ scene: ShowScene, _ state: CardState) -> String {
         switch state {
-        case .live: return "LIVE NOW"
+        case .live: return L("LIVE NOW")
         case .previewing:
-            return store.index(of: scene.id) == store.index(of: store.nextScene?.id) ? "NEXT · PREVIEWING" : "PREVIEWING"
-        case .next: return "NEXT"
-        case .done: return "DONE"
-        case .later: return "UP NEXT"
+            return store.index(of: scene.id) == store.index(of: store.nextScene?.id) ? L("NEXT · PREVIEWING") : L("PREVIEWING")
+        case .next: return L("NEXT")
+        case .done: return L("DONE")
+        case .later: return L("UP NEXT")
         }
     }
 
@@ -428,13 +428,13 @@ struct ScenesView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 230), spacing: 8, alignment: .leading)],
                       alignment: .leading, spacing: 8) {
                 ForEach(mixer.buses.filter { isSafeBus($0) }) { bus in
-                    chip(bus.displayName, dot: bus.color, prefix: "Bus \(busNumber(bus)) · ")
+                    chip(bus.displayName, dot: bus.color, prefix: L("Bus \(busNumber(bus)) · "))
                 }
                 ForEach((mixer.inputs + [mixer.main]).filter { store.show.safes.strips.contains($0.base) }) { strip in
-                    chip(strip.displayName, dot: strip.color, prefix: "Skip · ")
+                    chip(strip.displayName, dot: strip.color, prefix: L("Skip · "))
                 }
-                chip("Preamp gain & +48V (all)")
-                chip("Routing")
+                chip(L("Preamp gain & +48V (all)"))
+                chip(L("Routing"))
             }
             Text("Musicians' in-ear mixes and phantom power never change on recall.")
                 .font(.system(size: 12))
@@ -497,9 +497,9 @@ struct HeaderSceneControl: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            arrow("chevron.left", delta: -1, label: "Previous scene, preview before recall")
+            arrow("chevron.left", delta: -1, label: L("Previous scene, preview before recall"))
             labelButton
-            arrow("chevron.right", delta: 1, label: "Next scene, preview before recall")
+            arrow("chevron.right", delta: 1, label: L("Next scene, preview before recall"))
         }
         .padding(.horizontal, 2)
         .frame(height: 48)
@@ -513,10 +513,10 @@ struct HeaderSceneControl: View {
     private var isEmpty: Bool { store.allScenes.isEmpty }
 
     private var topLine: String {
-        guard let current = store.currentScene else { return "NO SCENE LIVE" }
+        guard let current = store.currentScene else { return L("NO SCENE LIVE") }
         let number = store.number(of: current.id)
-        guard let next = store.nextScene else { return "SCENE \(number) · LAST" }
-        return "SCENE \(number) · NEXT: \(next.name.uppercased())"
+        guard let next = store.nextScene else { return L("SCENE \(number) · LAST") }
+        return L("SCENE \(number) · NEXT: \(next.name.uppercased())")
     }
 
     private var labelButton: some View {
@@ -547,7 +547,7 @@ struct HeaderSceneControl: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isEmpty ? "Scenes" : "\(topLine.capitalized), \(store.currentScene?.name ?? "none")")
+        .accessibilityLabel(isEmpty ? L("Scenes") : "\(topLine.capitalized), \(store.currentScene?.name ?? "none")")
         .accessibilityHint("Opens the order of service")
     }
 

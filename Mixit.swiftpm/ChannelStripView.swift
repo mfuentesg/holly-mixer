@@ -36,7 +36,7 @@ struct ChannelStripView: View {
                     .frame(width: 66, height: 28)
             }
             if isMaster {
-                Text(strip.meterRight == nil ? "MONO" : "STEREO")
+                Text(strip.meterRight == nil ? L("MONO") : L("STEREO"))
                     .sectionLabelStyle()
                     .frame(height: 28)
             }
@@ -70,7 +70,7 @@ struct ChannelStripView: View {
                 Button {
                     mixer.presentedScreen = .channel(strip.kind)
                 } label: {
-                    Text(strip.kind == .main ? "EQ · Dyn" : "Bus EQ · Dyn")
+                    Text(strip.kind == .main ? L("EQ · Dyn") : L("Bus EQ · Dyn"))
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Theme.textControl)
                         .frame(maxWidth: .infinity)
@@ -81,13 +81,13 @@ struct ChannelStripView: View {
                 .buttonStyle(.plain)
             }
             if strip.soloAddress != nil {
-                StripButton(title: "SOLO", isOn: strip.isSoloed, style: .solo, height: 40,
-                            accessibilityLabel: "Solo \(strip.displayName)") {
+                StripButton(title: L("SOLO"), isOn: strip.isSoloed, style: .solo, height: 40,
+                            accessibilityLabel: L("Solo \(strip.displayName)")) {
                     mixer.toggleSolo(strip)
                 }
             }
-            StripButton(title: "MUTE", isOn: muted, style: .mute, height: 44,
-                        accessibilityLabel: "Mute \(strip.displayName)") {
+            StripButton(title: L("MUTE"), isOn: muted, style: .mute, height: 44,
+                        accessibilityLabel: L("Mute \(strip.displayName)")) {
                 mixer.toggleMute(strip)
             }
         }
@@ -154,15 +154,15 @@ struct ChannelStripView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(isMaster ? "Open \(strip.displayName) processing" : "Select \(strip.displayName)")
-        .accessibilityHint(isMaster ? "" : "Tap again to open the channel")
+        .accessibilityLabel(isMaster ? L("Open \(strip.displayName) processing") : L("Select \(strip.displayName)"))
+        .accessibilityHint(isMaster ? "" : L("Tap again to open the channel"))
     }
 
     private var masterTag: String {
         switch strip.kind {
-        case .main: return "MAIN"
-        case .bus(let number): return "BUS \(number)"
-        case .fxSend(let number): return "FX \(number)"
+        case .main: return L("MAIN")
+        case .bus(let number): return L("BUS \(number)")
+        case .fxSend(let number): return L("FX \(number)")
         default: return strip.shortLabel
         }
     }
@@ -216,9 +216,9 @@ struct ChannelStripView: View {
     private var faderLabel: String {
         switch control {
         case .fader:
-            return "\(strip.displayName) fader"
+            return L("\(strip.displayName) fader")
         case .send:
-            return "\(strip.displayName) send to \(mixer.master(for: mixer.selectedMix).displayName)"
+            return L("\(strip.displayName) send to \(mixer.master(for: mixer.selectedMix).displayName)")
         }
     }
 }

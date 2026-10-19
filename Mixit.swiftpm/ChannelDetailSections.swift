@@ -46,11 +46,11 @@ struct ChannelDetailInputTab: View {
 
     private func gainCard(_ number: Int) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            CardTitle(text: "Preamp gain")
+            CardTitle(text: L("Preamp gain"))
             HStack(alignment: .center, spacing: 24) {
-                ParamKnob(address: XR18Params.headamp(number, "gain"), title: "GAIN",
+                ParamKnob(address: XR18Params.headamp(number, "gain"), title: L("GAIN"),
                           range: XR18Params.preampGain, format: { ParamFormat.signed($0) + " dB" },
-                          undoLabel: "\(strip.displayName) gain", tint: Theme.accent, bipolar: true,
+                          undoLabel: L("\(strip.displayName) gain"), tint: Theme.accent, bipolar: true,
                           dialSize: 110, width: 130)
                 VStack(spacing: 6) {
                     MeterView(level: strip.meter, peak: strip.peak)
@@ -68,7 +68,7 @@ struct ChannelDetailInputTab: View {
 
     private func phantomCard(_ number: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            CardTitle(text: "Phantom power")
+            CardTitle(text: L("Phantom power"))
             ParamSwitch(address: XR18Params.headamp(number, "phantom"), title: "+48V",
                         undoLabel: "\(strip.displayName) +48V", tint: Theme.meterRed,
                         confirmTurnOn: { confirmPhantom = true })
@@ -81,7 +81,7 @@ struct ChannelDetailInputTab: View {
                             titleVisibility: .visible) {
             Button("Turn on +48V", role: .destructive) {
                 mixer.set(XR18Params.headamp(number, "phantom"), .int(1),
-                          label: "\(strip.displayName) +48V on")
+                          label: L("\(strip.displayName) +48V on"))
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -91,22 +91,22 @@ struct ChannelDetailInputTab: View {
 
     private var polarityCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CardTitle(text: "Polarity")
-            ParamSwitch(address: XR18Params.preamp(strip.base, "invert"), title: "Invert (Ø)",
-                        undoLabel: "\(strip.displayName) polarity")
+            CardTitle(text: L("Polarity"))
+            ParamSwitch(address: XR18Params.preamp(strip.base, "invert"), title: L("Invert (Ø)"),
+                        undoLabel: L("\(strip.displayName) polarity"))
         }
         .detailCard()
     }
 
     private var lowCutCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CardTitle(text: "Low cut")
-            ParamSwitch(address: XR18Params.preamp(strip.base, "hpon"), title: "Low cut",
-                        undoLabel: "\(strip.displayName) low cut")
+            CardTitle(text: L("Low cut"))
+            ParamSwitch(address: XR18Params.preamp(strip.base, "hpon"), title: L("Low cut"),
+                        undoLabel: L("\(strip.displayName) low cut"))
             HStack {
-                ParamKnob(address: XR18Params.preamp(strip.base, "hpf"), title: "FREQ",
+                ParamKnob(address: XR18Params.preamp(strip.base, "hpf"), title: L("FREQ"),
                           range: XR18Params.lowCut, format: { ParamFormat.frequency($0) + " Hz" },
-                          undoLabel: "\(strip.displayName) low cut frequency", tint: Theme.accent,
+                          undoLabel: L("\(strip.displayName) low cut frequency"), tint: Theme.accent,
                           dialSize: 56, width: 90)
                 Spacer()
                 Text("20 to 400 Hz")
@@ -231,13 +231,13 @@ private struct SendRow: View {
                     .font(Theme.rounded(15, .bold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
-                Text(index < 6 ? "Bus \(index + 1)" : "FX send \(index - 5)")
+                Text(index < 6 ? L("Bus \(index + 1)") : L("FX send \(index - 5)"))
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textTertiary)
             }
             .frame(width: 118, alignment: .leading)
             ChannelLevelSlider(strip: strip, control: .send(index), tint: master.color,
-                               label: "Send to \(master.displayName)")
+                               label: L("Send to \(master.displayName)"))
             Text(formatDecibels(level))
                 .font(Theme.mono(13, .bold))
                 .foregroundStyle(Theme.textPrimary)
@@ -259,7 +259,7 @@ struct ChannelDetailConfigTab: View {
     @FocusState private var isFocused: Bool
 
     private static let nameLimit = 12
-    private static let colorNames = ["Grey", "Red", "Green", "Yellow", "Blue", "Magenta", "Cyan", "White"]
+    private static let colorNames = [L("Grey"), L("Red"), L("Green"), L("Yellow"), L("Blue"), L("Magenta"), L("Cyan"), L("White")]
 
     var body: some View {
         CardGrid(minimumWidth: 340) {
@@ -275,7 +275,7 @@ struct ChannelDetailConfigTab: View {
 
     private var nameCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CardTitle(text: "Name")
+            CardTitle(text: L("Name"))
             HStack {
                 TextField("Name", text: $text)
                     .focused($isFocused)
@@ -307,12 +307,12 @@ struct ChannelDetailConfigTab: View {
         let name = String(text.prefix(Self.nameLimit))
         guard name != strip.name else { return }
         mixer.set("\(strip.base)/config/name", .string(name),
-                  label: "\(strip.displayName) renamed \(name.isEmpty ? "(no name)" : name)")
+                  label: L("\(strip.displayName) renamed \(name.isEmpty ? L("(no name)") : name)"))
     }
 
     private var colorCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CardTitle(text: "Colour")
+            CardTitle(text: L("Colour"))
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 52), spacing: 10)], spacing: 10) {
                 ForEach(0..<8, id: \.self) { index in
                     swatch(index)
@@ -326,7 +326,7 @@ struct ChannelDetailConfigTab: View {
         let isSelected = strip.colorIndex % 8 == index
         return Button {
             mixer.set("\(strip.base)/config/color", .int(Int32(index)),
-                      label: "\(strip.displayName) colour \(Self.colorNames[index])")
+                      label: L("\(strip.displayName) colour \(Self.colorNames[index])"))
         } label: {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Theme.channelColors[index])
@@ -348,16 +348,16 @@ struct ChannelDetailConfigTab: View {
 
     private var faderCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CardTitle(text: "Fader")
+            CardTitle(text: L("Fader"))
             HStack(spacing: 12) {
-                ChannelLevelSlider(strip: strip, control: .fader, tint: strip.color, label: "\(strip.displayName) fader")
-                Text(formatDecibels(strip.fader) + " dB")
+                ChannelLevelSlider(strip: strip, control: .fader, tint: strip.color, label: L("\(strip.displayName) fader"))
+                Text(formatDecibels(strip.fader) + L(" dB"))
                     .font(Theme.mono(14, .bold))
                     .foregroundStyle(Theme.textPrimary)
                     .frame(width: 84, alignment: .trailing)
             }
-            StripButton(title: "MUTE", isOn: !strip.isOn, style: .mute, height: 56,
-                        accessibilityLabel: "Mute \(strip.displayName)") {
+            StripButton(title: L("MUTE"), isOn: !strip.isOn, style: .mute, height: 56,
+                        accessibilityLabel: L("Mute \(strip.displayName)")) {
                 mixer.toggleMute(strip)
             }
         }

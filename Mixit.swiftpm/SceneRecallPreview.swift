@@ -49,7 +49,7 @@ struct SceneRecallPreview: View {
         let origin = store.currentScene.map { "From \(store.label(of: $0))" } ?? "From the current mixer state"
         return (Text("\(origin) · ")
             + Text("\(diff.changes.count)").font(Theme.mono(14)).foregroundColor(Theme.textBright)
-            + Text(diff.changes.count == 1 ? " change" : " changes")
+            + Text(diff.changes.count == 1 ? L(" change") : L(" changes"))
             + Text(" · \(diff.keptSafe) kept safe"))
             .font(.system(size: 14))
             .foregroundStyle(Theme.textSecondary)
@@ -121,7 +121,7 @@ struct SceneRecallPreview: View {
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.borderStrong, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                HoldToRecallButton(label: "Recall scene \(store.label(of: scene))") {
+                HoldToRecallButton(label: L("Recall scene \(store.label(of: scene))")) {
                     store.recall(scene.id, fade: store.fadeFaders)
                 }
             }
@@ -245,7 +245,7 @@ struct HoldToRecallButton: View {
                 Theme.accent.frame(width: proxy.size.width * progress)
             }
             HStack(spacing: 10) {
-                Text(isHolding ? "Keep holding" : title)
+                Text(isHolding ? L("Keep holding") : title)
                     .font(.system(size: 16, weight: .bold))
                 Text(String(format: "%.1f s", max(0, Self.holdDuration * (1 - progress))))
                     .font(Theme.mono(13, .regular))

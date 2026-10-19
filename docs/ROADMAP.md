@@ -14,7 +14,7 @@ Ordered by value for a church sound team. Items marked (needs hardware) should b
 6. **Feedback and clipping alerts**: highlight a channel whose meter has hit 0 dBFS in the last minute.
 
 ## Mixing
-7. **Mute groups and DCA-style groups** managed in the app (the XR18 has no DCAs, so Mixit could simulate them).
+7. **DCA groups** (`/dca/1..4`) and channel-to-DCA/mute-group assignment (`/ch/NN/grp`): see the X-AIR-Edit gap analysis.
 8. **Copy and paste channel settings** (EQ, gate, dynamics) between channels, and channel presets
    ("Male vocal", "Acoustic guitar") that can be applied from the channel page.
 9. **RTA / spectrum view** under the EQ (needs hardware: the XR18 sends RTA data through `/meters/15`).
@@ -38,7 +38,6 @@ Ordered by value for a church sound team. Items marked (needs hardware) should b
 ## Platform
 20. **Landscape iPhone layout** and iPad Split View.
 21. **Haptic and VoiceOver polish**; Dynamic Type check on all pages.
-22. **Spanish localisation**, since the channel names and the team are Spanish-speaking.
 23. **Widgets / Live Activity** showing the live scene and a mute-all button (needs a full Xcode app, not Playgrounds).
 
 ## Known gaps (not possible or unverified)

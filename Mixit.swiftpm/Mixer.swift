@@ -486,10 +486,10 @@ final class Mixer {
     private func levelLabel(_ strip: Strip, _ control: LevelControl, _ value: Float) -> String {
         switch control {
         case .fader:
-            return "\(strip.displayName) fader \(formatDecibels(value)) dB"
+            return L("\(strip.displayName) fader \(formatDecibels(value)) dB")
         case .send(let index):
             let target: MixTarget = index < 6 ? .bus(index + 1) : .fxSend(index - 5)
-            return "\(strip.displayName) → \(master(for: target).displayName) \(formatDecibels(value)) dB"
+            return L("\(strip.displayName) → \(master(for: target).displayName) \(formatDecibels(value)) dB")
         }
     }
 
@@ -519,7 +519,7 @@ final class Mixer {
         record(address, .int(new ? 1 : 0))
         connection.send(OSCMessage(address, .int(new ? 1 : 0)))
         record(Change(address: address, old: .int(old ? 1 : 0), new: .int(new ? 1 : 0),
-                      label: "Mute group \(number) \(new ? "on" : "off")"))
+                      label: L("Mute group \(number) \(new ? L("on") : L("off"))")))
     }
 
     func toggleSolo(_ strip: Strip) {

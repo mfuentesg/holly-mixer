@@ -18,7 +18,7 @@ struct BackupBanner: View {
                         Text("The mixer's settings changed since your last session")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(Color(hex: 0xFFE4A0))
-                        Text("\(pending.changes.count) values differ from the backup of \(pending.backup.date.formatted(date: .abbreviated, time: .shortened)). If the mixer was switched off and on, it may have lost them.")
+                        Text("\(pending.changes.count) values differ from the backup of \(pending.backup.date.mixit(date: .abbreviated, time: .shortened)). If the mixer was switched off and on, it may have lost them.")
                             .font(.system(size: 13))
                             .foregroundStyle(Color(hex: 0xE9D7A5))
                             .fixedSize(horizontal: false, vertical: true)
@@ -63,6 +63,7 @@ struct BackupBanner: View {
 @MainActor
 struct BackupView: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.horizontalSizeClass) private var sizeClass
     private let store = BackupStore.shared
 
     @State private var saving = false
@@ -79,7 +80,7 @@ struct BackupView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenTopBar(title: "Settings backup", subtitle: subtitle) {
+            ScreenTopBar(title: sizeClass == .compact ? L("Backup") : L("Settings backup"), subtitle: subtitle) {
                 Button {
                     newName = ""
                     saving = true
@@ -141,7 +142,7 @@ struct BackupView: View {
 
     private var subtitle: String {
         if let date = store.lastAutoSave {
-            return "Last automatic save \(date.formatted(date: .omitted, time: .shortened)) · \(mixer.mixerName.isEmpty ? "mixer" : mixer.mixerName)"
+            return L("Last automatic save \(date.mixit(date: .omitted, time: .shortened)) · \(mixer.mixerName.isEmpty ? L("mixer") : mixer.mixerName)")
         }
         return mixer.fullStateReady || mixer.isDemo ? "Nothing saved yet" : "Reading the mixer…"
     }
@@ -157,7 +158,7 @@ struct BackupView: View {
     private func pendingCard(_ pending: PendingBackupDecision) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("THE MIXER LOOKS DIFFERENT").sectionLabelStyle(Theme.meterAmber)
-            Text("\(pending.changes.count) values differ from the automatic backup of \(pending.backup.date.formatted(date: .abbreviated, time: .shortened)).")
+            Text("\(pending.changes.count) values differ from the automatic backup of \(pending.backup.date.mixit(date: .abbreviated, time: .shortened)).")
                 .font(.system(size: 15))
                 .foregroundStyle(Color(hex: 0xE9D7A5))
             HStack(spacing: 10) {
@@ -232,19 +233,24 @@ struct BackupView: View {
     }
 
     private func row(_ backup: MixerBackup) -> some View {
-        HStack(spacing: 12) {
+        let compact = sizeClass == .compact
+        let title = HStack(spacing: 12) {
             Image(systemName: backup.isAuto ? "clock.arrow.circlepath" : "bookmark.fill")
                 .font(.system(size: 16))
                 .foregroundStyle(backup.isAuto ? Theme.textControl : Theme.accentText)
                 .frame(width: 40, height: 40)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 2) {
-                Text(backup.name).font(.system(size: 16, weight: .semibold))
-                Text("\(backup.date.formatted(date: .abbreviated, time: .shortened)) · \(backup.values.count) values")
+                Text(backup.isAuto ? L("Automatic backup") : backup.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(1)
+                Text("\(backup.date.mixit(date: .abbreviated, time: .shortened)) · \(backup.values.count) values")
                     .font(Theme.mono(12, .regular))
                     .foregroundStyle(Theme.textTertiary)
+                    .lineLimit(compact ? 2 : 1)
             }
-            Spacer()
+        }
+        let actions = HStack(spacing: 0) {
             if let url = store.exportURL(for: backup) {
                 ShareLink(item: url) {
                     Image(systemName: "square.and.arrow.up")
@@ -271,6 +277,8 @@ struct BackupView: View {
                 Text("Review")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Theme.textBright)
+                    .lineLimit(1)
+                    .fixedSize()
                     .padding(.horizontal, 16)
                     .frame(height: 44)
                     .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
@@ -279,7 +287,22 @@ struct BackupView: View {
             .buttonStyle(.plain)
             .disabled(!mixer.fullStateReady && !mixer.isDemo)
         }
-        .frame(minHeight: 56)
+        return Group {
+            if compact {
+                VStack(alignment: .leading, spacing: 6) {
+                    title
+                    HStack { Spacer(); actions }
+                }
+                .padding(.vertical, 8)
+            } else {
+                HStack(spacing: 12) {
+                    title
+                    Spacer()
+                    actions
+                }
+                .frame(minHeight: 56)
+            }
+        }
         .overlay(alignment: .bottom) { Rectangle().fill(Color.white.opacity(0.05)).frame(height: 1) }
     }
 }
@@ -345,7 +368,7 @@ struct BackupReviewSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(Theme.background)
-            .navigationTitle(backup.name)
+            .navigationTitle(backup.isAuto ? L("Automatic backup") : backup.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }

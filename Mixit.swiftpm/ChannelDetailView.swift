@@ -64,12 +64,12 @@ struct ChannelDetailView: View {
 
     private var subtitle: String {
         switch strip.kind {
-        case .channel(let number): return "Input \(number)"
-        case .auxIn: return "Aux input"
-        case .fxReturn(let number): return "FX return \(number)"
-        case .bus(let number): return "Bus \(number) · 6-band EQ"
-        case .fxSend(let number): return "FX send \(number)"
-        case .main: return "Main LR · 6-band EQ"
+        case .channel(let number): return L("Input \(number)")
+        case .auxIn: return L("Aux input")
+        case .fxReturn(let number): return L("FX return \(number)")
+        case .bus(let number): return L("Bus \(number) · 6-band EQ")
+        case .fxSend(let number): return L("FX send \(number)")
+        case .main: return L("Main LR · 6-band EQ")
         }
     }
 
@@ -148,7 +148,7 @@ struct ChannelDetailView: View {
         .buttonStyle(.plain)
         .disabled(!exists)
         .opacity(exists ? 1 : 0.35)
-        .accessibilityLabel(offset < 0 ? "Previous channel" : "Next channel")
+        .accessibilityLabel(offset < 0 ? L("Previous channel") : L("Next channel"))
         .accessibilityValue(neighbour?.displayName ?? "")
     }
 
@@ -157,10 +157,10 @@ struct ChannelDetailView: View {
         let phantom = mixer.param(XR18Params.headamp(number, "phantom")).bool ?? false
         let gain = mixer.realValue(XR18Params.headamp(number, "gain"), XR18Params.preampGain)
         let lowCutOn = EQModel.lowCutIsOn(mixer, strip)
-        let lowCut = lowCutOn ? "LC \(ParamFormat.frequency(EQModel.lowCutFrequency(mixer, strip))) Hz" : "LC off"
+        let lowCut = lowCutOn ? L("LC \(ParamFormat.frequency(EQModel.lowCutFrequency(mixer, strip))) Hz") : L("LC off")
         return HStack(spacing: 6) {
-            chip(phantom ? "+48V on" : "+48V off", color: phantom ? Theme.meterRed : Theme.textTertiary)
-            chip(gain.map { "Gain " + ParamFormat.signed($0) } ?? "Gain —", color: Theme.textControl)
+            chip(phantom ? L("+48V on") : L("+48V off"), color: phantom ? Theme.meterRed : Theme.textTertiary)
+            chip(gain.map { L("Gain \(ParamFormat.signed($0))") } ?? L("Gain —"), color: Theme.textControl)
             chip(lowCut, color: lowCutOn ? Theme.textBright : Theme.textTertiary)
         }
         .padding(.trailing, 4)
@@ -198,7 +198,7 @@ struct ChannelDetailView: View {
             selectedTab = tab
         } label: {
             HStack(spacing: 8) {
-                Text(tab.rawValue)
+                Text(LocalizedStringKey(tab.rawValue))
                     .font(.system(size: 14, weight: .semibold))
                 if isActive(tab) {
                     Circle().fill(Theme.meterGreen).frame(width: 6, height: 6)
@@ -243,11 +243,11 @@ private struct ChannelDetailSideFader: View {
             if strip.hasGate || strip.hasDynamics {
                 HStack(spacing: 6) {
                     if strip.hasGate {
-                        Pill(text: "GATE", isOn: mixer.param(XR18Params.gate(strip.base, "on")).bool ?? strip.gateOn,
+                        Pill(text: L("GATE"), isOn: mixer.param(XR18Params.gate(strip.base, "on")).bool ?? strip.gateOn,
                              onColor: Theme.meterGreen, onText: Theme.greenText)
                     }
                     if strip.hasDynamics {
-                        Pill(text: "DYN", isOn: mixer.param(XR18Params.dyn(strip.base, "on")).bool ?? strip.compressorOn,
+                        Pill(text: L("DYN"), isOn: mixer.param(XR18Params.dyn(strip.base, "on")).bool ?? strip.compressorOn,
                              onColor: Theme.meterAmber, onText: Theme.amberText)
                     }
                 }
@@ -259,7 +259,7 @@ private struct ChannelDetailSideFader: View {
                     capLineColor: strip.color,
                     isMuted: !strip.isOn,
                     capWidth: 44,
-                    label: "\(strip.displayName) fader",
+                    label: L("\(strip.displayName) fader"),
                     isDragging: $isDragging,
                     onTouchingChanged: { mixer.setTouching(strip, .fader, $0) },
                     onChange: { mixer.setLevel(strip, .fader, to: $0) }
@@ -268,7 +268,7 @@ private struct ChannelDetailSideFader: View {
                     .frame(width: 10)
                     .padding(.vertical, 28)
             }
-            Text(formatDecibels(strip.fader) + " dB")
+            Text(formatDecibels(strip.fader) + L(" dB"))
                 .font(Theme.mono(14, .bold))
                 .foregroundStyle(Theme.textPrimary)
                 .frame(maxWidth: .infinity)
@@ -276,13 +276,13 @@ private struct ChannelDetailSideFader: View {
                 .background(Theme.background, in: RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.08), lineWidth: 1))
             if strip.soloAddress != nil {
-                StripButton(title: "SOLO", isOn: strip.isSoloed, style: .solo, height: 44,
-                            accessibilityLabel: "Solo \(strip.displayName)") {
+                StripButton(title: L("SOLO"), isOn: strip.isSoloed, style: .solo, height: 44,
+                            accessibilityLabel: L("Solo \(strip.displayName)")) {
                     mixer.toggleSolo(strip)
                 }
             }
-            StripButton(title: "MUTE", isOn: !strip.isOn, style: .mute, height: 56,
-                        accessibilityLabel: "Mute \(strip.displayName)") {
+            StripButton(title: L("MUTE"), isOn: !strip.isOn, style: .mute, height: 56,
+                        accessibilityLabel: L("Mute \(strip.displayName)")) {
                 mixer.toggleMute(strip)
             }
         }

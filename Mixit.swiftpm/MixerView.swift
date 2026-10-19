@@ -112,7 +112,7 @@ struct MixerHeader: View {
                 Text(mixer.mixerName.isEmpty ? mixer.host : mixer.mixerName)
                     .font(Theme.mono(14))
                     .foregroundStyle(Theme.textPrimary)
-                Text("\(mixer.model) · fw \(mixer.firmware) · \(mixer.isDemo ? "demo" : mixer.host)")
+                Text(L("\(mixer.model) · fw \(mixer.firmware) · \(mixer.isDemo ? L("demo") : mixer.host)"))
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -125,7 +125,7 @@ struct MixerHeader: View {
                     mixer.clearSolo()
                 } label: {
                     HStack(spacing: 8) {
-                        Text("SOLO · \(mixer.soloedStrips.count > 1 ? "\(mixer.soloedStrips.count) channels" : soloed.displayName)")
+                        Text(L("SOLO · \(mixer.soloedStrips.count > 1 ? L("\(mixer.soloedStrips.count) channels") : soloed.displayName)"))
                             .font(.system(size: 12, weight: .bold))
                         Text("Clear")
                             .font(.system(size: 12, weight: .medium))
@@ -192,7 +192,7 @@ struct MixerHeader: View {
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.demo.opacity(0.55), lineWidth: 1))
                 .buttonStyle(.plain)
             } else {
-                IconButton(systemName: "power", accessibilityLabel: "Disconnect from mixer") {
+                IconButton(systemName: "power", accessibilityLabel: L("Disconnect from mixer")) {
                     mixer.disconnect()
                 }
             }
@@ -234,6 +234,7 @@ struct PresentedScreenView: View {
 /// Header menu for the less frequent pages.
 struct MoreMenu: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(Localization.self) private var localization
 
     var body: some View {
         Menu {
@@ -262,6 +263,11 @@ struct MoreMenu: View {
             } label: {
                 Label("Settings backup", systemImage: "clock.arrow.circlepath")
             }
+            Picker("Language", selection: Bindable(localization).language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
+                }
+            }
         } label: {
             Image(systemName: "ellipsis")
                 .font(.system(size: 17, weight: .semibold))
@@ -279,11 +285,11 @@ struct ConnectionPill: View {
 
     var body: some View {
         let (label, color, text): (String, Color, Color) = {
-            if mixer.isDemo { return ("Demo mixer", Theme.demo, Theme.demoText) }
+            if mixer.isDemo { return (L("Demo mixer"), Theme.demo, Theme.demoText) }
             if mixer.status == .connected {
-                return (mixer.latency.map { "Connected · \($0) ms" } ?? "Connected", Theme.meterGreen, Theme.greenText)
+                return (mixer.latency.map { L("Connected · \($0) ms") } ?? L("Connected"), Theme.meterGreen, Theme.greenText)
             }
-            return ("Reconnecting…", Theme.accent, Theme.accentText)
+            return (L("Reconnecting…"), Theme.accent, Theme.accentText)
         }()
         HStack(spacing: 8) {
             Circle().fill(color).frame(width: 8, height: 8)
@@ -308,7 +314,7 @@ struct UndoButton: View {
         Menu {
             Section("Recent changes") {
                 ForEach(mixer.history.suffix(8).reversed()) { change in
-                    Text("\(change.date.formatted(date: .omitted, time: .shortened)) · \(change.label)")
+                    Text("\(change.date.mixit(date: .omitted, time: .shortened)) · \(change.label)")
                 }
             }
         } label: {
@@ -488,7 +494,7 @@ struct SendsBanner: View {
                 .foregroundStyle(master.color)
             (Text("Faders are sends to ") + Text(master.displayName).foregroundColor(master.color))
                 .font(.system(size: 15, weight: .semibold))
-            Text("\(master.shortLabel.replacingOccurrences(of: "B", with: "Bus ")) · sends on faders")
+            Text(L("\(master.shortLabel.replacingOccurrences(of: "B", with: L("Bus "))) · sends on faders"))
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textSecondary)
                 .lineLimit(1)
@@ -564,7 +570,7 @@ struct MixerFooter: View {
                     Button {
                         bank = item
                     } label: {
-                        Text(item.rawValue)
+                        Text(LocalizedStringKey(item.rawValue))
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(isSelected ? .white : Theme.textSecondary)
                             .lineLimit(1)
@@ -609,7 +615,7 @@ struct MixerFooter: View {
         } label: {
             HStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 2).fill(strip.color).frame(width: 10, height: 10)
-                Text(muted ? "Unmute \(strip.displayName)" : "Mute \(strip.displayName)")
+                Text(muted ? L("Unmute \(strip.displayName)") : L("Mute \(strip.displayName)"))
             }
             .quickButtonStyle(fill: muted ? Theme.mute.opacity(0.25) : Theme.card,
                               border: Theme.mute.opacity(muted ? 0.9 : 0.55))

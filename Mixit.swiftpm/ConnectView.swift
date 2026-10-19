@@ -54,6 +54,8 @@ struct ConnectView: View {
                         .font(.system(size: 15))
                         .foregroundStyle(Theme.textSecondary)
                 }
+                Spacer(minLength: 0)
+                LanguageMenu()
             }
 
             if mixer.status != .disconnected {
@@ -71,7 +73,7 @@ struct ConnectView: View {
                             Circle()
                                 .fill(isScanning ? Theme.meterGreen : Theme.textDim)
                                 .frame(width: 7, height: 7)
-                            Text(isScanning ? "Scanning" : "Scan again")
+                            Text(isScanning ? L("Scanning") : L("Scan again"))
                         }
                         .font(.system(size: 12))
                         .foregroundStyle(Theme.textTertiary)
@@ -85,7 +87,7 @@ struct ConnectView: View {
                 divider
 
                 if found.isEmpty {
-                    Text(isScanning ? "Looking for mixers…" : "No mixer answered. Check that this device is on the same network as the mixer, or type its IP address below.")
+                    Text(isScanning ? L("Looking for mixers…") : L("No mixer answered. Check that this device is on the same network as the mixer, or type its IP address below."))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -140,7 +142,7 @@ struct ConnectView: View {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(item.name)
                                         .font(.system(size: 14, weight: .semibold))
-                                    Text("\(item.ip) · \(item.lastUsed.formatted(.relative(presentation: .named)))")
+                                    Text("\(item.ip) · \(item.lastUsed.formatted(.relative(presentation: .named).locale(ActiveLanguage.locale)))")
                                         .font(.system(size: 12))
                                         .foregroundStyle(Theme.textTertiary)
                                 }
@@ -277,7 +279,7 @@ struct ConnectView: View {
                     Text("Check my network")
                         .font(.system(size: 20, weight: .bold))
                     Spacer()
-                    Button(isChecking ? "Checking…" : check == nil ? "Run" : "Run again") {
+                    Button(isChecking ? L("Checking…") : check == nil ? L("Run") : L("Run again")) {
                         Task { await runCheck() }
                     }
                     .font(.system(size: 13, weight: .semibold))
@@ -351,17 +353,17 @@ struct ConnectView: View {
 
     @ViewBuilder
     private var checkRows: some View {
-        checkRow(ok: path.isGood, label: path.title, hint: path.hint, value: path.isGood ? "on" : "off")
+        checkRow(ok: path.isGood, label: path.title, hint: path.hint, value: path.isGood ? L("on") : L("off"))
         if let check {
-            checkRow(ok: check.isReachable, label: "Mixer reachable",
-                     hint: check.isReachable ? "\(check.host) answered on the control port" : "\(check.host) did not answer",
-                     value: check.isReachable ? "yes" : "no")
-            checkRow(ok: (check.latency ?? 999) < 20, label: "Latency", hint: "Below 20 ms feels instant",
+            checkRow(ok: check.isReachable, label: L("Mixer reachable"),
+                     hint: check.isReachable ? L("\(check.host) answered on the control port") : L("\(check.host) did not answer"),
+                     value: check.isReachable ? L("yes") : L("no"))
+            checkRow(ok: (check.latency ?? 999) < 20, label: L("Latency"), hint: L("Below 20 ms feels instant"),
                      value: check.latency.map { "\($0) ms" } ?? "—")
-            checkRow(ok: check.lossPercent < 5, label: "Packet loss", hint: "Over \(check.attempts) pings",
+            checkRow(ok: check.lossPercent < 5, label: L("Packet loss"), hint: L("Over \(check.attempts) pings"),
                      value: String(format: "%.1f %%", check.lossPercent))
         } else {
-            Text("Tests the connection to \(host.isEmpty ? "the mixer" : host): whether it answers, how fast, and how many messages get lost.")
+            Text("Tests the connection to \(host.isEmpty ? L("the mixer") : host): whether it answers, how fast, and how many messages get lost.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)

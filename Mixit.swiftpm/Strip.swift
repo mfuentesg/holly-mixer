@@ -105,12 +105,12 @@ final class Strip: Identifiable {
     var displayName: String {
         if !name.isEmpty { return name }
         switch kind {
-        case .channel(let number): return "Ch \(number)"
-        case .auxIn: return "Aux In"
-        case .fxReturn(let number): return "FX \(number) Rtn"
-        case .bus(let number): return "Bus \(number)"
-        case .fxSend(let number): return "FX \(number)"
-        case .main: return "Main LR"
+        case .channel(let number): return L("Ch \(number)")
+        case .auxIn: return L("Aux In")
+        case .fxReturn(let number): return L("FX \(number) Rtn")
+        case .bus(let number): return L("Bus \(number)")
+        case .fxSend(let number): return L("FX \(number)")
+        case .main: return L("Main LR")
         }
     }
 

@@ -30,21 +30,21 @@ struct SceneEditSheet: View {
                 Section("Section") {
                     Picker("Section", selection: $sectionID) {
                         ForEach(store.show.sections) { section in
-                            Text(section.title).tag(Optional(section.id))
+                            Text(LocalizedStringKey(section.title)).tag(Optional(section.id))
                         }
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
                 }
             }
-            .navigationTitle(sceneID == nil ? "Save current…" : "Edit scene")
+            .navigationTitle(sceneID == nil ? L("Save current…") : L("Edit scene"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(sceneID == nil ? "Save" : "Done") { save() }
+                    Button(sceneID == nil ? L("Save") : L("Done")) { save() }
                         .disabled(trimmedName.isEmpty || sectionID == nil)
                 }
             }

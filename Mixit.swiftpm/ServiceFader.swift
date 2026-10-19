@@ -15,7 +15,10 @@ struct ServiceFader: View {
     var onTouchingChanged: (Bool) -> Void
     var onChange: (Float) -> Void
 
-    private let capSize = CGSize(width: 80, height: 72)
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    /// Phone in landscape: a shorter cap and track so the dB readout and mute button stay on screen.
+    private var isShort: Bool { verticalSizeClass == .compact }
+    private var capSize: CGSize { CGSize(width: 80, height: isShort ? 44 : 72) }
     private let unity: Float = 0.75
 
     @State private var dragStartValue: Float?
@@ -35,7 +38,7 @@ struct ServiceFader: View {
             .contentShape(Rectangle())
             .gesture(drag(travel: travel))
         }
-        .frame(minHeight: 200)
+        .frame(minHeight: isShort ? 70 : 200)
         .accessibilityElement()
         .accessibilityLabel(label)
         .accessibilityValue("\(formatDecibels(value)) dB, limited between \(minText) and \(maxText)")
@@ -114,14 +117,14 @@ struct ServiceFader: View {
     }
 
     private var cap: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: isShort ? 3 : 6) {
             grip
-            grip
+            if !isShort { grip }
             RoundedRectangle(cornerRadius: 2)
                 .fill(color)
                 .frame(width: 60, height: 3)
             grip
-            grip
+            if !isShort { grip }
         }
         .frame(width: capSize.width, height: capSize.height)
         .background(

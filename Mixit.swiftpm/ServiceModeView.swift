@@ -9,6 +9,8 @@ struct ServiceModeView: View {
     /// When set (editor preview) Exit calls this directly instead of asking for the PIN.
     private let onPreviewExit: (() -> Void)?
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var showingPIN = false
     private let scenes = SceneStore.shared
 
@@ -43,15 +45,19 @@ struct ServiceModeView: View {
 
     private var header: some View {
         HStack(spacing: 14) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(Theme.accentText)
-                .frame(width: 40, height: 40)
-                .background(Theme.accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+            if horizontalSizeClass != .compact || verticalSizeClass == .compact {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Theme.accentText)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 10))
+            }
             VStack(alignment: .leading, spacing: 2) {
                 Text("Service Mode")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 Text("\(store.layout.title) · only these controls are live")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textTertiary)
@@ -80,52 +86,77 @@ struct ServiceModeView: View {
                 }
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+                .fixedSize()
                 .padding(.horizontal, 16)
                 .frame(height: 44)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.14), lineWidth: 1))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(onPreviewExit == nil ? "Exit Service Mode, PIN required" : "Close preview")
+            .accessibilityLabel(onPreviewExit == nil ? L("Exit Service Mode, PIN required") : L("Close preview"))
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, horizontalSizeClass == .compact ? 14 : 20)
         .frame(height: 72)
         .background(Theme.surface)
         .overlay(alignment: .bottom) { Rectangle().fill(Theme.border).frame(height: 1) }
     }
 
-    /// NOW → NEXT bar with a hold-to-recall button (bottom of Service.dc.html).
+    /// NOW → NEXT bar with a hold-to-recall button (bottom of Service.dc.html). On a phone in portrait the
+    /// button gets its own row; in landscape the bar is shorter.
     @ViewBuilder
     private var sceneFooter: some View {
         if let next = scenes.stepTarget(1) {
             let now = scenes.scene(scenes.show.currentSceneID)
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("NOW").sectionLabelStyle()
-                    Text(now?.name ?? "—")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(Theme.textPrimary)
-                }
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(Theme.textMuted)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(next.note.isEmpty ? "NEXT" : "NEXT · \(next.note.uppercased())")
-                        .sectionLabelStyle(Theme.accentText)
-                        .lineLimit(1)
-                    Text(next.name)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(Theme.textPrimary)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                HoldToRecallButton(label: "go to \(next.name)", title: "Hold to go to \(next.name)",
-                                   height: 64, cornerRadius: 14) {
-                    scenes.recall(next.id, fade: scenes.fadeFaders)
-                }
-                .frame(width: 300)
+            let stacked = horizontalSizeClass == .compact && verticalSizeClass != .compact
+            let short = verticalSizeClass == .compact
+            let cue = VStack(alignment: .leading, spacing: 2) {
+                Text(next.note.isEmpty ? L("NEXT") : L("NEXT · \(next.note.uppercased())"))
+                    .sectionLabelStyle(Theme.accentText)
+                    .lineLimit(1)
+                Text(next.name)
+                    .font(.system(size: short ? 17 : 20, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, 20)
-            .frame(height: 96)
+            let nowView = VStack(alignment: .leading, spacing: 2) {
+                Text("NOW").sectionLabelStyle()
+                Text(now?.name ?? "—")
+                    .font(.system(size: short ? 17 : 20, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+            }
+            let button = HoldToRecallButton(label: L("go to \(next.name)"), title: L("Hold to go to \(next.name)"),
+                                            height: short ? 48 : stacked ? 56 : 64, cornerRadius: 14) {
+                scenes.recall(next.id, fade: scenes.fadeFaders)
+            }
+            Group {
+                if stacked {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            nowView
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(Theme.textMuted)
+                            cue.frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        button
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                } else {
+                    HStack(spacing: 16) {
+                        nowView
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Theme.textMuted)
+                        cue.frame(maxWidth: .infinity, alignment: .leading)
+                        button.frame(width: short ? 260 : 300)
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(height: short ? 68 : 96)
+                }
+            }
             .background(Theme.surface)
             .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) }
         }
@@ -211,7 +242,11 @@ struct ServiceCard: Identifiable {
 @MainActor
 struct ServiceFaderCard: View {
     @Environment(Mixer.self) private var mixer
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     let card: ServiceCard
+
+    /// Phone in landscape: everything gets smaller so the mute button still fits.
+    private var isShort: Bool { verticalSizeClass == .compact }
 
     private var item: ServiceItem { card.item }
     private var strip: Strip { card.strip }
@@ -219,7 +254,7 @@ struct ServiceFaderCard: View {
     private var isMuted: Bool { !strip.isOn }
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: isShort ? 6 : 12) {
             Rectangle()
                 .fill(color)
                 .frame(height: 6)
@@ -231,12 +266,12 @@ struct ServiceFaderCard: View {
                 MeterView(level: strip.meter, peak: strip.peak)
                     .frame(width: 12)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, isShort ? 2 : 12)
             readout
             muteButton
         }
         .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .padding(.bottom, isShort ? 10 : 16)
         .background(isMuted ? Color(hex: 0x141012) : Theme.strip, in: RoundedRectangle(cornerRadius: 18))
         .overlay(
             RoundedRectangle(cornerRadius: 18)
@@ -248,14 +283,16 @@ struct ServiceFaderCard: View {
     private var titles: some View {
         VStack(spacing: 2) {
             Text(item.label)
-                .font(Theme.rounded(26, .heavy))
+                .font(Theme.rounded(isShort ? 18 : 26, .heavy))
                 .foregroundStyle(Theme.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-            Text(serviceDetail(for: strip))
-                .font(.system(size: 13))
-                .foregroundStyle(Theme.textTertiary)
-                .lineLimit(1)
+            if !isShort {
+                Text(serviceDetail(for: strip))
+                    .font(.system(size: 13))
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineLimit(1)
+            }
         }
     }
 
@@ -279,7 +316,7 @@ struct ServiceFaderCard: View {
             .font(Theme.mono(18, .bold))
             .foregroundStyle(Theme.textPrimary)
             .frame(maxWidth: .infinity)
-            .frame(height: 40)
+            .frame(height: isShort ? 30 : 40)
             .background(Theme.background, in: RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.08), lineWidth: 1))
             .accessibilityHidden(true)
@@ -291,12 +328,12 @@ struct ServiceFaderCard: View {
             Button {
                 mixer.toggleMute(strip)
             } label: {
-                Text(isMuted ? "MUTED" : "MUTE")
+                Text(isMuted ? L("MUTED") : L("MUTE"))
                     .font(.system(size: 16, weight: .heavy))
                     .tracking(1)
                     .foregroundStyle(isMuted ? Color.white : Theme.textBright)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 72)
+                    .frame(height: isShort ? 48 : 72)
                     .background(isMuted ? Theme.mute : Theme.control, in: RoundedRectangle(cornerRadius: 14))
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
@@ -306,14 +343,14 @@ struct ServiceFaderCard: View {
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(weight: .medium), trigger: isMuted)
-            .accessibilityLabel((isMuted ? "Unmute " : "Mute ") + item.label)
+            .accessibilityLabel((isMuted ? L("Unmute ") : L("Mute ")) + item.label)
         } else {
-            Text(isMuted ? "MUTED" : "FADER ONLY")
+            Text(isMuted ? L("MUTED") : L("FADER ONLY"))
                 .font(.system(size: 12, weight: .bold))
                 .tracking(1)
                 .foregroundStyle(isMuted ? Theme.mute : Theme.textDim)
                 .frame(maxWidth: .infinity)
-                .frame(height: 72)
+                .frame(height: isShort ? 48 : 72)
         }
     }
 }
@@ -322,7 +359,7 @@ struct ServiceFaderCard: View {
 @MainActor
 func serviceDetail(for strip: Strip) -> String {
     if case .channel(let number) = strip.kind {
-        return strip.name.isEmpty ? "Ch \(number)" : "\(strip.name) · ch \(number)"
+        return strip.name.isEmpty ? L("Ch \(number)") : L("\(strip.name) · ch \(number)")
     }
     return strip.displayName
 }
@@ -341,7 +378,7 @@ struct ServiceEditorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScreenTopBar(title: "Service Mode", subtitle: "Build the layout volunteers will see") {
+            ScreenTopBar(title: L("Service Mode"), subtitle: L("Build the layout volunteers will see")) {
                 startButton
             }
             List {
@@ -482,11 +519,11 @@ private struct ServiceItemRow: View {
                     .frame(minHeight: 44)
                 colorMenu
             }
-            Text(strip.map(serviceDetail(for:)) ?? "Not on this mixer")
+            Text(strip.map(serviceDetail(for:)) ?? L("Not on this mixer"))
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textTertiary)
-            limitSlider(title: "Min", value: minBinding)
-            limitSlider(title: "Max", value: maxBinding)
+            limitSlider(title: L("Min"), value: minBinding)
+            limitSlider(title: L("Max"), value: maxBinding)
             Toggle("Volunteer may mute", isOn: $item.allowMute)
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.textControl)
@@ -568,7 +605,7 @@ private struct ServicePINSection: View {
         } header: {
             Text("Exit PIN").sectionLabelStyle()
         } footer: {
-            Text(store.hasCustomPIN ? "A custom PIN is set." : "The factory PIN is still active. Set your own.")
+            Text(store.hasCustomPIN ? L("A custom PIN is set.") : L("The factory PIN is still active. Set your own."))
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textMuted)
         }

@@ -3,11 +3,16 @@ import SwiftUI
 @main
 struct MixitApp: App {
     @State private var mixer = Mixer()
+    @State private var localization = Localization.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(mixer)
+                .environment(localization)
+                .environment(\.locale, localization.locale)
+                // A language change rebuilds the screen so every text is looked up again.
+                .id(localization.language)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
         }
