@@ -1,0 +1,198 @@
+/-prefs
+/-prefs/ap
+/-prefs/is
+/-prefs/is/addr
+/-prefs/is/gateway
+/-prefs/is/mask
+/-prefs/lan
+/-prefs/lan/addr
+/-prefs/lan/gateway
+/-prefs/lan/mask
+/-prefs/name
+/-prefs/rta
+/-snap
+/-snap/N
+/-stat
+/-stat/rta
+/-stat/solosw
+/-stat/tape
+/-stat/usb
+/-stat/usb/N
+/bus/N/config
+/bus/N/dyn
+/bus/N/dyn/filter
+/bus/N/eq
+/bus/N/eq/N
+/bus/N/geq
+/bus/N/grp
+/bus/N/insert
+/bus/N/mix
+/ch/N/automix
+/ch/N/config
+/ch/N/config/rtnsrc U01
+/ch/N/config/rtnsrc U02
+/ch/N/config/rtnsrc U03
+/ch/N/config/rtnsrc U04
+/ch/N/config/rtnsrc U05
+/ch/N/config/rtnsrc U06
+/ch/N/config/rtnsrc U07
+/ch/N/config/rtnsrc U08
+/ch/N/config/rtnsrc U09
+/ch/N/config/rtnsrc U10
+/ch/N/config/rtnsrc U11
+/ch/N/config/rtnsrc U12
+/ch/N/config/rtnsrc U13
+/ch/N/config/rtnsrc U14
+/ch/N/config/rtnsrc U15
+/ch/N/config/rtnsrc U16
+/ch/N/dyn
+/ch/N/dyn/filter
+/ch/N/eq
+/ch/N/eq/N
+/ch/N/gate
+/ch/N/gate/filter
+/ch/N/grp
+/ch/N/insert
+/ch/N/mix
+/ch/N/mix/N
+/ch/N/preamp
+/ch/N/preamp/rtnsw OFF
+/ch/N/preamp/rtnsw ON
+/config/amixenable
+/config/amixlock
+/config/buslink
+/config/chlink
+/config/linkcfg
+/config/mute
+/config/solo
+/dca/N
+/dca/N/config
+/dyn/filter OFF 2.0 532.1
+/dyn/filter OFF 3.0 611.0
+/dyn/filter OFF HC12 176.2
+/dyn/filter ON 3.0 611.0
+/fx/N
+/fx/N/par
+/fxsend/N/config
+/fxsend/N/grp
+/fxsend/N/mix
+/gate/filter OFF 3.0 990.9
+/gate/filter ON 3.0 479.8
+/gate/filter ON 3.0 611.0
+/gate/filter ON HC12 101.4
+/headamp/N
+/lr/config
+/lr/dyn
+/lr/dyn/filter
+/lr/eq
+/lr/eq/N
+/lr/geq
+/lr/insert
+/lr/mix
+/meters/N
+/routing/aux/N
+/routing/main/N
+/routing/p16/N
+/routing/p16/N Bus1 IN
+/routing/p16/N Bus2 IN
+/routing/p16/N Bus3 IN
+/routing/p16/N Bus4 IN
+/routing/p16/N Bus5 IN
+/routing/p16/N Bus6 IN
+/routing/p16/N Ch01 IN
+/routing/p16/N Ch02 IN
+/routing/p16/N Ch03 IN
+/routing/p16/N Ch04 IN
+/routing/p16/N Ch05 IN
+/routing/p16/N Ch06 IN
+/routing/p16/N Ch07 IN
+/routing/p16/N Ch08 IN
+/routing/p16/N Ch09 IN
+/routing/p16/N Ch10 IN
+/routing/p16/N Ch11 IN
+/routing/p16/N Ch12 IN
+/routing/p16/N Ch13 IN
+/routing/p16/N Ch14 IN
+/routing/p16/N Ch15 IN
+/routing/p16/N Ch16 IN
+/routing/p16/N Fx1L IN
+/routing/p16/N Fx1R IN
+/routing/p16/N Fx2L IN
+/routing/p16/N Fx2R IN
+/routing/p16/N Fx3L IN
+/routing/p16/N Fx3R IN
+/routing/p16/N Fx4L IN
+/routing/p16/N Fx4R IN
+/routing/p16/N L IN
+/routing/p16/N R IN
+/routing/p16/N U01 IN
+/routing/p16/N U02 IN
+/routing/p16/N U03 IN
+/routing/p16/N U04 IN
+/routing/p16/N U05 IN
+/routing/p16/N U06 IN
+/routing/p16/N U07 IN
+/routing/p16/N U08 IN
+/routing/p16/N U09 IN
+/routing/p16/N U10 IN
+/routing/p16/N U11 IN
+/routing/p16/N U12 IN
+/routing/p16/N U13 IN
+/routing/p16/N U14 IN
+/routing/p16/N U15 IN
+/routing/p16/N U16 IN
+/routing/usb/N
+/routing/usb/N AuxL AIN
+/routing/usb/N AuxL PRE
+/routing/usb/N AuxR AIN
+/routing/usb/N AuxR PRE
+/routing/usb/N Bus1 PRE
+/routing/usb/N Bus2 PRE
+/routing/usb/N Bus3 PRE
+/routing/usb/N Bus4 PRE
+/routing/usb/N Bus5 PRE
+/routing/usb/N Bus6 PRE
+/routing/usb/N Ch01 AIN
+/routing/usb/N Ch02 AIN
+/routing/usb/N Ch03 AIN
+/routing/usb/N Ch04 AIN
+/routing/usb/N Ch05 AIN
+/routing/usb/N Ch06 AIN
+/routing/usb/N Ch07 AIN
+/routing/usb/N Ch08 AIN
+/routing/usb/N Ch09 AIN
+/routing/usb/N Ch10 AIN
+/routing/usb/N Ch11 AIN
+/routing/usb/N Ch12 AIN
+/routing/usb/N Ch13 AIN
+/routing/usb/N Ch14 AIN
+/routing/usb/N Ch15 AIN
+/routing/usb/N Ch16 AIN
+/routing/usb/N Fx1L PRE
+/routing/usb/N Fx1R PRE
+/routing/usb/N Fx2L PRE
+/routing/usb/N Fx2R PRE
+/routing/usb/N Fx3L PRE
+/routing/usb/N Fx3R PRE
+/routing/usb/N Fx4L PRE
+/routing/usb/N Fx4R PRE
+/routing/usb/N L AIN
+/routing/usb/N L PRE
+/routing/usb/N R AIN
+/routing/usb/N R PRE
+/rtn/aux/config
+/rtn/aux/config/rtnsrc U0102
+/rtn/aux/eq
+/rtn/aux/eq/N
+/rtn/aux/grp
+/rtn/aux/mix
+/rtn/aux/mix/N
+/rtn/aux/preamp
+/rtn/aux/preamp/rtnsw ON
+/rtn/N/config
+/rtn/N/eq
+/rtn/N/eq/N
+/rtn/N/grp
+/rtn/N/mix
+/rtn/N/mix/N
+/rtn/N/preamp
