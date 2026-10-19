@@ -34,7 +34,12 @@ struct ChannelDetailView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     let strip: Strip
 
-    @State private var selectedTab = ChannelDetailTab.eq
+    @State private var selectedTab: ChannelDetailTab = {
+        #if DEBUG
+        if let raw = ScreenshotMode.tab, let tab = ChannelDetailTab(rawValue: raw) { return tab }
+        #endif
+        return .eq
+    }()
 
     var body: some View {
         let tabs = ChannelDetailTab.available(for: strip)

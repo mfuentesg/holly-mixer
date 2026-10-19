@@ -22,7 +22,7 @@ struct HollyMixerApp: App {
 struct ContentView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @AppStorage("mixerHost") private var host = "192.168.1.2"
+    @AppStorage("mixerHost") private var host = ""
     @AppStorage("recentMixers") private var recentJSON = "[]"
     @State private var didAutoConnect = false
 
@@ -43,12 +43,35 @@ struct ContentView: View {
             BackupStore.shared.attach(mixer)
             guard !didAutoConnect else { return }
             didAutoConnect = true
+            #if DEBUG
+            if ScreenshotMode.name != nil {
+                await ScreenshotMode.run(mixer)
+                return
+            }
+            #endif
+            // Nothing is assumed the first time: with no saved address the connect screen scans the network.
+            guard !host.isEmpty else { return }
             mixer.connect(host: host)
+            await findMixerIfAddressChanged(saved: host)
         }
         .onChange(of: mixer.hasSession) { _, hasSession in
             guard hasSession, !mixer.isDemo else { return }
             rememberMixer()
         }
+    }
+
+    /// The church's router may hand the mixer a new address. If the saved one doesn't answer, look for the mixer on
+    /// the network and follow it when it is clearly the same one (same name as a recent mixer, or the only one found).
+    private func findMixerIfAddressChanged(saved: String) async {
+        try? await Task.sleep(for: .seconds(4))
+        guard !mixer.hasSession, !mixer.isDemo, mixer.host == saved else { return }
+        let found = await MixerDiscovery.scan()
+        guard !mixer.hasSession, !mixer.isDemo, mixer.host == saved else { return }
+        let recentNames = Set(RecentMixer.load(from: recentJSON).map(\.name))
+        let match = found.first { recentNames.contains($0.name) } ?? (found.count == 1 ? found.first : nil)
+        guard let match, match.ip != saved else { return }
+        host = match.ip
+        mixer.connect(host: match.ip)
     }
 
     /// Puts the connected mixer at the top of the recent list.

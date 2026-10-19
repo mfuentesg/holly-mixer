@@ -4,7 +4,12 @@ struct MixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-    @State private var bank = Bank.channels1to8
+    @State private var bank: Bank = {
+        #if DEBUG
+        if let raw = ScreenshotMode.bank, let bank = Bank(rawValue: raw) { return bank }
+        #endif
+        return .channels1to8
+    }()
 
     var body: some View {
         let target = mixer.selectedMix

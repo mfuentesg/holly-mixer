@@ -289,7 +289,7 @@ struct ConnectView: View {
                     .background(Theme.control, in: RoundedRectangle(cornerRadius: 9))
                     .overlay(RoundedRectangle(cornerRadius: 9).stroke(Theme.borderStrong, lineWidth: 1))
                     .buttonStyle(.plain)
-                    .disabled(isChecking || host.isEmpty)
+                    .disabled(isChecking || checkTarget.isEmpty)
                 }
                 checkRows
             }
@@ -363,7 +363,7 @@ struct ConnectView: View {
             checkRow(ok: check.lossPercent < 5, label: L("Packet loss"), hint: L("Over \(check.attempts) pings"),
                      value: String(format: "%.1f %%", check.lossPercent))
         } else {
-            Text("Tests the connection to \(host.isEmpty ? L("the mixer") : host): whether it answers, how fast, and how many messages get lost.")
+            Text("Tests the connection to \(checkTarget.isEmpty ? L("the mixer") : checkTarget): whether it answers, how fast, and how many messages get lost.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -412,8 +412,14 @@ struct ConnectView: View {
         isScanning = false
     }
 
+    /// The typed address, or else the mixer found by the scan, so the check never tests an address nobody chose.
+    private var checkTarget: String {
+        let typed = host.trimmingCharacters(in: .whitespaces)
+        return typed.isEmpty ? (found.first?.ip ?? "") : typed
+    }
+
     private func runCheck() async {
-        let target = host.trimmingCharacters(in: .whitespaces)
+        let target = checkTarget
         guard !target.isEmpty else { return }
         isChecking = true
         check = await MixerDiscovery.check(host: target)

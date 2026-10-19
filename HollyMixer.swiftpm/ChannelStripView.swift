@@ -53,7 +53,7 @@ struct ChannelStripView: View {
                     lineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textDim),
                     capLineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textTertiary),
                     isMuted: muted,
-                    capWidth: isMaster ? 44 : 38,
+                    capWidth: isMaster ? 44 : strip.meterRight == nil ? 38 : 32,
                     label: faderLabel,
                     isCompact: isCompact,
                     isDragging: $isDragging,
@@ -200,9 +200,10 @@ struct ChannelStripView: View {
     @ViewBuilder
     private var meters: some View {
         if let right = strip.meterRight {
-            HStack(spacing: 3) {
-                MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)
-                MeterView(level: right, peak: strip.peak).frame(width: 7)
+            // Narrower pair so the fader cap stays clear of the meters on a 78 pt strip.
+            HStack(spacing: 2) {
+                MeterView(level: strip.meter, peak: strip.peak).frame(width: isMaster ? 7 : 5)
+                MeterView(level: right, peak: strip.peak).frame(width: isMaster ? 7 : 5)
             }
         } else {
             MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)

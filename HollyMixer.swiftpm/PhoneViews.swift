@@ -8,7 +8,7 @@ struct PhoneRootView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @AppStorage(MonitorPairing.storageKey) private var pairingJSON = ""
-    @AppStorage("mixerHost") private var mixerHost = "192.168.1.2"
+    @AppStorage("mixerHost") private var mixerHost = ""
 
     var body: some View {
         if let pairing = MonitorPairing.decode(pairingJSON) {
