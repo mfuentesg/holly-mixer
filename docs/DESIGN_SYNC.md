@@ -18,12 +18,12 @@ tokens: "Graphite console", see the *System* board). The SwiftUI code is the sou
 | Help: `HelpView.swift` | `Help.dc.html` |
 | Mute groups: `MuteGroupsView.swift`, footer/bottom bars | `MuteGroups.dc.html`, footer of `Main.dc.html`, bar of `PhoneMixer.dc.html` |
 | Connect: `ConnectView.swift` | `Connect.dc.html` (iPad) · `PhoneConnect.dc.html` (iPhone, with the musician card) |
-| Service Mode (hidden by `FeatureFlags.serviceMode`): `Service*.swift` | `Service.dc.html` (marked hidden in the board title) |
+| Simple view: `SimpleView.swift` (what the pastor sees) and `SimpleViewSettingsView` | `SimpleView.dc.html` · `SimpleViewSettings.dc.html` |
 | Tokens: `Theme.swift` | `System.dc.html` |
 | Alerts / confirmation dialogs (`confirmationDialog`, `.alert` in `ChannelDetailSections`, `ChannelDetailEQ`, `BackupView`, `SnapshotsView`, `PhoneMonitorView`) | `Alerts.dc.html` |
 | Banners, notices, connect/permission messages, inline help (`SendsBanner`, `ReconnectingBanner`, `BackupBanner`, `MixerBackup.notice`, `ConnectView`) | `Notices.dc.html` |
 
-Removed features (no board): Order of service / scenes.
+Removed features (no board): Order of service / scenes, the old Service Mode.
 
 ## Workflow when a screen changes
 

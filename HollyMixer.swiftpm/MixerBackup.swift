@@ -248,7 +248,7 @@ final class BackupStore {
         countdownTask = Task { [weak self] in
             // Wait for silence first: restoring while someone speaks could jump a fader under a speaker.
             while let self, self.pending != nil, !Task.isCancelled {
-                let isLive = (mixer.channels + [mixer.main]).contains { $0.meter > SceneStore.liveThreshold }
+                let isLive = (mixer.channels + [mixer.main]).contains { $0.meter > Mixer.liveSignalThreshold }
                 if !isLive || Self.ignoreLive { break }
                 self.restoreWaitsForSilence = true
                 try? await Task.sleep(for: .seconds(2))

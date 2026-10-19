@@ -31,6 +31,8 @@ final class Mixer {
     var undoToast: UndoToast?
     @ObservationIgnored private var removedSendLevels: [String: Float] = [:]
     private static let unityLevel: Float = 0.75
+    /// A channel louder than this (dBFS) counts as live: automatic restores wait for it to go quiet.
+    static let liveSignalThreshold: Float = -30
     /// Set by the Settings page on iPhone to open the musician pairing scanner.
     var showsPairingScanner = false
     private(set) var host = ""
@@ -835,8 +837,7 @@ struct UndoToast: Equatable, Identifiable {
 /// Pages shown full screen over the mixer.
 enum Screen: Identifiable, Hashable {
     case channel(Strip.Kind)
-    case serviceMode
-    case serviceEditor
+    case simpleView
     case monitorPairing
     case backups
     case snapshots

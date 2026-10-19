@@ -42,6 +42,8 @@ struct SettingsHubView: View {
                     group(L("MIXING"), rows: [
                         row("speaker.slash", L("Mute groups"),
                             L("Choose which channels each of the 4 groups silences together."), .muteGroups),
+                        row("person.crop.rectangle", L("Simple view"),
+                            L("Let someone mute and unmute only the channels you choose."), .simpleView),
                     ])
                     VStack(alignment: .leading, spacing: 8) {
                         Toggle(isOn: $showsEffects) {

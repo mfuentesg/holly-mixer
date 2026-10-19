@@ -5,8 +5,9 @@ struct ConnectView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Binding var host: String
-    /// Set on the iPhone: lets a musician pair before the phone has connected to anything.
+    /// Lets a musician or the pastor pair before the device has connected to anything.
     var onPair: ((MonitorPairing) -> Void)?
+    var onSimple: ((SimpleViewConfig) -> Void)?
     @AppStorage("recentMixers") private var recentJSON = "[]"
 
     @State private var found: [DiscoveredMixer] = []
@@ -199,9 +200,9 @@ struct ConnectView: View {
                             .scaledFont(20, .semibold)
                             .foregroundStyle(Theme.textControl)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(L("I'm a musician"))
+                            Text(L("I have a code"))
                                 .scaledFont(16, .bold)
-                            Text(L("Scan the code on the sound desk's iPad to control only your own monitor mix."))
+                            Text(L("Musicians and the pastor: scan the code shown on the sound desk's iPad."))
                                 .scaledFont(13)
                                 .foregroundStyle(Theme.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -219,10 +220,13 @@ struct ConnectView: View {
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showsScanner) {
-                    MonitorPairingScannerSheet { pairing in
+                    MonitorPairingScannerSheet(onPair: { pairing in
                         showsScanner = false
                         onPair?(pairing)
-                    }
+                    }, onSimple: { config in
+                        showsScanner = false
+                        onSimple?(config)
+                    })
                 }
             }
         }

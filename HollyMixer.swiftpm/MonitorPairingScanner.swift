@@ -30,7 +30,7 @@ struct MonitorPairing: Codable, Equatable {
         self.host = trimmed
         self.bus = bus
         self.me = me
-        self.lock = ["pin", "free"].contains(lock ?? "") ? lock : nil
+        self.lock = lock == "free" ? lock : nil
         self.exitPinHash = exitPinHash.flatMap { $0.count == 16 && $0.allSatisfy(\.isHexDigit) ? $0 : nil }
     }
 
@@ -93,21 +93,16 @@ enum MonitorSwitching: String, CaseIterable, Identifiable {
     /// Fixed to one bus; leaving needs a long press (and re-pairing to change).
     case locked
     /// Changing needs the Service Mode PIN.
-    case pin
     /// Changing is one tap, for the sound lead.
     case free
 
     var id: String { rawValue }
 
-    /// The options to offer: the PIN one needs Service Mode's PIN, which is off in this version.
-    static var available: [MonitorSwitching] {
-        allCases.filter { $0 != .pin || FeatureFlags.serviceMode }
-    }
+    static var available: [MonitorSwitching] { allCases }
 
     var title: String {
         switch self {
         case .locked: return L("Locked")
-        case .pin: return L("With PIN")
         case .free: return L("Free")
         }
     }
@@ -117,6 +112,8 @@ enum MonitorSwitching: String, CaseIterable, Identifiable {
 struct MonitorPairingScannerSheet: View {
     @Environment(\.dismiss) private var dismiss
     var onPair: (MonitorPairing) -> Void
+    /// Called when the scanned code is a Simple view code instead of a musician code.
+    var onSimple: ((SimpleViewConfig) -> Void)?
 
     @State private var hostText = ""
     @State private var bus = 1
@@ -127,7 +124,7 @@ struct MonitorPairingScannerSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Pair as musician")
+                Text(L("Scan a code"))
                     .scaledFont(20, .bold)
                 Spacer()
                 Button("Cancel") { dismiss() }
@@ -169,6 +166,8 @@ struct MonitorPairingScannerSheet: View {
             QRScannerView { code in
                 if let pairing = MonitorPairing(code: code) {
                     onPair(pairing)
+                } else if let simple = SimpleViewConfig(code: code), let onSimple {
+                    onSimple(simple)
                 } else {
                     message = L("That isn't a Holly Mixer pairing code.")
                 }

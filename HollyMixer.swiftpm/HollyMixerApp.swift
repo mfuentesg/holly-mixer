@@ -27,18 +27,20 @@ struct ContentView: View {
     @AppStorage("recentMixers") private var recentJSON = "[]"
     @AppStorage(MonitorPairing.storageKey) private var pairingJSON = ""
     @State private var didAutoConnect = false
+    private let simpleView = SimpleViewStore.shared
 
     var body: some View {
         Group {
             if mixer.hasSession {
-                if sizeClass == .compact {
+                if simpleView.active != nil {
+                    SimpleView()
+                } else if sizeClass == .compact {
                     PhoneRootView()
                 } else {
                     MixerView()
                 }
             } else {
-                ConnectView(host: $host,
-                            onPair: UIDevice.current.userInterfaceIdiom == .phone ? join : nil)
+                ConnectView(host: $host, onPair: join, onSimple: joinSimple)
             }
         }
         .task {
@@ -85,6 +87,18 @@ struct ContentView: View {
         } else {
             host = pairing.host
             mixer.connect(host: pairing.host)
+        }
+    }
+
+    /// The pastor's device scanned a Simple view code: lock into it and connect to the mixer.
+    private func joinSimple(_ config: SimpleViewConfig) {
+        SimpleViewStore.shared.start(config)
+        guard let target = config.host else { return }
+        if target == "demo" {
+            mixer.startDemo()
+        } else {
+            host = target
+            mixer.connect(host: target)
         }
     }
 

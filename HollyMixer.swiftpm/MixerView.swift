@@ -163,10 +163,8 @@ struct PresentedScreenView: View {
             if let strip = mixer.strip(kind) {
                 ChannelDetailView(strip: strip)
             }
-        case .serviceMode:
-            ServiceModeView()
-        case .serviceEditor:
-            ServiceEditorView()
+        case .simpleView:
+            SimpleViewSettingsView()
         case .monitorPairing:
             MonitorPairingView()
         case .backups:

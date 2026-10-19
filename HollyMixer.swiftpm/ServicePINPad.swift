@@ -16,8 +16,10 @@ struct ServiceShakeEffect: GeometryEffect {
 /// Four dots over a numeric keypad. Edits `entry`; the caller reacts when it reaches `length` digits.
 @MainActor
 struct ServicePINPad: View {
+    /// Digits in a PIN (exit PINs for musician mode and Simple view).
+    static let pinLength = 4
     @Binding var entry: String
-    var length = ServiceLayoutStore.pinLength
+    var length = ServicePINPad.pinLength
     var isDisabled = false
     /// Increase to shake the dots and keypad.
     var shakes = 0
@@ -86,76 +88,5 @@ struct ServicePINPad: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Delete")
-    }
-}
-
-/// Sheet that asks for the PIN before leaving Service Mode; three wrong tries lock entry for 30 seconds.
-@MainActor
-struct ServicePINSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    let store: ServiceLayoutStore
-    let onSuccess: () -> Void
-
-    @State private var entry = ""
-    @State private var shakes = 0
-
-    var body: some View {
-        VStack(spacing: 26) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 26, weight: .semibold))
-                .foregroundStyle(Theme.accentText)
-            Text("Enter PIN to exit")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(Theme.textPrimary)
-            status
-            ServicePINPad(entry: $entry, isDisabled: store.isLockedOut(), shakes: shakes)
-            Button("Cancel") { dismiss() }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Theme.textSecondary)
-                .frame(minHeight: 44)
-        }
-        .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.background.ignoresSafeArea())
-        .onChange(of: entry) { _, newValue in
-            if newValue.count == ServiceLayoutStore.pinLength { submit(newValue) }
-        }
-    }
-
-    private var status: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            let remaining = store.lockedUntil.map { Int(ceil($0.timeIntervalSince(context.date))) } ?? 0
-            Group {
-                if remaining > 0 {
-                    Text("Too many tries. Wait \(remaining) s.")
-                        .foregroundStyle(Theme.mute)
-                } else if store.failedAttempts > 0 {
-                    Text("Wrong PIN")
-                        .foregroundStyle(Theme.mute)
-                } else {
-                    Text("Ask the sound lead if you don't know it")
-                        .foregroundStyle(Theme.textTertiary)
-                }
-            }
-            .font(.system(size: 14, weight: .medium))
-            .onChange(of: remaining > 0) { _, locked in
-                if !locked { entry = "" }
-            }
-        }
-        .frame(height: 20)
-    }
-
-    private func submit(_ pin: String) {
-        if store.isLockedOut() {
-            entry = ""
-        } else if store.verifyPIN(pin) {
-            store.resetAttempts()
-            dismiss()
-            onSuccess()
-        } else {
-            store.registerFailure()
-            shakes += 1
-            entry = ""
-        }
     }
 }

@@ -14,7 +14,7 @@ Everything in the Holly Mixer design canvas:
   mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
-- **Service Mode:** (hidden for now, see below)
+- **Simple view (for the pastor):** the sound lead chooses which input channels someone sees; he gets one big MUTE button per channel (optional volume slider) and nothing else. It can lock this device or be paired to another iPad/iPhone with a QR code, and leaving it can require a PIN
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
   SOLO and MUTE side by side) so every control fits; musician "My mix" mode paired by QR code from the iPad
 - **Safety on a live system:** a channel silenced by a mute group or a muted DCA shows "G1" / "DCA2" on its MUTE
@@ -37,13 +37,11 @@ Everything in the Holly Mixer design canvas:
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
-- **Safer power cycles:** a safety copy is saved before every Service Mode start and snapshot load;
+- **Safer power cycles:** a safety copy is saved before every snapshot load;
   optional automatic restore with a visible 10 s countdown (it waits while the sound system is live)
 - **DCA groups:** the four DCAs as faders (last strips on the iPad, last section on the iPhone) and DCA membership per channel
   (channel page, Config tab)
 - **Mixer snapshots:** list, load and save the mixer's own 64 snapshot slots (commands to be verified on a real mixer)
-- **Service Mode** (hidden in this version, `FeatureFlags.serviceMode`): the locked volunteer layout, its editor and the PIN to leave it. Its NOW → NEXT footer and "Call sound lead" button come with it
-- **Service Mode footer (hidden with Service Mode):** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
 - **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be
   changed with the globe button on the Connect screen or in the `…` menu. Texts live in
   `HollyMixer.swiftpm/es.lproj/Localizable.strings` (English text = key)

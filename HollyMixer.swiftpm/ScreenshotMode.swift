@@ -22,8 +22,18 @@ enum ScreenshotMode {
         } else {
             UserDefaults.standard.removeObject(forKey: MonitorPairing.storageKey)
         }
+        SimpleViewStore.shared.stop()
+        var simple = SimpleViewConfig()
+        simple.channels = [1, 5, 6]
+        if name == "simple" || name == "simple-volume" {
+            simple.allowsVolume = name == "simple-volume"
+            SimpleViewStore.shared.start(simple)
+        } else if name == "simplesettings" {
+            SimpleViewStore.shared.draft = simple
+        }
         mixer.startDemo()
         try? await Task.sleep(for: .seconds(3))
+        if name == "simple" || name == "simple-volume" { mixer.channels[4].isOn = false }
         switch name {
         case "bus2": mixer.selectedMix = .bus(2)
         case "channel": mixer.selectedStrip = .channel(3); mixer.presentedScreen = .channel(.channel(3))
@@ -35,6 +45,7 @@ enum ScreenshotMode {
         case "pairing": mixer.presentedScreen = .monitorPairing
         case "silenced": mixer.toggleMuteGroup(1)
         case "help": mixer.presentedScreen = .help
+        case "simplesettings": mixer.presentedScreen = .simpleView
         case "select": mixer.selectedStrip = .channel(3)
         default: break
         }

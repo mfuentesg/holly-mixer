@@ -11,7 +11,6 @@ struct PhoneMonitorView: View {
 
     @State private var showsAllInputs = false
     @State private var confirmsExit = false
-    @State private var asksPIN = false
     @State private var asksExitPIN = false
     @State private var picksReturn = false
 
@@ -55,13 +54,6 @@ struct PhoneMonitorView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .foregroundStyle(Theme.textPrimary)
-        .sheet(isPresented: $asksPIN) {
-            ServicePINSheet(store: ServiceLayoutStore.shared) {
-                asksPIN = false
-                picksReturn = true
-            }
-            .presentationDetents([.large])
-        }
         .sheet(isPresented: $asksExitPIN) {
             MusicianExitPINSheet(expectedHash: pairing.exitPinHash ?? "") {
                 asksExitPIN = false
@@ -105,9 +97,9 @@ struct PhoneMonitorView: View {
                         .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
                 } else {
                     Button {
-                        if pairing.switching == .pin { asksPIN = true } else { picksReturn = true }
+                        picksReturn = true
                     } label: {
-                        Label("Return", systemImage: pairing.switching == .pin ? "lock.open" : "arrow.left.arrow.right")
+                        Label("Return", systemImage: "arrow.left.arrow.right")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Theme.accentText)
                             .padding(.horizontal, 12)
@@ -243,11 +235,12 @@ struct PhoneMonitorView: View {
 
 /// Small "Exit" control that must be held for 2 seconds, so it can't be hit by accident.
 struct HoldToExitButton: View {
+    var title: String = L("Hold to exit")
     var onConfirm: () -> Void
     @State private var progress: CGFloat = 0
 
     var body: some View {
-        Text("Hold to exit")
+        Text(title)
             .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(Theme.textSecondary)
             .padding(.horizontal, 10)
