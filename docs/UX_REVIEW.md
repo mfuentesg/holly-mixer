@@ -185,4 +185,8 @@ the copy fixes in (e) that applied.
 Built later: #25 (G, C and pan in one row; EQ thumbnail and pan arc removed), #28 (EQ band fade) and #30 (Help page in
 Settings).
 
-Not built: #22 beyond keeping iPhone landscape fitting, Dynamic Type in #29, and deleting the leftover scene strings (hidden Service Mode still uses some).
+Also built: Dynamic Type on the text-heavy pages (Settings, Connect, Backup, Help, Mute groups, Pairing; the faders and
+strips keep fixed sizes) and removal of 77 dead Spanish strings (scenes, banks, old pairing text).
+
+Not built: #22 beyond keeping iPhone landscape fitting. Still open: removing Service Mode and the scene store
+entirely (hidden behind `FeatureFlags.serviceMode`; needs the owner's decision) and checks on real hardware.

@@ -477,6 +477,14 @@ el **globo** en la pantalla de conexión, o *Ajustes → Idioma*: **Sistema**, *
 
 ---
 
+### Tamaño de texto
+
+Las páginas con mucho texto (Ajustes, Conexión, Copia de ajustes, Ayuda, Grupos de mute, Vincular) siguen el tamaño de
+texto del sistema (*Ajustes del dispositivo › Pantalla y brillo › Tamaño del texto*). Los faders y las tiras de canal
+mantienen un tamaño fijo para que no cambien de sitio durante un servicio.
+
+---
+
 ## 10. Preguntas frecuentes
 
 **No encuentro la consola.** Comprueba que el dispositivo esté en la **misma red** que la XR18 (no la red de

@@ -19,7 +19,7 @@ struct SnapshotsView: View {
                     mixer.requestSnapshotNames()
                 } label: {
                     Label("Refresh", systemImage: "arrow.clockwise")
-                        .font(.system(size: 14, weight: .semibold))
+                        .scaledFont(14, .semibold)
                         .foregroundStyle(Theme.textBright)
                         .padding(.horizontal, 14)
                         .frame(height: 44)
@@ -40,6 +40,7 @@ struct SnapshotsView: View {
             .scrollContentBackground(.hidden)
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
         .onAppear { mixer.requestSnapshotNames() }
         .confirmationDialog(loading.map { L("Load snapshot \($0)?") } ?? "", isPresented: Binding(
@@ -92,7 +93,7 @@ struct SnapshotsView: View {
                 .frame(width: 30, alignment: .leading)
             VStack(alignment: .leading, spacing: 2) {
                 Text(name.isEmpty ? L("Empty") : name)
-                    .font(.system(size: 16, weight: .semibold))
+                    .scaledFont(16, .semibold)
                     .foregroundStyle(name.isEmpty ? Theme.textMuted : Theme.textPrimary)
                     .lineLimit(1)
                 if isCurrent {
@@ -105,7 +106,7 @@ struct SnapshotsView: View {
                     deleting = slot
                 } label: {
                     Image(systemName: "trash")
-                        .font(.system(size: 14))
+                        .scaledFont(14)
                         .foregroundStyle(Theme.textMuted)
                         .frame(width: 44, height: 44)
                 }
@@ -117,7 +118,7 @@ struct SnapshotsView: View {
                 saving = slot
             } label: {
                 Text("Save here")
-                    .font(.system(size: 13, weight: .semibold))
+                    .scaledFont(13, .semibold)
                     .foregroundStyle(Theme.textControl)
                     .padding(.horizontal, 12)
                     .frame(height: 44)
@@ -127,7 +128,7 @@ struct SnapshotsView: View {
                 loading = slot
             } label: {
                 Text("Load")
-                    .font(.system(size: 14, weight: .bold))
+                    .scaledFont(14, .bold)
                     .foregroundStyle(name.isEmpty ? Theme.textMuted : Theme.onAccent)
                     .padding(.horizontal, 16)
                     .frame(height: 44)

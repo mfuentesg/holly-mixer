@@ -13,14 +13,14 @@ struct BackupBanner: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "exclamationmark.arrow.triangle.2.circlepath")
-                        .font(.system(size: 18, weight: .semibold))
+                        .scaledFont(18, .semibold)
                         .foregroundStyle(Theme.meterAmber)
                     VStack(alignment: .leading, spacing: 3) {
                         Text("The mixer's settings changed since your last session")
-                            .font(.system(size: 15, weight: .bold))
+                            .scaledFont(15, .bold)
                             .foregroundStyle(Color(hex: 0xFFE4A0))
                         Text("\(pending.changes.count) values differ from the backup of \(pending.backup.date.hollyMixer(date: .abbreviated, time: .shortened)). If the mixer was switched off and on, it may have lost them.")
-                            .font(.system(size: 13))
+                            .scaledFont(13)
                             .foregroundStyle(Color(hex: 0xE9D7A5))
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -29,7 +29,7 @@ struct BackupBanner: View {
                     HStack(spacing: 10) {
                         ProgressView().tint(Theme.accentText)
                         Text("Restoring \(store.restoreProgress) of \(store.restoreTotal)")
-                            .font(.system(size: 14, weight: .bold))
+                            .scaledFont(14, .bold)
                             .foregroundStyle(Theme.accentText)
                             .monospacedDigit()
                     }
@@ -38,14 +38,14 @@ struct BackupBanner: View {
                     HStack(spacing: 10) {
                         ProgressView().tint(Theme.accentText)
                         Text("Waiting for the sound system to go quiet before restoring")
-                            .font(.system(size: 13, weight: .semibold))
+                            .scaledFont(13, .semibold)
                             .foregroundStyle(Theme.accentText)
                         Spacer()
                         Button {
                             store.cancelCountdown()
                         } label: {
                             Text("Cancel")
-                                .font(.system(size: 14, weight: .semibold))
+                                .scaledFont(14, .semibold)
                                 .foregroundStyle(Theme.textBright)
                                 .padding(.horizontal, 16)
                                 .frame(height: 44)
@@ -57,7 +57,7 @@ struct BackupBanner: View {
                 if let seconds = store.restoreCountdown {
                     HStack(spacing: 10) {
                         Text("Restoring your settings in \(seconds) s")
-                            .font(.system(size: 14, weight: .bold))
+                            .scaledFont(14, .bold)
                             .foregroundStyle(Theme.accentText)
                             .monospacedDigit()
                         Spacer()
@@ -65,7 +65,7 @@ struct BackupBanner: View {
                             store.cancelCountdown()
                         } label: {
                             Text("Cancel")
-                                .font(.system(size: 14, weight: .semibold))
+                                .scaledFont(14, .semibold)
                                 .foregroundStyle(Theme.textBright)
                                 .padding(.horizontal, 16)
                                 .frame(height: 44)
@@ -79,7 +79,7 @@ struct BackupBanner: View {
                         reviewsPending = true
                     } label: {
                         Text("Review and restore")
-                            .font(.system(size: 14, weight: .bold))
+                            .scaledFont(14, .bold)
                             .foregroundStyle(Theme.onAccent)
                             .padding(.horizontal, 16)
                             .frame(height: 44)
@@ -89,7 +89,7 @@ struct BackupBanner: View {
                         store.keepMixerState()
                     } label: {
                         Text("Keep the mixer's")
-                            .font(.system(size: 14, weight: .semibold))
+                            .scaledFont(14, .semibold)
                             .foregroundStyle(Theme.textBright)
                             .padding(.horizontal, 16)
                             .frame(height: 44)
@@ -142,7 +142,7 @@ struct BackupView: View {
                     saving = true
                 } label: {
                     Text("Save now…")
-                        .font(.system(size: 15, weight: .bold))
+                        .scaledFont(15, .bold)
                         .foregroundStyle(Theme.onAccent)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
@@ -155,7 +155,7 @@ struct BackupView: View {
                 VStack(spacing: 16) {
                     if let notice = store.notice {
                         Text(notice)
-                            .font(.system(size: 13, weight: .semibold))
+                            .scaledFont(13, .semibold)
                             .foregroundStyle(Theme.greenText)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(14)
@@ -171,6 +171,7 @@ struct BackupView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
         .onAppear { store.reload() }
         .alert("Save current settings", isPresented: $saving) {
@@ -215,14 +216,14 @@ struct BackupView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("THE MIXER LOOKS DIFFERENT").sectionLabelStyle(Theme.meterAmber)
             Text("\(pending.changes.count) values differ from the automatic backup of \(pending.backup.date.hollyMixer(date: .abbreviated, time: .shortened)).")
-                .font(.system(size: 15))
+                .scaledFont(15)
                 .foregroundStyle(Color(hex: 0xE9D7A5))
             HStack(spacing: 10) {
                 Button {
                     reviewing = ReviewItem(backup: pending.backup)
                 } label: {
                     Text("Review and restore")
-                        .font(.system(size: 14, weight: .bold))
+                        .scaledFont(14, .bold)
                         .foregroundStyle(Theme.onAccent)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
@@ -232,7 +233,7 @@ struct BackupView: View {
                     store.keepMixerState()
                 } label: {
                     Text("Keep the mixer's")
-                        .font(.system(size: 14, weight: .semibold))
+                        .scaledFont(14, .semibold)
                         .padding(.horizontal, 16)
                         .frame(height: 44)
                         .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
@@ -251,9 +252,9 @@ struct BackupView: View {
             Toggle(isOn: Binding(get: { store.isAutoBackupOn }, set: { store.isAutoBackupOn = $0 })) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Back up automatically")
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(17, .semibold)
                     Text("Holly Mixer saves the mixer's settings on this device a few seconds after every change. When you connect and the mixer has lost them, you can put them back.")
-                        .font(.system(size: 13))
+                        .scaledFont(13)
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -262,9 +263,9 @@ struct BackupView: View {
             Toggle(isOn: Binding(get: { store.isAutoRestoreOn }, set: { store.isAutoRestoreOn = $0 })) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Restore automatically")
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(17, .semibold)
                     Text("If the mixer comes back reset, Holly Mixer counts down 10 s and puts your last settings back. Cancel any time. It waits if the sound system is live.")
-                        .font(.system(size: 13))
+                        .scaledFont(13)
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -282,7 +283,7 @@ struct BackupView: View {
                     importing = true
                 } label: {
                     Label("Import", systemImage: "square.and.arrow.down")
-                        .font(.system(size: 13, weight: .semibold))
+                        .scaledFont(13, .semibold)
                         .foregroundStyle(Theme.accentText)
                         .frame(minHeight: 44)
                 }
@@ -290,7 +291,7 @@ struct BackupView: View {
             }
             if store.backups.isEmpty {
                 Text("Nothing saved yet. The first automatic backup is made right after the mixer has been read.")
-                    .font(.system(size: 13))
+                    .scaledFont(13)
                     .foregroundStyle(Theme.textTertiary)
             }
             ForEach(store.backups) { backup in
@@ -303,13 +304,13 @@ struct BackupView: View {
         let compact = sizeClass == .compact
         let title = HStack(spacing: 12) {
             Image(systemName: backup.isAuto ? "clock.arrow.circlepath" : backup.isSafety == true ? "shield.lefthalf.filled" : "bookmark.fill")
-                .font(.system(size: 16))
+                .scaledFont(16)
                 .foregroundStyle(backup.isAuto ? Theme.textControl : Theme.accentText)
                 .frame(width: 40, height: 40)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 2) {
                 Text(backup.isAuto ? L("Automatic backup") : backup.name)
-                    .font(.system(size: 16, weight: .semibold))
+                    .scaledFont(16, .semibold)
                     .lineLimit(1)
                 Text("\(backup.date.hollyMixer(date: .abbreviated, time: .shortened)) · \(backup.values.count) values")
                     .font(Theme.mono(12, .regular))
@@ -321,7 +322,7 @@ struct BackupView: View {
             if let url = store.exportURL(for: backup) {
                 ShareLink(item: url) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 16))
+                        .scaledFont(16)
                         .foregroundStyle(Theme.textControl)
                         .frame(width: 44, height: 44)
                 }
@@ -334,7 +335,7 @@ struct BackupView: View {
                 Button("Delete", role: .destructive) { store.delete(backup) }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16))
+                    .scaledFont(16)
                     .foregroundStyle(Theme.textControl)
                     .frame(width: 44, height: 44)
             }
@@ -342,7 +343,7 @@ struct BackupView: View {
                 reviewing = ReviewItem(backup: backup)
             } label: {
                 Text("Review")
-                    .font(.system(size: 14, weight: .semibold))
+                    .scaledFont(14, .semibold)
                     .foregroundStyle(Theme.textBright)
                     .lineLimit(1)
                     .fixedSize()
@@ -404,7 +405,7 @@ struct BackupReviewSheet: View {
                                 Text(group.title)
                                     .font(Theme.rounded(16))
                                 Text(group.topics.joined(separator: ", "))
-                                    .font(.system(size: 12))
+                                    .scaledFont(12)
                                     .foregroundStyle(Theme.textTertiary)
                             }
                             Spacer()

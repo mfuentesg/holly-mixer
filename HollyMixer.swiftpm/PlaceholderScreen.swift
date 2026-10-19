@@ -11,7 +11,7 @@ struct PlaceholderScreen: View {
             ScreenTopBar(title: title)
             Spacer()
             Text(message)
-                .font(.system(size: 17))
+                .scaledFont(17)
                 .foregroundStyle(Theme.textSecondary)
             Spacer()
         }
@@ -47,9 +47,9 @@ struct ScreenTopBar<Trailing: View>: View {
             } label: {
                 HStack(spacing: 2) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .bold))
+                        .scaledFont(17, .bold)
                     Text(backTitle ?? L("Mixer"))
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, .semibold)
                 }
                 .foregroundStyle(Theme.accentText)
                 .padding(.leading, 6)
@@ -59,11 +59,11 @@ struct ScreenTopBar<Trailing: View>: View {
             .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 22, weight: .bold))
+                    .scaledFont(22, .bold)
                     .foregroundStyle(Theme.textPrimary)
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(Theme.textTertiary)
                 }
             }

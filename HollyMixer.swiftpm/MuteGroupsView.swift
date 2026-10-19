@@ -29,6 +29,7 @@ struct MuteGroupsView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
         .task { mixer.request(members.map { "\($0.base)/grp/mute" }) }
     }
@@ -47,11 +48,11 @@ struct MuteGroupsView: View {
                                 Circle().fill(Theme.mute).frame(width: 8, height: 8)
                             }
                             Text(names.name(number).isEmpty ? L("Group \(number)") : names.name(number))
-                                .font(.system(size: 15, weight: .bold))
+                                .scaledFont(15, .bold)
                                 .lineLimit(1)
                         }
                         Text(count(in: number) == 1 ? L("1 channel") : L("\(count(in: number)) channels"))
-                            .font(.system(size: 11))
+                            .scaledFont(11)
                             .foregroundStyle(isSelected ? Theme.textPrimary : Theme.textTertiary)
                     }
                     .frame(maxWidth: .infinity)
@@ -76,9 +77,9 @@ struct MuteGroupsView: View {
         return VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(L("Channels in group \(number)")).font(.system(size: 17, weight: .bold))
+                    Text(L("Channels in group \(number)")).scaledFont(17, .bold)
                     Text(included.isEmpty ? L("None yet") : included.map(\.displayName).joined(separator: " · "))
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(Theme.textTertiary)
                         .lineLimit(2)
                 }
@@ -87,7 +88,7 @@ struct MuteGroupsView: View {
                     Button(L("Clear all")) {
                         for strip in included { mixer.setMuteGroupMembership(strip, group: number, member: false) }
                     }
-                    .font(.system(size: 13, weight: .semibold))
+                    .scaledFont(13, .semibold)
                     .foregroundStyle(Theme.textControl)
                     .padding(.horizontal, 12)
                     .frame(height: 44)
@@ -120,7 +121,7 @@ struct MuteGroupsView: View {
                     if text.count > MuteGroupNames.limit { nameText = String(text.prefix(MuteGroupNames.limit)) }
                     names.set(number, to: nameText)
                 }
-                .font(.system(size: 15, weight: .semibold))
+                .scaledFont(15, .semibold)
                 .padding(.horizontal, 12)
                 .frame(height: 44)
                 .background(Theme.background, in: RoundedRectangle(cornerRadius: 10))
@@ -142,11 +143,11 @@ struct MuteGroupsView: View {
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: isMember ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 15))
+                    .scaledFont(15)
                     .foregroundStyle(isMember ? Theme.accent : Theme.textDim)
                 Circle().fill(strip.color).frame(width: 8, height: 8)
                 Text(strip.displayName)
-                    .font(.system(size: 13, weight: .semibold))
+                    .scaledFont(13, .semibold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                 Spacer(minLength: 0)

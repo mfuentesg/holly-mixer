@@ -128,10 +128,10 @@ struct MonitorPairingScannerSheet: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Pair as musician")
-                    .font(.system(size: 20, weight: .bold))
+                    .scaledFont(20, .bold)
                 Spacer()
                 Button("Cancel") { dismiss() }
-                    .font(.system(size: 16, weight: .semibold))
+                    .scaledFont(16, .semibold)
                     .foregroundStyle(Theme.accentText)
                     .frame(minWidth: 44, minHeight: 44)
             }
@@ -144,12 +144,12 @@ struct MonitorPairingScannerSheet: View {
                         scanner
                     } else {
                         Text("The camera can't scan codes on this device. Enter the details shown on the sound desk's iPad.")
-                            .font(.system(size: 14))
+                            .scaledFont(14)
                             .foregroundStyle(Theme.textSecondary)
                     }
                     if let message {
                         Text(message)
-                            .font(.system(size: 13, weight: .semibold))
+                            .scaledFont(13, .semibold)
                             .foregroundStyle(Theme.meterRed)
                     }
                     manualEntry
@@ -164,7 +164,7 @@ struct MonitorPairingScannerSheet: View {
     private var scanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Point the camera at the code on the sound desk's iPad.")
-                .font(.system(size: 14))
+                .scaledFont(14)
                 .foregroundStyle(Theme.textSecondary)
             QRScannerView { code in
                 if let pairing = MonitorPairing(code: code) {
@@ -187,7 +187,7 @@ struct MonitorPairingScannerSheet: View {
             } label: {
                 HStack {
                     Text("Enter manually")
-                        .font(.system(size: 15, weight: .semibold))
+                        .scaledFont(15, .semibold)
                     Spacer()
                     Image(systemName: showsManualEntry ? "chevron.up" : "chevron.down")
                 }
@@ -213,7 +213,7 @@ struct MonitorPairingScannerSheet: View {
                     join()
                 } label: {
                     Text("Join")
-                        .font(.system(size: 16, weight: .bold))
+                        .scaledFont(16, .bold)
                         .foregroundStyle(Theme.onAccent)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)

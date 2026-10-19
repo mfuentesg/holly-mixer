@@ -16,10 +16,10 @@ struct MusicianExitPINSheet: View {
     var body: some View {
         VStack(spacing: 26) {
             Image(systemName: "lock.fill")
-                .font(.system(size: 26, weight: .semibold))
+                .scaledFont(26, .semibold)
                 .foregroundStyle(Theme.accentText)
             Text(L("Enter PIN to exit"))
-                .font(.system(size: 22, weight: .bold))
+                .scaledFont(22, .bold)
                 .foregroundStyle(Theme.textPrimary)
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let remaining = lockedUntil.map { Int(ceil($0.timeIntervalSince(context.date))) } ?? 0
@@ -32,12 +32,12 @@ struct MusicianExitPINSheet: View {
                         Text(L("Ask the sound lead if you don't know it")).foregroundStyle(Theme.textTertiary)
                     }
                 }
-                .font(.system(size: 14, weight: .medium))
+                .scaledFont(14, .medium)
             }
             .frame(height: 20)
             ServicePINPad(entry: $entry, length: 4, isDisabled: isLocked, shakes: shakes)
             Button(L("Cancel")) { dismiss() }
-                .font(.system(size: 16, weight: .semibold))
+                .scaledFont(16, .semibold)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(minHeight: 44)
         }

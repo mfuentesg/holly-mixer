@@ -46,9 +46,9 @@ struct SettingsHubView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Toggle(isOn: $showsEffects) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(L("Show effects in the mix selector")).font(.system(size: 16, weight: .semibold))
+                                Text(L("Show effects in the mix selector")).scaledFont(16, .semibold)
                                 Text(L("Adds FX 1–4 next to the monitor mixes. Each channel's Sends tab always has its FX sends."))
-                                    .font(.system(size: 12))
+                                    .scaledFont(12)
                                     .foregroundStyle(Theme.textTertiary)
                             }
                         }
@@ -78,7 +78,7 @@ struct SettingsHubView: View {
                         }
                     } label: {
                         Label(mixer.isDemo ? L("Exit demo") : L("Disconnect from mixer"), systemImage: "power")
-                            .font(.system(size: 15, weight: .semibold))
+                            .scaledFont(15, .semibold)
                             .foregroundStyle(Theme.accentText)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
@@ -93,6 +93,7 @@ struct SettingsHubView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
     }
 
@@ -161,20 +162,20 @@ struct SettingsRow: View {
     private var label: some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 19))
+                .scaledFont(19)
                 .foregroundStyle(Theme.textControl)
                 .frame(width: 44, height: 44)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 16, weight: .semibold))
+                Text(title).scaledFont(16, .semibold)
                 Text(detail)
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(Theme.textTertiary)
                     .multilineTextAlignment(.leading)
             }
             Spacer(minLength: 8)
             Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .semibold))
+                .scaledFont(13, .semibold)
                 .foregroundStyle(Theme.textMuted)
         }
         .padding(.horizontal, 14)

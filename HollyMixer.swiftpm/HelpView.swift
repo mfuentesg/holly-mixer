@@ -49,6 +49,7 @@ struct HelpView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
     }
 
@@ -56,11 +57,11 @@ struct HelpView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Image(systemName: topic.icon)
-                    .font(.system(size: 18))
+                    .scaledFont(18)
                     .foregroundStyle(Theme.textControl)
                     .frame(width: 40, height: 40)
                     .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
-                Text(topic.title).font(.system(size: 17, weight: .bold))
+                Text(topic.title).scaledFont(17, .bold)
             }
             ForEach(Array(topic.steps.enumerated()), id: \.offset) { index, step in
                 HStack(alignment: .top, spacing: 10) {
@@ -70,7 +71,7 @@ struct HelpView: View {
                         .frame(width: 20, height: 20)
                         .background(Theme.accent.opacity(0.14), in: Circle())
                     Text(step)
-                        .font(.system(size: 14))
+                        .scaledFont(14)
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }

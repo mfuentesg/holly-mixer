@@ -17,7 +17,7 @@ tokens: "Graphite console", see the *System* board). The SwiftUI code is the sou
 | Settings page: `SettingsHubView.swift` | `Settings.dc.html` |
 | Help: `HelpView.swift` | `Help.dc.html` |
 | Mute groups: `MuteGroupsView.swift`, footer/bottom bars | `MuteGroups.dc.html`, footer of `Main.dc.html`, bar of `PhoneMixer.dc.html` |
-| Connect: `ConnectView.swift` | `Connect.dc.html` |
+| Connect: `ConnectView.swift` | `Connect.dc.html` (iPad) · `PhoneConnect.dc.html` (iPhone, with the musician card) |
 | Service Mode (hidden by `FeatureFlags.serviceMode`): `Service*.swift` | `Service.dc.html` (marked hidden in the board title) |
 | Tokens: `Theme.swift` | `System.dc.html` |
 | Alerts / confirmation dialogs (`confirmationDialog`, `.alert` in `ChannelDetailSections`, `ChannelDetailEQ`, `BackupView`, `SnapshotsView`, `PhoneMonitorView`) | `Alerts.dc.html` |

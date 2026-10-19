@@ -69,6 +69,7 @@ struct MonitorPairingView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
     }
 
@@ -91,7 +92,7 @@ struct MonitorPairingView: View {
                 }
                 .pickerStyle(.segmented)
                 Text("The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead.")
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -108,7 +109,7 @@ struct MonitorPairingView: View {
                         if digits != text || digits.count > 4 { exitPIN = String(digits.prefix(4)) }
                     }
                 Text(L("With a PIN, the musician must type it to leave musician mode. Without one, holding Exit and confirming is enough."))
-                    .font(.system(size: 12))
+                    .scaledFont(12)
                     .foregroundStyle(Theme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -174,7 +175,7 @@ struct MonitorPairingView: View {
                     .frame(maxWidth: 360)
                     .accessibilityLabel("Pairing QR code for \(mixer.master(for: .bus(bus)).displayName)")
                 Text("On the musician's iPhone open Holly Mixer, then Settings > Pair as musician and scan this code.")
-                    .font(.system(size: 14))
+                    .scaledFont(14)
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
                 VStack(alignment: .leading, spacing: 6) {
@@ -190,7 +191,7 @@ struct MonitorPairingView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Text("This mixer's address can't be put in a code. Check the connection.")
-                    .font(.system(size: 14))
+                    .scaledFont(14)
                     .foregroundStyle(Theme.textSecondary)
             }
         }
@@ -201,7 +202,7 @@ struct MonitorPairingView: View {
 
     private func detailLine(_ title: String, _ value: String) -> some View {
         HStack {
-            Text(title).font(.system(size: 14)).foregroundStyle(Theme.textTertiary)
+            Text(title).scaledFont(14).foregroundStyle(Theme.textTertiary)
             Spacer()
             Text(value).font(Theme.mono(15, .bold))
         }

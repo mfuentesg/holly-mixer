@@ -36,6 +36,7 @@ struct ConnectView: View {
             .padding(.vertical, columns ? 48 : 24)
         }
         .background(Theme.background.ignoresSafeArea())
+        .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
         .task { await scan() }
     }
@@ -51,10 +52,10 @@ struct ConnectView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.08), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Connect to a mixer")
-                        .font(.system(size: 32, weight: .bold))
+                        .scaledFont(32, .bold)
                         .tracking(-0.4)
                     Text("Works with XR18 over Wi-Fi or LAN. More than one iPad can be connected at once.")
-                        .font(.system(size: 15))
+                        .scaledFont(15)
                         .foregroundStyle(Theme.textSecondary)
                 }
                 Spacer(minLength: 0)
@@ -78,7 +79,7 @@ struct ConnectView: View {
                                 .frame(width: 7, height: 7)
                             Text(isScanning ? L("Scanning") : L("Scan again"))
                         }
-                        .font(.system(size: 12))
+                        .scaledFont(12)
                         .foregroundStyle(Theme.textTertiary)
                         .frame(minHeight: 44)
                     }
@@ -91,7 +92,7 @@ struct ConnectView: View {
 
                 if found.isEmpty {
                     Text(isScanning ? L("Looking for mixers…") : L("No mixer answered. Check that this device is on the same network as the mixer, or type its IP address below."))
-                        .font(.system(size: 13))
+                        .scaledFont(13)
                         .foregroundStyle(Theme.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -118,7 +119,7 @@ struct ConnectView: View {
                     Button("Connect") {
                         connect(to: host.trimmingCharacters(in: .whitespaces))
                     }
-                    .font(.system(size: 15, weight: .semibold))
+                    .scaledFont(15, .semibold)
                     .foregroundStyle(Theme.textBright)
                     .padding(.horizontal, 18)
                     .frame(height: 48)
@@ -145,9 +146,9 @@ struct ConnectView: View {
                             } label: {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(item.name)
-                                        .font(.system(size: 14, weight: .semibold))
+                                        .scaledFont(14, .semibold)
                                     Text("\(item.ip) · \(item.lastUsed.formatted(.relative(presentation: .named).locale(ActiveLanguage.locale)))")
-                                        .font(.system(size: 12))
+                                        .scaledFont(12)
                                         .foregroundStyle(Theme.textTertiary)
                                 }
                                 .lineLimit(1)
@@ -168,18 +169,18 @@ struct ConnectView: View {
             } label: {
                 HStack(spacing: 14) {
                     Image(systemName: "play")
-                        .font(.system(size: 20, weight: .semibold))
+                        .scaledFont(20, .semibold)
                         .foregroundStyle(Color(hex: 0xB794FF))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Try the demo mixer")
-                            .font(.system(size: 16, weight: .bold))
+                            .scaledFont(16, .bold)
                         Text("Practise safely — nothing you touch reaches the room.")
-                            .font(.system(size: 13))
+                            .scaledFont(13)
                             .foregroundStyle(Color(hex: 0xB9A6E0))
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 15, weight: .bold))
+                        .scaledFont(15, .bold)
                 }
                 .foregroundStyle(Color(hex: 0xE2D4FF))
                 .padding(.horizontal, 20)
@@ -195,19 +196,19 @@ struct ConnectView: View {
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: "qrcode.viewfinder")
-                            .font(.system(size: 20, weight: .semibold))
+                            .scaledFont(20, .semibold)
                             .foregroundStyle(Theme.textControl)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(L("I'm a musician"))
-                                .font(.system(size: 16, weight: .bold))
+                                .scaledFont(16, .bold)
                             Text(L("Scan the code on the sound desk's iPad to control only your own monitor mix."))
-                                .font(.system(size: 13))
+                                .scaledFont(13)
                                 .foregroundStyle(Theme.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 15, weight: .bold))
+                            .scaledFont(15, .bold)
                     }
                     .foregroundStyle(Theme.textPrimary)
                     .padding(.horizontal, 20)
@@ -233,10 +234,10 @@ struct ConnectView: View {
                 .tint(Theme.accentText)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Connecting to \(mixer.host)…")
-                    .font(.system(size: 15, weight: .semibold))
+                    .scaledFont(15, .semibold)
                 if case .waitingForNetwork = mixer.status {
                     Text("If iOS asked for Local Network access, tap Allow.")
-                        .font(.system(size: 13))
+                        .scaledFont(13)
                         .foregroundStyle(Theme.textSecondary)
                 }
             }
@@ -244,7 +245,7 @@ struct ConnectView: View {
             Button("Cancel") {
                 mixer.disconnect()
             }
-            .font(.system(size: 14, weight: .semibold))
+            .scaledFont(14, .semibold)
             .foregroundStyle(Theme.accentText)
             .frame(minHeight: 44)
             .buttonStyle(.plain)
@@ -264,14 +265,14 @@ struct ConnectView: View {
         } label: {
             HStack(spacing: 16) {
                 Image(systemName: "slider.horizontal.below.rectangle")
-                    .font(.system(size: 20))
+                    .scaledFont(20)
                     .foregroundStyle(Theme.textControl)
                     .frame(width: 48, height: 48)
                     .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(info.name)
-                        .font(.system(size: 17, weight: .semibold))
+                        .scaledFont(17, .semibold)
                     Text("\(info.model) · fw \(info.firmware) · \(info.ip) · \(info.latency) ms")
                         .font(Theme.mono(13, .regular))
                         .foregroundStyle(Theme.textTertiary)
@@ -280,7 +281,7 @@ struct ConnectView: View {
                 Spacer()
                 if info.isFirmwareOutdated {
                     Text("Firmware \(info.firmware)")
-                        .font(.system(size: 12, weight: .semibold))
+                        .scaledFont(12, .semibold)
                         .foregroundStyle(Theme.amberText)
                         .padding(.horizontal, 10)
                         .frame(height: 28)
@@ -289,7 +290,7 @@ struct ConnectView: View {
                 }
                 if isLastUsed {
                     Text("Last used")
-                        .font(.system(size: 12, weight: .semibold))
+                        .scaledFont(12, .semibold)
                         .foregroundStyle(Theme.accentText)
                         .padding(.horizontal, 10)
                         .frame(height: 28)
@@ -297,7 +298,7 @@ struct ConnectView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.accent.opacity(0.4), lineWidth: 1))
                 }
                 Text("Connect")
-                    .font(.system(size: 15, weight: .bold))
+                    .scaledFont(15, .bold)
                     .foregroundStyle(isPrimary ? Theme.onAccent : Theme.textBright)
                     .padding(.horizontal, 18)
                     .frame(height: 44)
@@ -317,12 +318,12 @@ struct ConnectView: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     Text("Check my network")
-                        .font(.system(size: 20, weight: .bold))
+                        .scaledFont(20, .bold)
                     Spacer()
                     Button(isChecking ? L("Checking…") : check == nil ? L("Run") : L("Run again")) {
                         Task { await runCheck() }
                     }
-                    .font(.system(size: 13, weight: .semibold))
+                    .scaledFont(13, .semibold)
                     .foregroundStyle(Theme.textBright)
                     .padding(.horizontal, 14)
                     .frame(height: 36)
@@ -341,15 +342,15 @@ struct ConnectView: View {
 
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: "globe")
-                    .font(.system(size: 20))
+                    .scaledFont(20)
                     .foregroundStyle(Color(hex: 0x8CB4FF))
                     .frame(width: 44, height: 44)
                     .background(Color(hex: 0x528FFA, opacity: 0.16), in: RoundedRectangle(cornerRadius: 12))
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Why “Local Network” access?")
-                        .font(.system(size: 15, weight: .bold))
+                        .scaledFont(15, .bold)
                     Text("Holly Mixer only talks to mixers in this building. If you tapped “Don't Allow”, turn it on in Settings › Privacy & Security › Local Network.")
-                        .font(.system(size: 13))
+                        .scaledFont(13)
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     Button("Open Settings") {
@@ -357,7 +358,7 @@ struct ConnectView: View {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .font(.system(size: 14, weight: .semibold))
+                    .scaledFont(14, .semibold)
                     .foregroundStyle(Theme.accentText)
                     .frame(minHeight: 36)
                     .buttonStyle(.plain)
@@ -377,10 +378,10 @@ struct ConnectView: View {
         if unreachable {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Can't see the mixer?")
-                    .font(.system(size: 15, weight: .bold))
+                    .scaledFont(15, .bold)
                     .foregroundStyle(Color(hex: 0xFFE4A0))
                 Text("Guest Wi-Fi networks often block devices from seeing each other. Join the same network as the mixer (for example the staff network), then scan again.")
-                    .font(.system(size: 13))
+                    .scaledFont(13)
                     .foregroundStyle(Color(hex: 0xE9D7A5))
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -404,7 +405,7 @@ struct ConnectView: View {
                      value: String(format: "%.1f %%", check.lossPercent))
         } else {
             Text("Tests the connection to \(checkTarget.isEmpty ? L("the mixer") : checkTarget): whether it answers, how fast, and how many messages get lost.")
-                .font(.system(size: 13))
+                .scaledFont(13)
                 .foregroundStyle(Theme.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -414,13 +415,13 @@ struct ConnectView: View {
         let color = ok ? Theme.meterGreen : Theme.meterAmber
         return HStack(spacing: 12) {
             Text(ok ? "✓" : "!")
-                .font(.system(size: 13, weight: .heavy))
+                .scaledFont(13, .heavy)
                 .foregroundStyle(ok ? Color(hex: 0x6FE597) : Theme.amberText)
                 .frame(width: 24, height: 24)
                 .background(color.opacity(0.16), in: Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(.system(size: 14, weight: .semibold))
-                Text(hint).font(.system(size: 12)).foregroundStyle(Theme.textTertiary)
+                Text(label).scaledFont(14, .semibold)
+                Text(hint).scaledFont(12).foregroundStyle(Theme.textTertiary)
             }
             Spacer()
             Text(value)
