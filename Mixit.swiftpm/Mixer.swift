@@ -53,6 +53,15 @@ final class Mixer {
     private(set) var muteGroups = [false, false, false, false]
     /// Changes made from this app, newest last.
     private(set) var history: [Change] = []
+    /// True once every known parameter has been read from the mixer in this session.
+    private(set) var fullStateReady = false
+    /// Every value seen or sent in this session, by OSC address (levels, EQ, names…). The settings
+    /// backup is made from this.
+    private(set) var liveValues: [String: OSCArgument] = [:]
+    /// Called after `liveValues` changes (cheap: it only flags the backup as dirty).
+    @ObservationIgnored var onValuesChanged: (() -> Void)?
+    /// Called once per connection when `fullStateReady` becomes true.
+    @ObservationIgnored var onFullState: (() -> Void)?
 
     /// Strips that feed the mixes: channels 1-16, aux in and FX returns.
     var inputs: [Strip] { channels + [auxIn] + fxReturns }
@@ -75,6 +84,9 @@ final class Mixer {
     /// Observable values for any other OSC address (EQ, dynamics, preamp…), created on demand.
     @ObservationIgnored private var params: [String: Param] = [:]
     @ObservationIgnored private var editStartValues: [String: OSCArgument] = [:]
+    @ObservationIgnored private var fullPending: Set<String> = []
+    @ObservationIgnored private var fullStateTask: Task<Void, Never>?
+    @ObservationIgnored private var fullProgressAt = Date()
 
     /// Levels are sent at most this often while dragging.
     private static let levelSendInterval: TimeInterval = 0.025
@@ -153,6 +165,8 @@ final class Mixer {
         isSynced = false
         latency = nil
         history = []
+        fullStateReady = false
+        fullStateTask?.cancel()
         selectedMix = .main
         lastReply = .distantPast
         transportProblemSince = nil
@@ -223,6 +237,68 @@ final class Mixer {
             try? await Task.sleep(for: .seconds(1))
             isSynced = true
         }
+        requestFullState()
+    }
+
+    /// Every address the settings backup covers: levels, mutes, names, EQ, gate, dynamics, preamp.
+    var fullStateAddresses: [String] {
+        var seen = Set<String>()
+        var list: [String] = []
+        func add(_ address: String) {
+            if !address.hasPrefix("/-stat"), seen.insert(address).inserted { list.append(address) }
+        }
+        for strip in allStrips {
+            strip.syncAddresses.forEach(add)
+            XR18Params.detailAddresses(for: strip).forEach(add)
+            if strip.isChannel || strip.kind == .auxIn {
+                ["config/icon", "config/insrc", "mix/lr"].forEach { add("\(strip.base)/\($0)") }
+            }
+            if strip.isChannel { add(XR18Params.preamp(strip.base, "rtnsw")) }
+        }
+        for number in 1...4 { add("/config/mute/\(number)") }
+        return list
+    }
+
+    /// Reads everything the backup needs from the mixer, then reports `fullStateReady`.
+    private func requestFullState() {
+        fullStateTask?.cancel()
+        fullStateTask = Task { [weak self] in
+            guard let self else { return }
+            // The basic sync already asked for these.
+            let basic = Set(allStrips.flatMap(\.syncAddresses))
+            let extra = fullStateAddresses.filter { !basic.contains($0) }
+            fullPending = Set(extra)
+            for (index, address) in extra.enumerated() {
+                guard !Task.isCancelled else { return }
+                connection.send(OSCMessage(address))
+                if index % 8 == 7 { try? await Task.sleep(for: .milliseconds(10)) }
+            }
+            // UDP can drop a reply, and some addresses don't exist: wait until most have answered, or
+            // until replies have stopped for a while, but never longer than 6 s.
+            fullProgressAt = Date()
+            for _ in 0..<24 {
+                if fullPending.count <= extra.count / 50 { break }
+                if Date().timeIntervalSince(fullProgressAt) > 1.2 { break }
+                try? await Task.sleep(for: .milliseconds(250))
+                guard !Task.isCancelled else { return }
+            }
+            fullPending = []
+            fullStateReady = true
+            onFullState?()
+        }
+    }
+
+    /// Writes backed-up values to the mixer in small batches. Changes are not added to undo.
+    func writeValues(_ values: [(address: String, value: OSCArgument)], progress: ((Int) -> Void)? = nil) async {
+        for (index, item) in values.enumerated() {
+            route(OSCMessage(item.address, item.value), fromMixer: false)
+            connection.send(OSCMessage(item.address, item.value))
+            if index % 8 == 7 {
+                progress?(index + 1)
+                try? await Task.sleep(for: .milliseconds(15))
+            }
+        }
+        progress?(values.count)
     }
 
     private func handle(_ state: NWConnection.State) {
@@ -316,6 +392,8 @@ final class Mixer {
     /// the user's finger are ignored, and changes made elsewhere make the strip flash.
     private func route(_ message: OSCMessage, fromMixer: Bool) {
         if fromMixer && touchedAddresses.contains(message.address) { return }
+        record(message.address, message.arguments.first)
+        if fromMixer, fullPending.remove(message.address) != nil { fullProgressAt = Date() }
         if let param = params[message.address], let value = message.arguments.first {
             param.value = value
         }
@@ -349,6 +427,19 @@ final class Mixer {
         }
     }
 
+    /// Keeps the newest value of an address for the settings backup.
+    private func record(_ address: String, _ value: OSCArgument?) {
+        guard let value, !address.hasPrefix("/-stat"), !address.hasPrefix("/meters") else { return }
+        switch value {
+        case .blob: return
+        default: break
+        }
+        if liveValues[address] != value {
+            liveValues[address] = value
+            onValuesChanged?()
+        }
+    }
+
     private func flash(_ strip: Strip) {
         let generation = (flashGeneration[strip.kind] ?? 0) + 1
         flashGeneration[strip.kind] = generation
@@ -366,6 +457,7 @@ final class Mixer {
     func setLevel(_ strip: Strip, _ control: LevelControl, to value: Float) {
         strip.setLevel(value, for: control)
         let address = strip.address(control)
+        record(address, .float(value))
         if Date().timeIntervalSince(lastSent[address] ?? .distantPast) >= Self.levelSendInterval {
             sendLevel(strip, control)
         } else {
@@ -405,6 +497,7 @@ final class Mixer {
         let address = strip.address(control)
         lastSent[address] = Date()
         pendingAddresses.remove(address)
+        record(address, .float(strip.level(control)))
         connection.send(OSCMessage(address, .float(strip.level(control))))
     }
 
@@ -412,6 +505,7 @@ final class Mixer {
         let address = "\(strip.base)/mix/on"
         let old = strip.isOn
         strip.isOn.toggle()
+        record(address, .int(strip.isOn ? 1 : 0))
         connection.send(OSCMessage(address, .int(strip.isOn ? 1 : 0)))
         record(Change(address: address, old: .int(old ? 1 : 0), new: .int(strip.isOn ? 1 : 0),
                       label: "\(strip.displayName) \(strip.isOn ? "unmuted" : "muted")"))
@@ -422,6 +516,7 @@ final class Mixer {
         let old = muteGroups[number - 1]
         muteGroups[number - 1].toggle()
         let new = muteGroups[number - 1]
+        record(address, .int(new ? 1 : 0))
         connection.send(OSCMessage(address, .int(new ? 1 : 0)))
         record(Change(address: address, old: .int(old ? 1 : 0), new: .int(new ? 1 : 0),
                       label: "Mute group \(number) \(new ? "on" : "off")"))
@@ -534,6 +629,7 @@ enum Screen: Identifiable, Hashable {
     case serviceMode
     case serviceEditor
     case monitorPairing
+    case backups
 
     var id: Self { self }
 }

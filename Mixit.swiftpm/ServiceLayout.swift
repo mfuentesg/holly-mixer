@@ -41,6 +41,8 @@ struct ServiceItem: Codable, Identifiable, Equatable {
 struct ServiceLayout: Codable, Equatable {
     var title = "Domingo AM · Volunteer"
     var items: [ServiceItem] = []
+    /// Number the "Call sound lead" button dials. Optional so older saved layouts still load.
+    var soundLeadPhone: String?
 }
 
 /// Formats a dB limit with a true minus sign: "+8.0", "−20.0", "0.0".

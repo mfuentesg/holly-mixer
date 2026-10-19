@@ -10,6 +10,7 @@ struct ServiceModeView: View {
     private let onPreviewExit: (() -> Void)?
 
     @State private var showingPIN = false
+    private let scenes = SceneStore.shared
 
     init(onPreviewExit: (() -> Void)? = nil) {
         self.onPreviewExit = onPreviewExit
@@ -25,6 +26,7 @@ struct ServiceModeView: View {
         VStack(spacing: 0) {
             header
             content
+            sceneFooter
         }
         .background(Theme.background.ignoresSafeArea())
         .sheet(isPresented: $showingPIN) {
@@ -33,6 +35,7 @@ struct ServiceModeView: View {
         }
         .onAppear {
             store.seedIfNeeded(mixer)
+            scenes.attach(mixer)
             UIApplication.shared.isIdleTimerDisabled = true
         }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
@@ -56,6 +59,20 @@ struct ServiceModeView: View {
             }
             Spacer(minLength: 8)
             connectionPill
+            if let phone = soundLeadURL {
+                Button {
+                    UIApplication.shared.open(phone)
+                } label: {
+                    Text("Call sound lead")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textBright)
+                        .padding(.horizontal, 16)
+                        .frame(height: 44)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.borderStrong, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
             Button(action: requestExit) {
                 HStack(spacing: 8) {
                     Image(systemName: "lock")
@@ -74,6 +91,49 @@ struct ServiceModeView: View {
         .frame(height: 72)
         .background(Theme.surface)
         .overlay(alignment: .bottom) { Rectangle().fill(Theme.border).frame(height: 1) }
+    }
+
+    /// NOW → NEXT bar with a hold-to-recall button (bottom of Service.dc.html).
+    @ViewBuilder
+    private var sceneFooter: some View {
+        if let next = scenes.stepTarget(1) {
+            let now = scenes.scene(scenes.show.currentSceneID)
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("NOW").sectionLabelStyle()
+                    Text(now?.name ?? "—")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                }
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Theme.textMuted)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(next.note.isEmpty ? "NEXT" : "NEXT · \(next.note.uppercased())")
+                        .sectionLabelStyle(Theme.accentText)
+                        .lineLimit(1)
+                    Text(next.name)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                HoldToRecallButton(label: "go to \(next.name)", title: "Hold to go to \(next.name)",
+                                   height: 64, cornerRadius: 14) {
+                    scenes.recall(next.id, fade: scenes.fadeFaders)
+                }
+                .frame(width: 300)
+            }
+            .padding(.horizontal, 20)
+            .frame(height: 96)
+            .background(Theme.surface)
+            .overlay(alignment: .top) { Rectangle().fill(Theme.border).frame(height: 1) }
+        }
+    }
+
+    private var soundLeadURL: URL? {
+        let digits = (store.layout.soundLeadPhone ?? "").filter { $0.isNumber || $0 == "+" }
+        return digits.isEmpty ? nil : URL(string: "tel:\(digits)")
     }
 
     private func requestExit() {
@@ -328,6 +388,15 @@ struct ServiceEditorView: View {
                 .foregroundStyle(Theme.textPrimary)
                 .frame(minHeight: 44)
                 .listRowBackground(Theme.card)
+            TextField("Sound lead phone (shows a “Call sound lead” button)", text: Binding(
+                get: { layout.soundLeadPhone ?? "" },
+                set: { layout.soundLeadPhone = $0.isEmpty ? nil : $0 }
+            ))
+            .keyboardType(.phonePad)
+            .font(.system(size: 17))
+            .foregroundStyle(Theme.textPrimary)
+            .frame(minHeight: 44)
+            .listRowBackground(Theme.card)
         } header: {
             Text("Layout title").sectionLabelStyle()
         }

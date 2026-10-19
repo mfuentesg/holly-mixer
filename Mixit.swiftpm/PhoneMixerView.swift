@@ -50,6 +50,7 @@ struct PhoneMixerView: View {
                     .frame(height: 28)
                     .background(Theme.accent.opacity(0.13))
             }
+            BackupBanner()
             rows(target: target, busColor: busColor)
                 .opacity(isReconnecting ? 0.4 : 1)
                 .saturation(isReconnecting ? 0.35 : 1)
@@ -131,6 +132,11 @@ struct PhoneMixerView: View {
                 mixer.presentedScreen = .serviceMode
             } label: {
                 Label("Start Service Mode", systemImage: "lock")
+            }
+            Button {
+                mixer.presentedScreen = .backups
+            } label: {
+                Label("Settings backup", systemImage: "clock.arrow.circlepath")
             }
             Button {
                 mixer.disconnect()

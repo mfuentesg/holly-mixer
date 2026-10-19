@@ -425,7 +425,7 @@ struct ScenesView: View {
     private var safeCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("RECALL SAFE FOR THIS SHOW").sectionLabelStyle()
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8, alignment: .leading)],
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 230), spacing: 8, alignment: .leading)],
                       alignment: .leading, spacing: 8) {
                 ForEach(mixer.buses.filter { isSafeBus($0) }) { bus in
                     chip(bus.displayName, dot: bus.color, prefix: "Bus \(busNumber(bus)) · ")

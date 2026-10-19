@@ -3,7 +3,7 @@
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
 for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
-## What works now (v0.4)
+## What works now (v0.5)
 
 Everything in the Mixit design canvas:
 
@@ -17,6 +17,11 @@ Everything in the Mixit design canvas:
 - **Service Mode:** locked volunteer layout with big faders and min/max limits, PIN to exit, and an editor
 - **iPhone:** portrait mixer with horizontal faders; musician "My mix" mode paired by QR code from the iPad
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer
+- **Settings backup:** Mixit saves every level, mute, name, EQ, gate and dynamics value on the device a few
+  seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
+  restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
+  backups, export and import between iPads
+- **Service Mode footer:** NOW → NEXT with a hold-to-go button, and an optional "Call sound lead" button
 - App icon from the design
 
 No mixer nearby? Tap **Try the demo mixer** on the connect screen: a simulated XR18 with the

@@ -1,5 +1,7 @@
 import Darwin
 import Foundation
+import Network
+import Observation
 
 /// A mixer that answered `/xinfo`.
 struct DiscoveredMixer: Identifiable, Hashable {
@@ -146,4 +148,68 @@ struct RecentMixer: Codable, Identifiable, Hashable {
     static func save(_ mixers: [RecentMixer]) -> String {
         (try? String(decoding: JSONEncoder().encode(mixers), as: UTF8.self)) ?? "[]"
     }
+}
+
+extension DiscoveredMixer {
+    /// Newest XR18 firmware the design was made against.
+    static let latestFirmware = "1.16"
+
+    /// True when the mixer runs older firmware than `latestFirmware` ("1.15" < "1.16").
+    var isFirmwareOutdated: Bool {
+        func parts(_ text: String) -> [Int] { text.split(separator: ".").map { Int($0) ?? 0 } }
+        let mine = parts(firmware), latest = parts(Self.latestFirmware)
+        for index in 0..<max(mine.count, latest.count) {
+            let a = index < mine.count ? mine[index] : 0
+            let b = index < latest.count ? latest[index] : 0
+            if a != b { return a < b }
+        }
+        return false
+    }
+}
+
+/// What kind of network this device is on right now (Wi-Fi, Ethernet, mobile data or none).
+@MainActor
+@Observable
+final class NetworkPathInfo {
+    enum Kind { case wifi, ethernet, cellular, other, none }
+
+    private(set) var kind = Kind.other
+    @ObservationIgnored private let monitor = NWPathMonitor()
+
+    init() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            let kind: Kind
+            if path.status != .satisfied { kind = .none }
+            else if path.usesInterfaceType(.wifi) { kind = .wifi }
+            else if path.usesInterfaceType(.wiredEthernet) { kind = .ethernet }
+            else if path.usesInterfaceType(.cellular) { kind = .cellular }
+            else { kind = .other }
+            Task { @MainActor in self?.kind = kind }
+        }
+        monitor.start(queue: DispatchQueue(label: "mixit.path"))
+    }
+
+    deinit { monitor.cancel() }
+
+    var title: String {
+        switch kind {
+        case .wifi: return "Wi-Fi"
+        case .ethernet: return "Ethernet"
+        case .cellular: return "Mobile data only"
+        case .other: return "Network"
+        case .none: return "Offline"
+        }
+    }
+
+    var hint: String {
+        switch kind {
+        case .wifi: return "Connected to Wi-Fi. Use the same network as the mixer."
+        case .ethernet: return "Connected over a wired adapter."
+        case .cellular: return "Not on Wi-Fi: the mixer can't be reached over mobile data."
+        case .other: return "Connected."
+        case .none: return "No network. Join the mixer's Wi-Fi or plug in Ethernet."
+        }
+    }
+
+    var isGood: Bool { kind == .wifi || kind == .ethernet || kind == .other }
 }

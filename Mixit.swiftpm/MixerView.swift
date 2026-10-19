@@ -23,6 +23,7 @@ struct MixerView: View {
                 ReconnectingBanner()
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
+            BackupBanner()
 
             HStack(spacing: 14) {
                 ScrollViewReader { proxy in
@@ -224,6 +225,8 @@ struct PresentedScreenView: View {
             ServiceEditorView()
         case .monitorPairing:
             MonitorPairingView()
+        case .backups:
+            BackupView()
         }
     }
 }
@@ -253,6 +256,11 @@ struct MoreMenu: View {
                 mixer.presentedScreen = .monitorPairing
             } label: {
                 Label("Pair a musician's iPhone", systemImage: "qrcode")
+            }
+            Button {
+                mixer.presentedScreen = .backups
+            } label: {
+                Label("Settings backup", systemImage: "clock.arrow.circlepath")
             }
         } label: {
             Image(systemName: "ellipsis")

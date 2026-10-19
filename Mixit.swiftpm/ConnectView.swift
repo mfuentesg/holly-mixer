@@ -11,6 +11,7 @@ struct ConnectView: View {
     @State private var isScanning = false
     @State private var check: NetworkCheck?
     @State private var isChecking = false
+    @State private var path = NetworkPathInfo()
 
     var body: some View {
         let columns = sizeClass == .regular
@@ -235,6 +236,15 @@ struct ConnectView: View {
                 }
                 .lineLimit(1)
                 Spacer()
+                if info.isFirmwareOutdated {
+                    Text("Firmware \(info.firmware)")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.amberText)
+                        .padding(.horizontal, 10)
+                        .frame(height: 28)
+                        .background(Theme.meterAmber.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.meterAmber.opacity(0.4), lineWidth: 1))
+                }
                 if isLastUsed {
                     Text("Last used")
                         .font(.system(size: 12, weight: .semibold))
@@ -285,6 +295,8 @@ struct ConnectView: View {
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.border, lineWidth: 1))
 
+            isolationCard
+
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: "globe")
                     .font(.system(size: 20))
@@ -316,8 +328,30 @@ struct ConnectView: View {
         }
     }
 
+    /// Shown when the mixer can't be seen: the usual cause on church networks.
+    @ViewBuilder
+    private var isolationCard: some View {
+        let unreachable = (check.map { !$0.isReachable } ?? false) || (found.isEmpty && !isScanning)
+        if unreachable {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Can't see the mixer?")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Color(hex: 0xFFE4A0))
+                Text("Guest Wi-Fi networks often block devices from seeing each other. Join the same network as the mixer (for example the staff network), then scan again.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color(hex: 0xE9D7A5))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.meterAmber.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.meterAmber.opacity(0.4), lineWidth: 1))
+        }
+    }
+
     @ViewBuilder
     private var checkRows: some View {
+        checkRow(ok: path.isGood, label: path.title, hint: path.hint, value: path.isGood ? "on" : "off")
         if let check {
             checkRow(ok: check.isReachable, label: "Mixer reachable",
                      hint: check.isReachable ? "\(check.host) answered on the control port" : "\(check.host) did not answer",

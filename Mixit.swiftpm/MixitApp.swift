@@ -35,6 +35,7 @@ struct ContentView: View {
         }
         .task {
             // Reconnect to the last mixer on launch.
+            BackupStore.shared.attach(mixer)
             guard !didAutoConnect else { return }
             didAutoConnect = true
             mixer.connect(host: host)

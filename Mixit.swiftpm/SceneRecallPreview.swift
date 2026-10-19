@@ -225,6 +225,10 @@ struct SceneWarningsView: View {
 @MainActor
 struct HoldToRecallButton: View {
     let label: String
+    /// Idle caption; the default is "Hold to recall".
+    var title = "Hold to recall"
+    var height: CGFloat = 56
+    var cornerRadius: CGFloat = 12
     let onComplete: () -> Void
 
     @State private var progress: Double = 0
@@ -241,7 +245,7 @@ struct HoldToRecallButton: View {
                 Theme.accent.frame(width: proxy.size.width * progress)
             }
             HStack(spacing: 10) {
-                Text(isHolding ? "Keep holding" : "Hold to recall")
+                Text(isHolding ? "Keep holding" : title)
                     .font(.system(size: 16, weight: .bold))
                 Text(String(format: "%.1f s", max(0, Self.holdDuration * (1 - progress))))
                     .font(Theme.mono(13, .regular))
@@ -250,9 +254,9 @@ struct HoldToRecallButton: View {
             .foregroundStyle(progress > 0.5 ? Theme.onAccent : Color.white)
             .frame(maxWidth: .infinity)
         }
-        .frame(height: 56)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .frame(height: height)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in begin() }
