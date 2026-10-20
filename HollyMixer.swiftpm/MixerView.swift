@@ -103,7 +103,7 @@ struct MixerHeader: View {
                 Text(mixer.mixerName.isEmpty ? mixer.host : mixer.mixerName)
                     .font(Theme.mono(14))
                     .foregroundStyle(Theme.textPrimary)
-                Text(L("\(mixer.model) · fw \(mixer.firmware) · \(mixer.isDemo ? L("demo") : mixer.host)"))
+                Text(L("\(mixer.model) · fw \(mixer.firmware) · \(mixer.isDemo ? L("demo") : mixer.host)") + " · v\(AppInfo.version)")
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textTertiary)
             }
@@ -139,7 +139,7 @@ struct MixerHeader: View {
             MoreMenu(showsTitle: !isCompact && !isShort)
 
             if !isCompact {
-                MiniStereoMeter(left: mixer.main.meter, right: mixer.main.meterRight ?? mixer.main.meter)
+                MainMiniMeter(strip: mixer.main)
                     .frame(width: 104)
             }
         }
@@ -548,5 +548,23 @@ struct MixerFooter: View {
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 1)
         }
+    }
+}
+
+enum AppInfo {
+    /// "0.1 (1)": marketing version and build number from Info.plist.
+    static let version: String = {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(short) (\(build))"
+    }()
+}
+
+/// Header level of Main LR. Separate view so the 20 Hz meter doesn't re-evaluate the whole header.
+private struct MainMiniMeter: View {
+    let strip: Strip
+    var body: some View {
+        MiniStereoMeter(left: strip.meter, right: strip.meterRight ?? strip.meter)
     }
 }

@@ -70,10 +70,17 @@ final class Strip: Identifiable {
     var meter: Float = -90
     /// Right channel of a stereo meter, if the strip has one.
     var meterRight: Float?
+    /// True once a right meter channel has been seen. Views read this, not `meterRight`, so layout
+    /// doesn't depend on a value that changes 20 times a second.
+    var isStereoMeter = false
     /// Peak-hold level in dBFS, decaying slowly.
     var peak: Float = -90
     /// Send levels (same 0...1 taper as faders), see `MixTarget.sendIndex`.
     var sends: [Float]
+    /// Mute groups (bit 0 = group 1) and DCAs (bit 0 = DCA 1) the strip belongs to, from `grp/mute` and `grp/dca`.
+    /// Kept here, not read from `Mixer.liveValues`, so a fader drag doesn't redraw every strip.
+    var muteGroupMask = 0
+    var dcaMask = 0
     /// Briefly true after another client (X AIR, another iPad, the mixer) changed this strip.
     var changedElsewhere = false
 
@@ -204,6 +211,10 @@ final class Strip: Identifiable {
             gateOn = value != 0
         case ("dyn/on", .int(let value)?):
             compressorOn = value != 0
+        case ("grp/mute", .int(let value)?):
+            muteGroupMask = Int(value)
+        case ("grp/dca", .int(let value)?):
+            dcaMask = Int(value)
         case ("config/name", .string(let value)?):
             name = value
         case ("config/color", .int(let value)?):
@@ -224,6 +235,7 @@ final class Strip: Identifiable {
     func setMeter(_ level: Float, right: Float? = nil) {
         meter = level
         meterRight = right
+        if right != nil { isStereoMeter = true }
         let loudest = max(level, right ?? level)
         peak = max(loudest, peak - 0.6)
     }

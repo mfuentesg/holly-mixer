@@ -18,6 +18,7 @@ struct FaderView: View {
     var onChange: (Float) -> Void
 
     static let unity: Float = 0.75
+    private static let dragSpace = "faderTrack"
     private var capHeight: CGFloat { isCompact ? 40 : 54 }
     /// Space above and below the travel so the cap can sit at the ends.
     private var inset: CGFloat { isCompact ? 20 : 28 }
@@ -43,19 +44,6 @@ struct FaderView: View {
             ZStack(alignment: .topLeading) {
                 scale(travel: travel, centerX: centerX, trackWidth: trackWidth)
 
-                if isDragging {
-                    Text(formatDecibels(value))
-                        .font(Theme.mono(12, .bold))
-                        .foregroundStyle(Theme.onAccent)
-                        .padding(.horizontal, 8)
-                        .frame(height: 26)
-                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 8))
-                        .shadow(color: .black.opacity(0.5), radius: 8, y: 6)
-                        .fixedSize()
-                        .position(x: centerX, y: capCenterY - 38 - 13)
-                        .zIndex(2)
-                }
-
                 // Only the cap takes drags, so swiping elsewhere scrolls the strip row.
                 cap
                     .frame(width: max(trackWidth, capWidth), height: capHeight + 16)
@@ -72,6 +60,7 @@ struct FaderView: View {
                     .position(x: centerX, y: capCenterY)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .coordinateSpace(name: Self.dragSpace)
         }
         .frame(minHeight: isCompact ? 70 : 140)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
@@ -86,7 +75,9 @@ struct FaderView: View {
     }
 
     private func drag(travel: CGFloat) -> some Gesture {
-        DragGesture(minimumDistance: 0)
+        // Measured in the fixed track space, not the cap's own: the cap moves under the finger, which would
+        // shrink the translation and make it lag behind.
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.dragSpace))
             .onChanged { gesture in
                 if dragStartValue == nil && !isHorizontalSwipe {
                     // Wait for a clear vertical move: a sideways swipe across the strips only scrolls.
@@ -168,14 +159,8 @@ struct FaderView: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(isDragging ? Theme.accent : Color.white.opacity(0.16), lineWidth: 1)
         }
-        .background {
-            if isDragging {
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Theme.accent.opacity(0.28), lineWidth: 3)
-                    .padding(-2.5)
-            }
-        }
-        .shadow(color: .black.opacity(isDragging ? 0.7 : 0.55), radius: isDragging ? 13 : 7, y: isDragging ? 14 : 6)
+        // No glow ring and no wide shadow while dragging: together they read as a second cap trailing behind.
+        .shadow(color: .black.opacity(0.55), radius: isDragging ? 8 : 7, y: isDragging ? 7 : 6)
         .scaleEffect(isDragging ? 1.08 : 1)
         .opacity(isMuted ? 0.55 : 1)
         .animation(.spring(duration: 0.18), value: isDragging)

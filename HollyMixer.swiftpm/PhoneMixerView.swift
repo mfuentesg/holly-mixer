@@ -66,6 +66,12 @@ struct PhoneMixerView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     ConnectionPill()
+                    if mixer.soloedStrips.isEmpty {
+                        Text("v\(AppInfo.version)")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Theme.textTertiary)
+                            .lineLimit(1)
+                    }
                     if let soloed = mixer.soloedStrips.first {
                         Button {
                             mixer.clearSolo()

@@ -40,7 +40,7 @@ struct ChannelStripView: View {
                 statusRow
             }
             if isMaster && !isCompact {
-                Text(strip.meterRight == nil ? L("MONO") : L("STEREO"))
+                Text(strip.isStereoMeter ? L("STEREO") : L("MONO"))
                     .sectionLabelStyle()
                     .frame(height: 28)
             }
@@ -51,7 +51,7 @@ struct ChannelStripView: View {
                     lineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textDim),
                     capLineColor: busColor ?? (strip.isNamed || isMaster ? strip.color : Theme.textTertiary),
                     isMuted: muted || silencer != nil,
-                    capWidth: isMaster ? 44 : strip.meterRight == nil ? 38 : 32,
+                    capWidth: isMaster ? 44 : strip.isStereoMeter ? 32 : 38,
                     label: faderLabel,
                     isCompact: isCompact,
                     isDragging: $isDragging,
@@ -234,17 +234,8 @@ struct ChannelStripView: View {
         .accessibilityLabel("Gate \(strip.gateOn ? "on" : "off"), compressor \(strip.compressorOn ? "on" : "off")")
     }
 
-    @ViewBuilder
     private var meters: some View {
-        if let right = strip.meterRight {
-            // Narrower pair so the fader cap stays clear of the meters on a 78 pt strip.
-            HStack(spacing: 2) {
-                MeterView(level: strip.meter, peak: strip.peak).frame(width: isMaster ? 7 : 5)
-                MeterView(level: right, peak: strip.peak).frame(width: isMaster ? 7 : 5)
-            }
-        } else {
-            MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)
-        }
+        StripMeters(strip: strip, isMaster: isMaster)
     }
 
     private var stripFill: Color {
@@ -405,5 +396,23 @@ struct PanArc: View {
         let amount = Int((Double(pan) * 2 - 1) * 100)
         if amount == 0 { return "C" }
         return (amount < 0 ? "L" : "R") + "\(abs(amount))"
+    }
+}
+
+/// The strip's level meter(s). Reads the 20 Hz meter values itself, so only the bars redraw.
+private struct StripMeters: View {
+    let strip: Strip
+    let isMaster: Bool
+
+    var body: some View {
+        if strip.isStereoMeter {
+            // Narrower pair so the fader cap stays clear of the meters on a 78 pt strip.
+            HStack(spacing: 2) {
+                MeterView(level: strip.meter, peak: strip.peak).frame(width: isMaster ? 7 : 5)
+                MeterView(level: strip.meterRight ?? strip.meter, peak: strip.peak).frame(width: isMaster ? 7 : 5)
+            }
+        } else {
+            MeterView(level: strip.meter, peak: strip.peak).frame(width: 7)
+        }
     }
 }

@@ -19,6 +19,7 @@ struct PhoneHorizontalFader: View {
     var onChange: (Float) -> Void
 
     static let unity: Float = 0.75
+    private static let dragSpace = "faderTrack"
     /// Scale marks in dB.
     private static let marks: [Float] = [10, 5, 0, -5, -10, -20, -30, -40, -50]
 
@@ -55,6 +56,7 @@ struct PhoneHorizontalFader: View {
                     .position(x: capX, y: geometry.size.height / 2)
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .coordinateSpace(name: Self.dragSpace)
         }
         .frame(minHeight: 36)
         .sensoryFeedback(.selection, trigger: value >= Self.unity)
@@ -71,7 +73,9 @@ struct PhoneHorizontalFader: View {
     }
 
     private func drag(travel: CGFloat) -> some Gesture {
-        DragGesture(minimumDistance: 0)
+        // Measured in the fixed track space, not the cap's own: the cap moves under the finger, which would
+        // shrink the translation and make it lag behind.
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.dragSpace))
             .onChanged { gesture in
                 if dragStartValue == nil && !isVerticalSwipe {
                     // Wait for a clear sideways move: a vertical swipe that starts on a cap scrolls the list.

@@ -73,7 +73,7 @@ final class Mixer {
     private(set) var fullStateReady = false
     /// Every value seen or sent in this session, by OSC address (levels, EQ, names…). The settings
     /// backup is made from this.
-    private(set) var liveValues: [String: OSCArgument] = [:]
+    @ObservationIgnored private(set) var liveValues: [String: OSCArgument] = [:]
     /// Called after `liveValues` changes (cheap: it only flags the backup as dirty).
     @ObservationIgnored var onValuesChanged: (() -> Void)?
     /// Called once per connection when `fullStateReady` becomes true.
@@ -677,8 +677,7 @@ final class Mixer {
 
     /// Which DCAs (bit mask) a strip belongs to. Needs `/…/grp/dca` to have been read.
     func dcaMask(of strip: Strip) -> Int {
-        if case .int(let value)? = liveValues["\(strip.base)/grp/dca"] { return Int(value) }
-        return 0
+        strip.dcaMask
     }
 
     func setDCAMembership(_ strip: Strip, dca number: Int, member: Bool) {
@@ -691,8 +690,7 @@ final class Mixer {
 
     /// Which mute groups (bit mask, bit 0 = group 1) a strip belongs to. Needs `/…/grp/mute` to have been read.
     func muteGroupMask(of strip: Strip) -> Int {
-        if case .int(let value)? = liveValues["\(strip.base)/grp/mute"] { return Int(value) }
-        return 0
+        strip.muteGroupMask
     }
 
     func setMuteGroupMembership(_ strip: Strip, group number: Int, member: Bool) {
