@@ -16,4 +16,9 @@ of skipping it silently.
 - The app is localized in English and Spanish (`es.lproj/Localizable.strings`, English text = key): add both.
 - Debug builds accept `SIMCTL_CHILD_HM_SHOT=<screen>` (see `ScreenshotMode.swift`) for screenshots with the demo mixer.
 - `tools/fake_xair.py` is a fake mixer for connection/restore testing (`docs/FAKE_MIXER.md`).
+- Live-control performance: views must not read values that change at meter rate (`Strip.meter`, `peak`) or on every
+  fader tick (`Mixer.liveValues`, which is `@ObservationIgnored`) in a big `body`; read them in a small child view
+  (see `StripMeters`), or the whole strip row re-renders.
+- A `DragGesture` on a view that moves under the finger (fader cap, EQ dot) must use a fixed `coordinateSpace:`
+  (see `FaderView.dragSpace`), or the translation shrinks and the control lags behind the finger.
 - Device install needs `DEVELOPMENT_TEAM=27322XSMN7` and bundle id `com.mfuentesg.hollymixer`.
