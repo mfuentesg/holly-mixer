@@ -4,7 +4,7 @@ import SwiftUI
 struct PhoneMixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(Localization.self) private var localization
-    @State private var showScanner = false
+    @State private var showsMonitorSetup = false
     @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
     var onPair: (MonitorPairing) -> Void
 
@@ -45,15 +45,15 @@ struct PhoneMixerView: View {
         .onChange(of: showsEffects) { _, shows in
             if !shows, case .fxSend = mixer.selectedMix { mixer.selectedMix = .main }
         }
-        .onChange(of: mixer.showsPairingScanner) { _, wanted in
+        .onChange(of: mixer.showsMonitorSetup) { _, wanted in
             if wanted {
-                showScanner = true
-                mixer.showsPairingScanner = false
+                showsMonitorSetup = true
+                mixer.showsMonitorSetup = false
             }
         }
-        .sheet(isPresented: $showScanner) {
-            MonitorPairingScannerSheet { pairing in
-                showScanner = false
+        .sheet(isPresented: $showsMonitorSetup) {
+            MonitorSetupSheet { pairing in
+                showsMonitorSetup = false
                 onPair(pairing)
             }
         }

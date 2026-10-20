@@ -40,7 +40,7 @@ struct ContentView: View {
                     MixerView()
                 }
             } else {
-                ConnectView(host: $host, onPair: join, onSimple: joinSimple)
+                ConnectView(host: $host, onPair: join)
             }
         }
         .task {
@@ -87,18 +87,6 @@ struct ContentView: View {
         } else {
             host = pairing.host
             mixer.connect(host: pairing.host)
-        }
-    }
-
-    /// The pastor's device scanned a Simple view code: lock into it and connect to the mixer.
-    private func joinSimple(_ config: SimpleViewConfig) {
-        SimpleViewStore.shared.start(config)
-        guard let target = config.host else { return }
-        if target == "demo" {
-            mixer.startDemo()
-        } else {
-            host = target
-            mixer.connect(host: target)
         }
     }
 

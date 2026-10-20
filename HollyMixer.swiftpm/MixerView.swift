@@ -165,8 +165,6 @@ struct PresentedScreenView: View {
             }
         case .simpleView:
             SimpleViewSettingsView()
-        case .monitorPairing:
-            MonitorPairingView()
         case .backups:
             BackupView()
         case .snapshots:

@@ -7,7 +7,6 @@ struct ConnectView: View {
     @Binding var host: String
     /// Lets a musician or the pastor pair before the device has connected to anything.
     var onPair: ((MonitorPairing) -> Void)?
-    var onSimple: ((SimpleViewConfig) -> Void)?
     @AppStorage("recentMixers") private var recentJSON = "[]"
 
     @State private var found: [DiscoveredMixer] = []
@@ -15,7 +14,7 @@ struct ConnectView: View {
     @State private var check: NetworkCheck?
     @State private var isChecking = false
     @State private var path = NetworkPathInfo()
-    @State private var showsScanner = false
+    @State private var showsSetup = false
 
     var body: some View {
         let columns = sizeClass == .regular
@@ -191,18 +190,18 @@ struct ConnectView: View {
             }
             .buttonStyle(.plain)
 
-            if onPair != nil {
+            if onPair != nil && UIDevice.current.userInterfaceIdiom == .phone {
                 Button {
-                    showsScanner = true
+                    showsSetup = true
                 } label: {
                     HStack(spacing: 14) {
-                        Image(systemName: "qrcode.viewfinder")
+                        Image(systemName: "person.wave.2")
                             .scaledFont(20, .semibold)
                             .foregroundStyle(Theme.textControl)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(L("I have a code"))
+                            Text(L("I'm a musician"))
                                 .scaledFont(16, .bold)
-                            Text(L("Musicians and the pastor: scan the code shown on the sound desk's iPad."))
+                            Text(L("Set up this phone to control only your own monitor mix."))
                                 .scaledFont(13)
                                 .foregroundStyle(Theme.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -219,14 +218,11 @@ struct ConnectView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .sheet(isPresented: $showsScanner) {
-                    MonitorPairingScannerSheet(onPair: { pairing in
-                        showsScanner = false
+                .sheet(isPresented: $showsSetup) {
+                    MonitorSetupSheet { pairing in
+                        showsSetup = false
                         onPair?(pairing)
-                    }, onSimple: { config in
-                        showsScanner = false
-                        onSimple?(config)
-                    })
+                    }
                 }
             }
         }

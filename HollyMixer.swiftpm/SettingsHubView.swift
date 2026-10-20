@@ -10,8 +10,8 @@ struct SettingsHubView: View {
     @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
     @State private var confirmsDisconnect = false
 
-    /// iPhone in portrait scans the pairing code; the iPad (and landscape) shows the code.
-    private var scansPairingCode: Bool { UIDevice.current.userInterfaceIdiom == .phone && verticalSizeClass != .compact }
+    /// Musician mode is for phones in portrait.
+    private var offersMusicianSetup: Bool { UIDevice.current.userInterfaceIdiom == .phone && verticalSizeClass != .compact }
 
     var body: some View {
         NavigationStack {
@@ -59,7 +59,7 @@ struct SettingsHubView: View {
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
                     }
                     group(L("SAFETY"), rows: safetyRows)
-                    group(L("MUSICIANS"), rows: [pairRow])
+                    if !musicianRows.isEmpty { group(L("MUSICIANS"), rows: musicianRows) }
                     group(L("HELP"), rows: [
                         row("questionmark.circle", L("Help"),
                             L("Why a channel is silent, mixing for a musician, mute groups and restoring settings."), .help),
@@ -109,17 +109,14 @@ struct SettingsHubView: View {
         return rows
     }
 
-    private var pairRow: SettingsRow {
-        if scansPairingCode {
-            return SettingsRow(icon: "qrcode.viewfinder", title: L("Pair as musician…"),
-                               detail: L("Scan the code on the sound desk's iPad to control only your own monitor mix."),
-                               screen: nil) {
-                mixer.presentedScreen = nil
-                mixer.showsPairingScanner = true
-            }
-        }
-        return row("qrcode", L("Pair a musician's iPhone"),
-                   L("Shows a code that locks a musician's iPhone to one monitor mix."), .monitorPairing)
+    /// Musician mode is for phones: the row only exists on an iPhone in portrait.
+    private var musicianRows: [SettingsRow] {
+        guard offersMusicianSetup else { return [] }
+        return [SettingsRow(icon: "person.wave.2", title: L("Set up as musician…"),
+                            detail: L("Control only your own monitor mix from this phone."), screen: nil) {
+            mixer.presentedScreen = nil
+            mixer.showsMonitorSetup = true
+        }]
     }
 
     private func row(_ icon: String, _ title: String, _ detail: String, _ screen: Screen) -> SettingsRow {

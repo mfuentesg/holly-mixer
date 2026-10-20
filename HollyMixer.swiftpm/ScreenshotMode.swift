@@ -42,7 +42,6 @@ enum ScreenshotMode {
         case "settings": mixer.presentedScreen = .settings
         case "mutegroups": mixer.presentedScreen = .muteGroups
         case "snapshots": mixer.presentedScreen = .snapshots
-        case "pairing": mixer.presentedScreen = .monitorPairing
         case "silenced": mixer.toggleMuteGroup(1)
         case "help": mixer.presentedScreen = .help
         case "simplesettings": mixer.presentedScreen = .simpleView

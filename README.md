@@ -14,9 +14,9 @@ Everything in the Holly Mixer design canvas:
   mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
-- **Simple view (for the pastor):** the sound lead chooses which input channels someone sees; he gets one big MUTE button per channel (optional volume slider) and nothing else. It can lock this device or be paired to another iPad/iPhone with a QR code, and leaving it can require a PIN
+- **Simple view (for the pastor):** the sound lead chooses which input channels someone sees; he gets one big MUTE button per channel (optional volume slider) and nothing else. It locks the device it is started on (each device is set up once), and leaving it can require a PIN
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
-  SOLO and MUTE side by side) so every control fits; musician "My mix" mode paired by QR code from the iPad
+  SOLO and MUTE side by side) so every control fits; musician "My mix" mode set up on the phone with the mixer address, monitor and channel
 - **Safety on a live system:** a channel silenced by a mute group or a muted DCA shows "G1" / "DCA2" on its MUTE
   button; mute groups can be named and show how many channels they hold; in a monitor mix the strip button takes the
   channel out of that mix instead of muting the room; a double-tap resets a fader only from its cap, and never from

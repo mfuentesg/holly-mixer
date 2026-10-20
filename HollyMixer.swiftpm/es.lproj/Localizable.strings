@@ -245,7 +245,6 @@
 "Mute group %lld" = "Grupo de mute %lld";
 "Exit demo" = "Salir de la demo";
 "Disconnect from mixer" = "Desconectar de la consola";
-"Pair a musician's iPhone" = "Vincular el iPhone de un músico";
 "More" = "Más";
 "Recent changes" = "Cambios recientes";
 "Undo. %lld changes in history" = "Deshacer. %lld cambios en el historial";
@@ -265,7 +264,6 @@
 "Main LR" = "Main LR";
 "Mix: %@" = "Mezcla: %@";
 "Choose which mix the faders control" = "Elige qué mezcla controlan los faders";
-"Pair as musician…" = "Vincular como músico…";
 "Disconnect" = "Desconectar";
 "Mute %@, %@" = "Mute de %1$@, %2$@";
 "Solo %@, %@" = "Solo de %1$@, %2$@";
@@ -285,19 +283,9 @@
 "%@ in my mix" = "%@ en mi mezcla";
 "Hold to exit" = "Mantén para salir";
 "Touch and hold for two seconds" = "Mantén pulsado dos segundos";
-"Locks the iPhone to one bus: the musician only mixes their own monitor." = "Fija el iPhone a un bus: el músico solo mezcla su propio monitor.";
 "BUS" = "BUS";
-"ME (THE MUSICIAN'S OWN CHANNEL)" = "YO (EL CANAL DEL PROPIO MÚSICO)";
 "Ch %lld" = "Can. %lld";
-"Pairing QR code for %@" = "Código QR de vinculación para %@";
-"On the musician's iPhone open Holly Mixer, then Settings > Pair as musician and scan this code." = "En el iPhone del músico abre Holly Mixer, luego Ajustes > Vincular como músico y escanea este código.";
-"This mixer's address can't be put in a code. Check the connection." = "La dirección de esta consola no se puede poner en un código. Revisa la conexión.";
 "Mixer" = "Consola";
-"Pair as musician" = "Vincular como músico";
-"The camera can't scan codes on this device. Enter the details shown on the sound desk's iPad." = "La cámara no puede escanear códigos en este dispositivo. Escribe los datos que muestra el iPad de la mesa de sonido.";
-"Point the camera at the code on the sound desk's iPad." = "Apunta la cámara al código del iPad de la mesa de sonido.";
-"QR code scanner" = "Escáner de código QR";
-"Enter manually" = "Escribir a mano";
 "Mixer address (e.g. 192.168.1.2)" = "Dirección de la consola (p. ej. 192.168.1.2)";
 "Join" = "Unirse";
 "Bus" = "Bus";
@@ -447,15 +435,12 @@
 "Loading a snapshot changes whatever its recall scope covers, like on the mixer itself. Holly Mixer saves a safety copy first. The commands follow the official protocol document and still need to be checked on a real mixer." = "Cargar un snapshot cambia lo que cubra su alcance de carga, igual que en la consola. Holly Mixer guarda antes una copia de seguridad. Los comandos siguen el documento oficial del protocolo y aún hay que comprobarlos en una consola real.";
 "Locked" = "Bloqueado";
 "Free" = "Libre";
-"Changing return" = "Cambio de retorno";
-"CHANGING RETURN" = "CAMBIO DE RETORNO";
 "Change return" = "Cambiar de retorno";
 "In use" = "En uso";
 "Unused" = "Sin usar";
 "Show unused returns" = "Mostrar retornos sin usar";
 "Only the return changes. Your own channel stays the same." = "Solo cambia el retorno. Tu propio canal sigue igual.";
 "Return" = "Retorno";
-"The mixer has no user accounts, so this limit lives in Holly Mixer only. Locked: the musician can't change return. Free: one tap, for the sound lead." = "La consola no tiene cuentas de usuario, así que este límite existe solo en Holly Mixer. Bloqueado: el músico no puede cambiar de retorno. Libre: un toque, para el responsable de sonido.";
 
 /* Mute groups */
 "MUTE GROUPS" = "GRUPOS DE MUTE";
@@ -475,8 +460,6 @@
 "Choose which channels each of the 4 groups silences together." = "Elige qué canales silencia a la vez cada uno de los 4 grupos.";
 "Saved copies of every setting; restore them if the mixer forgets them." = "Copias guardadas de todos los ajustes; restáuralas si la consola los olvida.";
 "The 64 memories stored inside the mixer itself." = "Las 64 memorias guardadas dentro de la propia consola.";
-"Scan the code on the sound desk's iPad to control only your own monitor mix." = "Escanea el código del iPad de la mesa de sonido para controlar solo tu mezcla de monitor.";
-"Shows a code that locks a musician's iPhone to one monitor mix." = "Muestra un código que fija el iPhone de un músico a una mezcla de monitor.";
 "CHANNELS" = "CANALES";
 "AUX · FX" = "AUX · FX";
 "BUSES · FX SENDS" = "BUSES · ENVÍOS FX";
@@ -497,8 +480,6 @@
 "NAME" = "NOMBRE";
 "Name (e.g. Band)" = "Nombre (p. ej. Banda)";
 "Monitor" = "Retorno";
-"MONITOR" = "RETORNO";
-"That isn't a Holly Mixer pairing code." = "Ese código no es de Holly Mixer.";
 "Enter the mixer's address, like 192.168.1.2." = "Escribe la dirección de la consola, por ejemplo 192.168.1.2.";
 "Disconnect from the mixer?" = "¿Desconectar de la consola?";
 "The mixer keeps working. Only this app stops controlling it." = "La consola sigue funcionando. Solo esta app deja de controlarla.";
@@ -530,9 +511,6 @@
 "Settings › Settings backup keeps every saved copy." = "Ajustes › Copia de ajustes guarda todas las copias.";
 "Simple view" = "Vista simple";
 "Let someone mute and unmute only the channels you choose." = "Permite que alguien silencie y active solo los canales que elijas.";
-"Scan a code" = "Escanear un código";
-"I have a code" = "Tengo un código";
-"Musicians and the pastor: scan the code shown on the sound desk's iPad." = "Músicos y el pastor: escanea el código que muestra el iPad de la mesa de sonido.";
 "Go back to the full view?" = "¿Volver a la vista completa?";
 "Full view" = "Vista completa";
 "You will see every channel and every control." = "Verás todos los canales y todos los controles.";
@@ -551,6 +529,9 @@
 "ON THIS DEVICE" = "EN ESTE DISPOSITIVO";
 "Start Simple view on this device" = "Iniciar la vista simple en este dispositivo";
 "This device then shows only those channels until the PIN is entered (or the lock button is held and confirmed)." = "Este dispositivo mostrará solo esos canales hasta escribir el PIN (o mantener el botón de bloqueo y confirmar).";
-"ON ANOTHER DEVICE" = "EN OTRO DISPOSITIVO";
-"Pairing QR code for the Simple view" = "Código QR para la vista simple";
-"On the other iPad or iPhone, open Holly Mixer and tap “I have a code”, then scan this. It starts in Simple view and stays there." = "En el otro iPad o iPhone, abre Holly Mixer, toca «Tengo un código» y escanéalo. Empieza en la vista simple y se queda ahí.";
+"Set up as musician" = "Configurar como músico";
+"Set up as musician…" = "Configurar como músico…";
+"Control only your own monitor mix from this phone." = "Controla solo tu propia mezcla de monitor desde este teléfono.";
+"Set up this phone to control only your own monitor mix." = "Configura este teléfono para controlar solo tu propia mezcla de monitor.";
+"This phone will only control your own monitor mix. Ask the sound lead for the address, the monitor and your channel." = "Este teléfono solo controlará tu propia mezcla de monitor. Pide al responsable de sonido la dirección, el monitor y tu canal.";
+"Monitor %lld" = "Retorno %lld";

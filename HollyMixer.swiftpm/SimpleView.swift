@@ -11,40 +11,7 @@ struct SimpleViewConfig: Codable, Equatable {
     var allowsVolume = false
     /// Hash of the PIN needed to go back to the full view; nil = holding the lock button and confirming is enough.
     var exitPinHash: String?
-    /// Mixer to connect to when this config came from a QR code ("demo" for the demo mixer).
-    var host: String?
-
     init() {}
-
-    /// `hollymixer://simple?host=<host>&ch=1,5,6&vol=0&pin=<hash>`; nil for anything else.
-    init?(code: String) {
-        let text = code.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let components = URLComponents(string: text),
-              components.scheme?.lowercased() == "hollymixer",
-              components.host?.lowercased() == "simple" else { return nil }
-        let items = components.queryItems ?? []
-        func value(_ name: String) -> String? { items.first { $0.name == name }?.value }
-        guard let host = value("host"), !host.isEmpty, let list = value("ch") else { return nil }
-        let numbers = list.split(separator: ",").compactMap { Int($0) }.filter { (1...16).contains($0) }
-        guard !numbers.isEmpty else { return nil }
-        self.host = host
-        channels = numbers
-        allowsVolume = value("vol") == "1"
-        exitPinHash = value("pin").flatMap { $0.count == 16 && $0.allSatisfy(\.isHexDigit) ? $0 : nil }
-    }
-
-    /// The text for the QR code, or nil without a mixer address.
-    func code(host: String) -> String? {
-        var components = URLComponents()
-        components.scheme = "hollymixer"
-        components.host = "simple"
-        components.queryItems = [
-            URLQueryItem(name: "host", value: host),
-            URLQueryItem(name: "ch", value: channels.map(String.init).joined(separator: ",")),
-            URLQueryItem(name: "vol", value: allowsVolume ? "1" : "0"),
-        ] + (exitPinHash.map { [URLQueryItem(name: "pin", value: $0)] } ?? [])
-        return components.string
-    }
 }
 
 /// The draft being edited, and whether this device is locked in Simple view right now. Both are kept on the device.
@@ -211,8 +178,6 @@ struct SimpleViewSettingsView: View {
     private let store = SimpleViewStore.shared
     @State private var pin = ""
 
-    private var host: String { mixer.isDemo ? "demo" : mixer.host }
-
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
@@ -223,10 +188,6 @@ struct SimpleViewSettingsView: View {
                     channelsCard(draft: $store.draft)
                     optionsCard(draft: $store.draft)
                     actionsCard
-                    if let code = store.draft.code(host: host), !store.draft.channels.isEmpty,
-                       let image = QRCode.image(for: code) {
-                        pairCard(image: image)
-                    }
                 }
                 .padding(20)
                 .frame(maxWidth: 820)
@@ -341,26 +302,6 @@ struct SimpleViewSettingsView: View {
             Text(L("This device then shows only those channels until the PIN is entered (or the lock button is held and confirmed)."))
                 .scaledFont(12)
                 .foregroundStyle(Theme.textTertiary)
-        }
-        .card()
-    }
-
-    private func pairCard(image: UIImage) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L("ON ANOTHER DEVICE")).sectionLabelStyle()
-            HStack(alignment: .top, spacing: 16) {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(10)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 12))
-                    .frame(width: 180, height: 180)
-                    .accessibilityLabel(L("Pairing QR code for the Simple view"))
-                Text(L("On the other iPad or iPhone, open Holly Mixer and tap “I have a code”, then scan this. It starts in Simple view and stays there."))
-                    .scaledFont(14)
-                    .foregroundStyle(Theme.textSecondary)
-            }
         }
         .card()
     }

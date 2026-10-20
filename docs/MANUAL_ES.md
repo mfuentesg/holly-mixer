@@ -131,7 +131,7 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 | | **Grupos de mute** | Elige **qué canales pertenecen a cada grupo** y **ponle nombre** (hasta 12 letras, p. ej. «Banda»; el nombre sale en el botón del pie). Arriba eliges el grupo (1–4, con su nombre y cuántos canales tiene); debajo ves todos los canales con un círculo: **toca un canal para incluirlo (contorno naranja con ✓) y vuelve a tocarlo para quitarlo**. **Quitar todos** vacía el grupo. El rojo solo marca un grupo que está silenciado ahora; para silenciarlo usa el pie. |
 | | **Vista simple** | Deja que alguien (por ejemplo el pastor) **silencie y active solo los canales que tú elijas**. Ver la [sección 6b](#6b-vista-simple-para-el-pastor). |
 | **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
-| **MÚSICOS** | **Vincular el iPhone de un músico** (iPad) / **Vincular como músico…** (iPhone) | En el iPad muestra un código QR; en el iPhone abre la cámara para escanearlo ([sección 6](#6-modo-músico-mi-mezcla)). |
+| **MÚSICOS** | **Configurar como músico…** (solo en iPhone) | Deja ese teléfono controlando solo la mezcla de monitor de un músico ([sección 6](#6-modo-músico-mi-mezcla)). |
 | **AYUDA** | **Ayuda** | Una guía corta con las cuatro preguntas habituales durante un servicio: por qué un canal no suena, cambiar lo que oye un músico, grupos de mute y restaurar ajustes. |
 | **IDIOMA** | Sistema / English / Español | Cambia el idioma de la app. |
 | | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión (pide confirmación; la consola sigue funcionando). Ya no hay botón de apagado en la barra superior. |
@@ -377,24 +377,19 @@ Al girar el iPhone aparece la misma mesa del iPad en versión compacta (ver [3.4
 
 Permite que **cada músico regule su propio monitor desde su iPhone**, sin poder tocar nada más de la mezcla.
 
-### 6.1 Preparar (en el iPad de la mesa de sonido)
+### 6.1 Configurar el iPhone del músico
 
-<p align="center"><img src="manual/ipad-pairing.jpg" alt="Vincular el iPhone de un músico" width="420"></p>
+*Ajustes → Configurar como músico…* (o, desde la pantalla de conexión, **Soy músico**: no hace falta conectarse antes).
+Pide al responsable de sonido estos datos:
 
-*Ajustes → Vincular el iPhone de un músico.*
-
-| Control | Para qué sirve |
+| Dato | Para qué sirve |
 |---|---|
-| **BUS** | Elige el bus de monitor de ese músico (el retorno que escucha). |
-| **YO (EL CANAL DEL PROPIO MÚSICO)** | Elige el canal del propio músico para destacarlo en su mezcla. |
-| **PIN DE SALIDA (opcional)** | 4 dígitos que el músico debe escribir para salir del modo músico (tres fallos bloquean el teclado 30 s). Sin PIN, basta mantener Salir y confirmar. El QR lleva solo una huella del PIN. |
-| **CAMBIO DE RETORNO** | Define si el músico puede cambiar de retorno: **Bloqueado** (no puede) o **Libre** (un toque, pensado para el responsable de sonido). Explica que esta limitación existe solo dentro de Holly Mixer, porque la consola no tiene cuentas de usuario. |
-| **Código QR** | Se muestra a la derecha, junto con los datos escritos debajo. |
+| **Dirección de la consola** | Por ejemplo `192.168.1.2`. |
+| **Retorno** | El bus de monitor del músico (1–6). |
+| **Mi canal** | El canal del propio músico, que se destaca en su mezcla. |
+| **PIN de salida (opcional)** | 4 dígitos que el músico debe escribir para salir del modo músico (tres fallos bloquean el teclado 30 s). Sin PIN, basta mantener Salir y confirmar. |
 
-### 6.2 Vincular (en el iPhone del músico)
-
-*Ajustes → Vincular como músico…* (o, desde la pantalla de conexión, **Tengo un código**: no hace falta conectarse antes). Apunta la cámara al QR del iPad. Si la cámara no funciona, toca **Escribir a mano**
-y rellena la dirección de la consola, el bus y el canal, luego **Unirse**. La vinculación manual siempre es **Bloqueada**.
+Toca **Unirse**. El teléfono queda en modo músico (siempre con el retorno **bloqueado**).
 
 ### 6.3 La pantalla del músico
 
@@ -432,7 +427,7 @@ pastor), cada uno con **un botón MUTE enorme**, y nada más. No ve la mezcla, E
 | **Permitir también cambiar el volumen** | Apagado por defecto: solo silenciar y activar. Si lo activas, cada tarjeta añade un fader. |
 | **PIN para volver a la vista completa** | 4 dígitos (opcional). Sin PIN, basta mantener el botón y confirmar. |
 | **Iniciar la vista simple en este dispositivo** | Este iPad/iPhone pasa a la vista simple y **se queda así**, también si cierras la app, hasta que se escriba el PIN. |
-| **En otro dispositivo (código QR)** | Muestra un QR. En el otro iPad o iPhone: abre Holly Mixer, toca **Tengo un código** y escanéalo. Empieza en la vista simple y se queda ahí. Así tú sigues con la vista completa en tu equipo. |
+| **En otro iPad o iPhone** | Abre Ajustes → Vista simple **en ese dispositivo**, elige los canales, pon el PIN y toca *Iniciar*. Cada dispositivo se configura una vez. |
 
 ### Usarla (el pastor)
 
