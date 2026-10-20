@@ -237,6 +237,8 @@ private struct ChannelEQGraph: View {
     @State private var drag: NodeDrag?
     @State private var pinch: PinchState?
 
+    private static let graphSpace = "eqGraph"
+
     var body: some View {
         let bands = EQModel.bands(mixer, strip)
         let isOn = EQModel.isOn(mixer, strip)
@@ -267,6 +269,7 @@ private struct ChannelEQGraph: View {
                 tooltip(layout: layout, bands: bands, lowCutHz: lowCutHz)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
+            .coordinateSpace(name: Self.graphSpace)
             .background(Color(hex: 0x0D0E12))
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .contentShape(Rectangle())
@@ -322,7 +325,9 @@ private struct ChannelEQGraph: View {
             .contentShape(Circle())
             .position(node.point)
             .gesture(
-                DragGesture(minimumDistance: 0)
+                // Measured in the fixed graph space: the dot moves under the finger, which would shrink the
+                // translation and make it lag behind.
+                DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.graphSpace))
                     .onChanged { value in
                         dragChanged(node.selection, value.translation, layout: layout, bands: bands)
                     }
