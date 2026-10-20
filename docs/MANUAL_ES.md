@@ -106,7 +106,7 @@ De izquierda a derecha:
 | Elemento | Qué hace |
 |---|---|
 | **Logo** | La marca de la app. |
-| **Nombre de la consola** y debajo **modelo · fw · IP** | Identifica a qué consola estás conectado (o «demo»). |
+| **Nombre de la consola** y debajo **modelo · fw · IP · versión de la app** | Identifica a qué consola estás conectado (o «demo»). |
 | **Indicador de conexión** | Verde «Conectado · 12 ms» = todo bien (la cifra es la latencia). Naranja «Reconectando…» = se perdió la consola. Azul/violeta «Consola demo» = simulación. |
 | **SOLO · canal · Quitar** (solo aparece si hay solo) | Avisa de que hay canales en solo (escuchas en auriculares/monitor de sala, según la consola). Tócalo para **quitar todos los solos** de golpe. |
 | **Deshacer (↶)** | Revierte el último cambio hecho desde la app. Un punto naranja indica que hay cambios por deshacer. Tras deshacer aparece un aviso de 3 segundos («Deshecho: …») que dice qué se revirtió. **Mantén pulsado** para ver la lista de los últimos 8 cambios con su hora. Guarda hasta 100 cambios. |
@@ -198,7 +198,7 @@ Cada canal es una columna. De arriba a abajo:
 
 - **Arrastra la tapa** hacia arriba o abajo. La tapa **no salta** hasta tu dedo: se mueve relativa a donde pusiste
   el dedo, para evitar tirones.
-- Mientras arrastras aparece una burbuja naranja con el valor en dB.
+- El valor en dB se lee en la caja numérica bajo el fader (se pone naranja mientras arrastras).
 - **Doble toque** en el fader lo devuelve a **0 dB** (posición «unidad»).
 - La escala a la izquierda va de **+10** a **−∞**; el **0** se resalta.
 - **Solo la tapa mueve el fader.** Si pasas el dedo en horizontal por encima de varios faders para desplazar la
