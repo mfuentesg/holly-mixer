@@ -85,7 +85,8 @@ struct SnapshotsView: View {
 
     private func row(_ slot: Int) -> some View {
         let name = mixer.snapshotNames[slot - 1]
-        let isCurrent = mixer.currentSnapshot == slot
+        // The XR18 keeps reporting a deleted slot as the last one used; an empty slot is never "last used".
+        let isCurrent = mixer.currentSnapshot == slot && !name.isEmpty
         return HStack(spacing: 12) {
             Text(String(format: "%02d", slot))
                 .font(Theme.mono(13, .bold))

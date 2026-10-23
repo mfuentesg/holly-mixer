@@ -766,9 +766,7 @@ class FakeXAir:
         self.save_snapshot(slot)
 
     def _snap_delete(self, slot):
-        self.snapshots.pop(slot, None)
-        if self.snap_index == slot:
-            self.snap_index = 0
+        self.snapshots.pop(slot, None)            # a real XR18 (1.16) keeps the deleted slot as the index
 
     def _snap_load(self, slot):
         entry = self.snapshots.get(slot)

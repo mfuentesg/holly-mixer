@@ -56,8 +56,9 @@ a 32-bit count followed by signed 16-bit values in 1/256 dB.
 `tools/xr18_dump.py dump --snapshots` at church, October 2026: 2475 addresses answered, 518 silent.
 
 - **Snapshots:** every `/-snap/...` read answers (`index`, `name`, the 64 `/-snap/NN/name` and `scope`); every
-  `/snap/...` is silent, although the official protocol document uses that spelling. Load, save and delete through
-  `/-snap/load|save|delete N` still need a test outside a service, because they change the mixer.
+  `/snap/...` is silent, although the official protocol document uses that spelling. `tools/xr18_snaptest.py` confirmed
+  `/-snap/name` + `/-snap/save N`, `/-snap/load N` and `/-snap/delete N`: save and load set `/-snap/index` to N, and
+  after a delete the index still points at the deleted slot.
 - **Exists as Holly Mixer expects:** DCA `on`, `fader`, `config/name`, `config/color`; `grp/dca` and `grp/mute` on
   every strip; preamp, gate, dynamics and EQ fields; `/config/mute/1-4`; `/-stat/solosw/01-48`.
 - **Does not exist on the XR18** (silent, nothing in Holly Mixer depends on them):
