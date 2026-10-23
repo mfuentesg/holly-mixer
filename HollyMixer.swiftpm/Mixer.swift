@@ -61,8 +61,9 @@ final class Mixer {
     private(set) var snapshotNames = Array(repeating: "", count: 64)
     /// The slot last loaded or saved, as reported by the mixer (`/snap/index`), if known.
     private(set) var currentSnapshot: Int?
-    /// "/snap" as in the official protocol document; "/-snap" if that is what the mixer answers to.
-    private(set) var snapshotPrefix = "/snap"
+    /// "/-snap" is what an XR18 on firmware 1.16 answers to; switches to "/snap" (the official protocol document's
+    /// spelling) if that is what the mixer answers to.
+    private(set) var snapshotPrefix = "/-snap"
     /// The four DCA groups.
     let dcas = (1...4).map { DCAGroup(number: $0) }
     /// Mute groups 1-4: true when the group is engaged.
@@ -269,7 +270,7 @@ final class Mixer {
             strip.syncAddresses.forEach(add)
             XR18Params.detailAddresses(for: strip).forEach(add)
             if strip.isChannel || strip.kind == .auxIn {
-                ["config/icon", "config/insrc", "mix/lr"].forEach { add("\(strip.base)/\($0)") }
+                ["config/insrc", "mix/lr"].forEach { add("\(strip.base)/\($0)") }
             }
             if strip.isChannel { add(XR18Params.preamp(strip.base, "rtnsw")) }
         }
@@ -597,8 +598,8 @@ final class Mixer {
     // MARK: - Mixer snapshots
     // Official protocol (X AIR Remote Control Protocol, fw 1.11+): `/snap/name` and `/snap/index` fill a temporary
     // buffer, `/snap/load N`, `/snap/save N` and `/snap/delete N` act on slot N, `/snap/NN/name` reads or renames
-    // a slot. The official app's binary also contains "/-snap", so both spellings are asked and the one the
-    // mixer answers to is used.
+    // a slot. An XR18 on firmware 1.16 answers only to "/-snap" (as in the official app's binary), so both
+    // spellings are asked and the one the mixer answers to is used.
 
     /// Asks the mixer for the names of all 64 snapshot slots.
     func requestSnapshotNames() {

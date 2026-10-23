@@ -72,10 +72,12 @@ list of parameters Holly Mixer should request for the same page.
 
 - Mixer snapshots: the official protocol document (`docs/XAIR_PROTOCOL_NOTES.md`) lists `/snap/NN/name`,
   `/snap/name`, `/snap/index`, `/snap/load N`, `/snap/save N`, `/snap/delete N` and `/snap/NN/scope`. The official app's
-  binary also holds `/-snap`; Holly Mixer asks for both and uses the one the mixer answers to. While the official app loads
-  or saves a snapshot, run `xr18_dump.py listen` to confirm which spelling your firmware uses.
+  binary also holds `/-snap`; Holly Mixer asks for both and uses the one the mixer answers to. On firmware 1.16 only
+  `/-snap` answers (see "Checked on a real XR18" in `docs/XAIR_PROTOCOL_NOTES.md`). Loading and saving still need a test:
+  while the official app loads or saves a snapshot, run `xr18_dump.py listen` to see the exact commands.
 - DCA: `/dca/N/on`, `/dca/N/fader`, `/dca/N/config/name|color`, and `/ch/NN/grp/dca` as a bit mask (bit 0 = DCA 1).
-  Move a DCA and add a channel to it in the official app and check the values in the log.
+  All of them exist on firmware 1.16. To confirm the bit mask, move a DCA and add a channel to it in the official app
+  and check the values in the log.
 
 ## 3. From captures to Holly Mixer
 

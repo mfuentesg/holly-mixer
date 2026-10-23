@@ -15,7 +15,7 @@ python3 tools/fake_xair.py --port 10025 --ip 192.168.1.50 -v
 
 Options: `--host`, `--port`, `--latency-ms N` (delay of every reply), `--jitter-ms N` (extra random 0..N ms),
 `--loss PERCENT` (applied to incoming and outgoing packets), `--scenario NAME`, `--ip` (address reported by
-`/xinfo`, default is this Mac's LAN IP), `--snap-prefix /snap|/-snap`, `--xremote-timeout SECONDS` (default 10),
+`/xinfo`, default is this Mac's LAN IP), `--snap-prefix /snap|/-snap` (default `/-snap`, like a real XR18 on firmware 1.16), `--xremote-timeout SECONDS` (default 10),
 `-v` (log every received message). Flags given explicitly override the scenario's own values.
 
 The app always talks to port 10024, so keep the default port when testing the app. The Python tools can also be

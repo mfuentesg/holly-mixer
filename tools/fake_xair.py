@@ -932,8 +932,8 @@ def main(argv=None):
     parser.add_argument("--loss", type=float, default=None, help="drop PERCENT of packets, in each direction")
     parser.add_argument("--scenario", default="normal", choices=sorted(SCENARIOS))
     parser.add_argument("--ip", default=None, help="IP reported by /xinfo (default: this machine's LAN IP)")
-    parser.add_argument("--snap-prefix", default="/snap", choices=["/snap", "/-snap"],
-                        help="spelling the snapshot commands answer to")
+    parser.add_argument("--snap-prefix", default="/-snap", choices=["/snap", "/-snap"],
+                        help="spelling the snapshot commands answer to (a real XR18 on 1.16: /-snap)")
     parser.add_argument("--xremote-timeout", type=float, default=XREMOTE_TIMEOUT, help="subscription lifetime in seconds")
     parser.add_argument("-v", "--verbose", action="store_true", help="log every received message")
     args = parser.parse_args(argv)

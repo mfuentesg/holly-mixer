@@ -109,9 +109,9 @@ final class DemoTransport: MixerTransport {
             values["\(base)/on"] = .int(1)
         }
         for (slot, name) in ["Domingo AM", "Domingo PM", "Jóvenes", "Ensayo", "Pasos de sonido"].enumerated() {
-            values[String(format: "/snap/%02d/name", slot + 1)] = .string(name)
+            values[String(format: "/-snap/%02d/name", slot + 1)] = .string(name)
         }
-        values["/snap/index"] = .int(1)
+        values["/-snap/index"] = .int(1)
         for (index, channel) in channels.enumerated() {
             let base = String(format: "/ch/%02d", index + 1)
             strip(base, name: channel.name, color: channel.color, db: channel.db, isOn: channel.isOn, sends: 10)
