@@ -71,4 +71,4 @@ a 32-bit count followed by signed 16-bit values in 1/256 dB.
     `/lr/geq/20` and `/lr/geq/25` answer (0.65 and 0.567); treat them as a firmware quirk.
 - **Routing:** `/routing/main/01-02`, `/routing/aux/01-06` and `/routing/p16/01-16` exist. `/headamp/17` and `/18`
   (aux line inputs) have `gain` but no `phantom`.
-- Still to check: the sign and scale of the gain-reduction meter (`/meters/6`).
+- Still to check: the sign and scale of the gain-reduction meter (`/meters/6`); `tools/xr18_grtest.py` shows them (read-only).
