@@ -4,6 +4,8 @@ import Foundation
 /// rarely touched live; each channel's Sends tab still has its FX sends.
 enum MixSelectorSettings {
     static let showEffectsKey = "showEffectsInMixSelector"
+    /// User setting: show the four DCA faders on the mixer. Off by default; DCA membership stays in each channel's settings.
+    static let showDCAsKey = "showDCAFaders"
 }
 
 /// Features that exist in the code but are switched off in the current version.

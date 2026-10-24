@@ -175,6 +175,15 @@ final class Mixer {
         connection.send(OSCMessage("/xinfo"))
     }
 
+    /// Back in front after another app, a lock or a call: iOS may have frozen or closed the UDP socket and the
+    /// mixer has stopped sending (its /xremote lease is 10 s). Open a fresh socket, subscribe and read the state again.
+    func resumeAfterBackground() {
+        guard hasSession, !isDemo, status != .disconnected else { return }
+        retryNow()
+        subscribe()
+        requestState()
+    }
+
     private func start(host: String) {
         self.host = host
         status = .connecting
@@ -259,7 +268,7 @@ final class Mixer {
         requestFullState()
     }
 
-    /// Every address the settings backup covers: levels, mutes, names, EQ, gate, dynamics, preamp.
+    /// Every address the settings backup covers: levels, mutes, names, EQ, gate, dynamics, preamp, effects, routing and links.
     var fullStateAddresses: [String] {
         var seen = Set<String>()
         var list: [String] = []
@@ -277,8 +286,29 @@ final class Mixer {
         for number in 1...4 { add("/config/mute/\(number)") }
         for group in dcas { group.syncAddresses.forEach(add) }
         for strip in allStrips { add("\(strip.base)/grp/dca"); add("\(strip.base)/grp/mute") }
+        Self.globalAddresses.forEach(add)
         return list
     }
+
+    /// Effects, routing and console-wide settings. Each slot's `type` comes before its `par` values, because the
+    /// mixer loads the defaults of a type when it changes. Addresses this firmware doesn't answer are ignored.
+    static let globalAddresses: [String] = {
+        var list: [String] = []
+        for slot in 1...4 {
+            list.append("/fx/\(slot)/type")
+            list += (1...64).map { String(format: "/fx/\(slot)/par/%02d", $0) }
+        }
+        list += (1...2).map { String(format: "/routing/main/%02d", $0) }
+        list += (1...6).map { String(format: "/routing/aux/%02d", $0) }
+        list += (1...16).map { String(format: "/routing/p16/%02d", $0) }
+        list += ["1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14", "15-16"].map { "/config/chlink/\($0)" }
+        list += ["1-2", "3-4", "5-6"].map { "/config/buslink/\($0)" }
+        list += ["preamp", "eq", "dyn", "fdrmute"].map { "/config/linkcfg/\($0)" }
+        list += ["level", "source", "sourcetrim", "chmode", "busmode", "dcamode", "exclusive", "followsel",
+                 "followsolo", "dimatt", "dim", "mono", "delay", "delaytime", "masterctrl", "mute", "dimpfl"]
+            .map { "/config/solo/\($0)" }
+        return list
+    }()
 
     /// Reads everything the backup needs from the mixer, then reports `fullStateReady`.
     private func requestFullState() {

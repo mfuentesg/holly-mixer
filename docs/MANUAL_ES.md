@@ -128,7 +128,8 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 | Sección | Opción | Para qué sirve |
 |---|---|---|
 | **MEZCLA** | **Mostrar efectos en el selector de mezcla** (interruptor) | Añade FX 1–4 junto a las mezclas de monitor. Apagado por defecto: los efectos casi nunca se tocan en vivo. Si lo apagas estando en una mezcla FX, la app vuelve a Main LR. |
-| | **Grupos de mute** | Elige **qué canales pertenecen a cada grupo** y **ponle nombre** (hasta 12 letras, p. ej. «Banda»; el nombre sale en el botón del pie). Arriba eliges el grupo (1–4, con su nombre y cuántos canales tiene); debajo ves todos los canales con un círculo: **toca un canal para incluirlo (contorno naranja con ✓) y vuelve a tocarlo para quitarlo**. **Quitar todos** vacía el grupo. El rojo solo marca un grupo que está silenciado ahora; para silenciarlo usa el pie. |
+| | **Mostrar faders DCA** (interruptor) | Añade los 4 DCA a la mezcla principal. Apagado por defecto. Los canales se asignan a un DCA en la página de cada canal (*Config.*). |
+| | **Grupos de mute** | Elige **qué canales pertenecen a cada grupo**. Arriba eliges el grupo (1–4, con cuántos canales tiene); debajo ves todos los canales con un círculo: **toca un canal para incluirlo (contorno naranja con ✓) y vuelve a tocarlo para quitarlo**. **Quitar todos** vacía el grupo. El rojo solo marca un grupo que está silenciado ahora; para silenciarlo usa el pie. |
 | | **Vista simple** | Deja que alguien (por ejemplo el pastor) **silencie y active solo los canales que tú elijas**. Ver la [sección 6b](#6b-vista-simple-para-el-pastor). |
 | **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
 | **MÚSICOS** | **Configurar como músico…** (solo en iPhone) | Deja ese teléfono controlando solo la mezcla de monitor de un músico ([sección 6](#6-modo-músico-mi-mezcla)). |
@@ -165,15 +166,13 @@ Cuando eliges un bus aparece una franja de color: **«Los faders son envíos a �
 ### 2.5 Pie de página: grupos de mute
 
 No hay selector de bancos: **todas las tiras están en una sola fila que se desplaza hacia los lados**, en este
-orden: canales 1–16, entrada aux, retornos FX, buses y envíos FX. Con la mezcla *Main LR* los **4 DCA** (Banda, Voces,
-Pastor, Playback…) quedan **fijos a la derecha, junto al master**, siempre a la vista; en pantallas más estrechas van
-al **principio** de la fila. Con la mezcla de un bus o de FX solo se ven las entradas, más el master a la derecha.
+orden: canales 1–16, entrada aux, retornos FX, buses y envíos FX. Los **4 DCA** están **ocultos por defecto**: actívalos en *Ajustes → Mostrar faders DCA* y, con la mezcla *Main LR*,
+aparecen al **principio** de la fila. Con la mezcla de un bus o de FX solo se ven las entradas, más el master a la derecha.
 
-En el pie están los botones **GRUPOS DE MUTE 1 2 3 4**. Cada botón muestra el **nombre** del grupo y **cuántos canales**
-tiene («Banda · 7 canales»; «Vacío» si no tiene ninguno). Un toque silencia (rojo) o reactiva a la vez todos los
-canales del grupo. **Qué canales forman cada grupo y su nombre:** *Ajustes → Grupos de mute* (ver 2.2), o en la
-página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2). Los nombres se guardan en este
-dispositivo: la XR18 no puede guardarlos.
+En el pie están los botones **GRUPOS DE MUTE 1 2 3 4**. Cada botón muestra **«Grupo N»** y **cuántos canales**
+tiene («7 canales»; «Vacío» si no tiene ninguno). Un toque silencia (rojo) o reactiva a la vez todos los
+canales del grupo. **Qué canales forman cada grupo:** *Ajustes → Grupos de mute* (ver 2.2), o en la
+página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2). Los grupos de mute no tienen nombre: la XR18 no puede guardarlo.
 
 ---
 
@@ -356,7 +355,7 @@ Cada **fila de canal** tiene:
 - Un **fader horizontal** con medidor integrado. Se arrastra de la misma manera que el vertical.
 
 **Todo en una sola lista que se desplaza** (sin bancos), con un título pequeño por tipo: **CANALES**, **AUX · FX**,
-**BUSES · ENVÍOS FX** y **DCA** (con la mezcla *Main LR*); 
+**BUSES · ENVÍOS FX** y, si activaste *Mostrar faders DCA*, **DCA** (con la mezcla *Main LR*); 
 
 **Main LR siempre a mano:** debajo de la lista hay una fila fija con el fader y el mute de **Main LR** (en la mezcla de un
 bus, es el master de ese bus). Cuando hay un solo activo aparece junto a la conexión un botón **SOLO · … ✕** para quitarlo.
@@ -365,7 +364,7 @@ bus, es el master de ese bus). Cuando hay un solo activo aparece junto a la cone
 cada fila pasa de **M** a **✕**: *quita el canal de esa mezcla* (envío a −∞) sin silenciarlo en la sala; vuelve a tocarlo
 para devolverlo a su nivel anterior. (En el iPad el botón se llama **QUITAR / QUITADO**.)
 
-**Barra inferior:** **GRUPOS DE MUTE 1 2 3 4** con nombre y número de canales, para silenciar o reactivar cada grupo con un toque.
+**Barra inferior:** **GRUPOS DE MUTE 1 2 3 4** con el número de canales, para silenciar o reactivar cada grupo con un toque.
 
 ### 5.2 Horizontal
 
@@ -444,8 +443,9 @@ pastor), cada uno con **un botón MUTE enorme**, y nada más. No ve la mezcla, E
 <p align="center"><img src="manual/ipad-backups.jpg" alt="Copia de ajustes" width="420"></p>
 
 Una XR18 **olvida sus ajustes si se apaga**. Holly Mixer los guarda **en el propio dispositivo** unos segundos
-después de cada cambio, para poder devolverlos. Guarda niveles, mutes, nombres, EQ, gate, dinámica, preamp, envíos y
-grupos de mute.
+después de cada cambio, para poder devolverlos. Guarda niveles, mutes, nombres, EQ, gate, dinámica, preamp, envíos,
+grupos de mute, **efectos (FX 1–4 con sus parámetros), ruteo (principal, aux y USB/P16) y enlaces/opciones de solo**.
+Al restaurar, el tipo de cada efecto se escribe antes que sus parámetros. Lo que la consola no responda se ignora.
 
 *Ajustes → Copia de ajustes.*
 

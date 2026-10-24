@@ -4,6 +4,7 @@ struct MixerView: View {
     @Environment(Mixer.self) private var mixer
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @AppStorage(MixSelectorSettings.showDCAsKey) private var showsDCAs = false
     var body: some View {
         let target = mixer.selectedMix
         let master = mixer.master(for: target)
@@ -24,10 +25,9 @@ struct MixerView: View {
             }
             BackupBanner()
 
-            GeometryReader { proxy in
-                // Wide iPads pin the four DCA faders next to Main; narrower screens list them first in the row.
-                let pinsDCAs = target == .main && proxy.size.width >= 1000
-                let leadingDCAs = target == .main && !pinsDCAs
+            GeometryReader { _ in
+                // The four DCA faders come first in the row, only when switched on in Settings.
+                let leadingDCAs = target == .main && showsDCAs
                 HStack(spacing: 14) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
@@ -52,13 +52,6 @@ struct MixerView: View {
                                        startPoint: .leading, endPoint: .trailing)
                             .frame(width: 56)
                             .allowsHitTesting(false)
-                    }
-                    if pinsDCAs {
-                        HStack(spacing: 6) {
-                            ForEach(mixer.dcas) { group in
-                                DCAStripView(group: group)
-                            }
-                        }
                     }
                     ChannelStripView(strip: master, control: .fader, busColor: busColor, isMaster: true)
                 }
@@ -499,7 +492,6 @@ struct ReconnectingBanner: View {
 /// Bottom bar: the four mute groups. Assign channels to them in Settings > Mute groups.
 struct MixerFooter: View {
     @Environment(Mixer.self) private var mixer
-    private let names = MuteGroupNames.shared
     var isShort = false
 
     var body: some View {
@@ -517,7 +509,7 @@ struct MixerFooter: View {
                                 .font(Theme.mono(15, .bold))
                             if !isShort {
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text(names.name(number).isEmpty ? L("Group \(number)") : names.name(number))
+                                    Text(L("Group \(number)"))
                                         .font(.system(size: 12, weight: .bold))
                                         .lineLimit(1)
                                     Text(count == 0 ? L("Empty") : (count == 1 ? L("1 channel") : L("\(count) channels")))
@@ -536,7 +528,7 @@ struct MixerFooter: View {
                         .shadow(color: isOn ? Theme.mute.opacity(0.45) : .clear, radius: 9)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("\(L("Mute group \(number)")) \(names.name(number)), \(count)")
+                    .accessibilityLabel("\(L("Mute group \(number)")), \(count)")
                     .accessibilityValue(isOn ? "on" : "off")
                 }
             }

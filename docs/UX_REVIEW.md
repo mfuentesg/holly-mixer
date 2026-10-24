@@ -190,3 +190,14 @@ strips keep fixed sizes) and removal of 77 dead Spanish strings (scenes, banks, 
 
 Not built: #22 beyond keeping iPhone landscape fitting. Still open: removing Service Mode and the scene store
 entirely (hidden behind `FeatureFlags.serviceMode`; needs the owner's decision) and checks on real hardware.
+
+## Decisions from the owner (2026-10-24)
+
+1. Mute group names: **removed** for this mixer (groups show "Group N" and their channel count).
+2. "Take out of this monitor" (#3): see the answer in the session notes; unchanged.
+3. DCAs: **not pinned**. Hidden by default; *Settings → Show DCA faders* adds them to the main mix (first strips on the
+   iPad, last section on the iPhone). Membership stays in each channel's Config tab.
+4. Musician exit PIN: stays **optional** (empty = hold Exit and confirm).
+5. Snapshots: stay hidden behind `FeatureFlags.snapshots`.
+6. Console words in the Spanish UI: unchanged.
+7. Landscape iPhone: stays supported; portrait is the common case.

@@ -8,6 +8,7 @@ struct SettingsHubView: View {
     @Environment(Localization.self) private var localization
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
+    @AppStorage(MixSelectorSettings.showDCAsKey) private var showsDCAs = false
     @State private var confirmsDisconnect = false
 
     /// Musician mode is for phones in portrait.
@@ -50,6 +51,17 @@ struct SettingsHubView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(L("Show effects in the mix selector")).scaledFont(16, .semibold)
                                 Text(L("Adds FX 1–4 next to the monitor mixes. Each channel's Sends tab always has its FX sends."))
+                                    .scaledFont(12)
+                                    .foregroundStyle(Theme.textTertiary)
+                            }
+                        }
+                        .padding(14)
+                        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
+                        Toggle(isOn: $showsDCAs) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(L("Show DCA faders")).scaledFont(16, .semibold)
+                                Text(L("Adds the 4 DCA faders to the main mix. Assign channels to a DCA in each channel's settings."))
                                     .scaledFont(12)
                                     .foregroundStyle(Theme.textTertiary)
                             }

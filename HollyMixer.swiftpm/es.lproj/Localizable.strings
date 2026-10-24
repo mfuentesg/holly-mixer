@@ -478,7 +478,6 @@
 "Remove %@ from this mix" = "Quitar %@ de esta mezcla";
 "silenced by %@" = "silenciado por %@";
 "NAME" = "NOMBRE";
-"Name (e.g. Band)" = "Nombre (p. ej. Banda)";
 "Monitor" = "Retorno";
 "Enter the mixer's address, like 192.168.1.2." = "Escribe la dirección de la consola, por ejemplo 192.168.1.2.";
 "Disconnect from the mixer?" = "¿Desconectar de la consola?";
@@ -503,7 +502,7 @@
 "The faders now control what goes into their ears. The room does not change." = "Los faders ahora controlan lo que entra en sus oídos. La sala no cambia.";
 "The ✕ / REMOVE button takes a channel out of their mix. Tap it again to bring it back." = "El botón ✕ / QUITAR saca un canal de su mezcla. Vuelve a tocarlo para devolverlo.";
 "Tap Main LR, or Back to Main in the blue banner, to return to the room mix." = "Toca Main LR, o Volver a la sala en la franja azul, para regresar a la mezcla de la sala.";
-"Settings › Mute groups: pick a group, name it, then tap the channels it should silence." = "Ajustes › Grupos de mute: elige un grupo, ponle nombre y toca los canales que debe silenciar.";
+"Settings › Mute groups: pick a group, then tap the channels it should silence." = "Ajustes › Grupos de mute: elige un grupo y toca los canales que debe silenciar.";
 "The four buttons at the bottom mute or release a whole group at once." = "Los cuatro botones de abajo silencian o sueltan un grupo entero de una vez.";
 "The mixer lost its settings" = "La consola perdió sus ajustes";
 "After the mixer is switched off and on, a banner offers to restore the last saved settings." = "Después de apagar y encender la consola, un aviso ofrece restaurar los últimos ajustes guardados.";
@@ -535,3 +534,11 @@
 "Set up this phone to control only your own monitor mix." = "Configura este teléfono para controlar solo tu propia mezcla de monitor.";
 "This phone will only control your own monitor mix. Ask the sound lead for the address, the monitor and your channel." = "Este teléfono solo controlará tu propia mezcla de monitor. Pide al responsable de sonido la dirección, el monitor y tu canal.";
 "Monitor %lld" = "Retorno %lld";
+"Show DCA faders" = "Mostrar faders DCA";
+"Adds the 4 DCA faders to the main mix. Assign channels to a DCA in each channel's settings." = "Añade los 4 faders DCA a la mezcla principal. Asigna canales a un DCA en los ajustes de cada canal.";
+"effects" = "efectos";
+"routing" = "ruteo";
+"links" = "enlaces";
+"solo options" = "opciones de solo";
+"Routing" = "Ruteo";
+"Effect %@" = "Efecto %@";

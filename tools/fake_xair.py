@@ -328,6 +328,19 @@ def build_state(church=True):
     for i in range(1, 5):
         v[f"/fx/{i}/type"] = i - 1
         v[f"/fx/{i}/source"] = 0
+        for p in range(1, 65):
+            v[f"/fx/{i}/par/{p:02d}"] = _f(((i * 7 + p * 13) % 100) / 100)
+    for n in range(1, 3):
+        v[f"/routing/main/{n:02d}"] = 0
+    for n in range(1, 7):
+        v[f"/routing/aux/{n:02d}"] = 0
+    for n in range(1, 17):
+        v[f"/routing/p16/{n:02d}"] = n - 1
+    for name in ("preamp", "eq", "dyn", "fdrmute"):
+        v[f"/config/linkcfg/{name}"] = 1 if name != "preamp" else 0
+    v["/config/solo/level"] = _f(0.5)
+    v["/config/solo/chmode"] = 0
+    v["/config/solo/exclusive"] = 0
     v["/-prefs/name"] = "XR18-C3-D7-F9"
     return {address: [value] for address, value in v.items()}   # every stored value is a list of OSC args
 

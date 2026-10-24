@@ -5,9 +5,6 @@ import SwiftUI
 struct MuteGroupsView: View {
     @Environment(Mixer.self) private var mixer
     @State private var selected = 1
-    private let names = MuteGroupNames.shared
-    @State private var nameText = ""
-    @FocusState private var nameFocused: Bool
 
     private var members: [Strip] { mixer.channels + [mixer.auxIn] + mixer.fxReturns + mixer.buses }
 
@@ -47,7 +44,7 @@ struct MuteGroupsView: View {
                             if mixer.muteGroups[number - 1] {
                                 Circle().fill(Theme.mute).frame(width: 8, height: 8)
                             }
-                            Text(names.name(number).isEmpty ? L("Group \(number)") : names.name(number))
+                            Text(L("Group \(number)"))
                                 .scaledFont(15, .bold)
                                 .lineLimit(1)
                         }
@@ -97,7 +94,6 @@ struct MuteGroupsView: View {
                     .buttonStyle(.plain)
                 }
             }
-            nameField(number)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
                 ForEach(members) { strip in
                     chip(strip, group: number, bit: bit)
@@ -107,32 +103,6 @@ struct MuteGroupsView: View {
         .padding(16)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.border, lineWidth: 1))
-    }
-
-    /// The group's name, shown on the bottom bar buttons. Kept in the app: the XR18 has no names for mute groups.
-    private func nameField(_ number: Int) -> some View {
-        HStack(spacing: 10) {
-            Text(L("NAME")).sectionLabelStyle()
-            TextField(L("Name (e.g. Band)"), text: $nameText)
-                .focused($nameFocused)
-                .submitLabel(.done)
-                .autocorrectionDisabled()
-                .onChange(of: nameText) { _, text in
-                    if text.count > MuteGroupNames.limit { nameText = String(text.prefix(MuteGroupNames.limit)) }
-                    names.set(number, to: nameText)
-                }
-                .scaledFont(15, .semibold)
-                .padding(.horizontal, 12)
-                .frame(height: 44)
-                .background(Theme.background, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10)
-                    .stroke(nameFocused ? Theme.accent : Theme.border, lineWidth: 1))
-            Text("\(nameText.count)/\(MuteGroupNames.limit)")
-                .font(Theme.mono(11, .regular))
-                .foregroundStyle(Theme.textMuted)
-        }
-        .onAppear { nameText = names.name(number) }
-        .onChange(of: selected) { _, newGroup in nameText = names.name(newGroup) }
     }
 
     /// One tap includes the channel in the group, another tap takes it out.

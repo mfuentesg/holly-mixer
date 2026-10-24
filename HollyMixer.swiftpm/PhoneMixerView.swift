@@ -6,6 +6,7 @@ struct PhoneMixerView: View {
     @Environment(Localization.self) private var localization
     @State private var showsMonitorSetup = false
     @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
+    @AppStorage(MixSelectorSettings.showDCAsKey) private var showsDCAs = false
     var onPair: (MonitorPairing) -> Void
 
     var body: some View {
@@ -162,8 +163,10 @@ struct PhoneMixerView: View {
                 if target == .main {
                     heading(L("BUSES · FX SENDS"))
                     rows(mixer.buses + mixer.fxSends)
-                    heading("DCA")
-                    ForEach(mixer.dcas) { group in PhoneDCARow(group: group) }
+                    if showsDCAs {
+                        heading("DCA")
+                        ForEach(mixer.dcas) { group in PhoneDCARow(group: group) }
+                    }
                 }
             }
             .padding(.horizontal, 12)
@@ -189,14 +192,13 @@ struct PhoneMixerView: View {
                 .frame(width: 70, alignment: .leading)
             ForEach(1...4, id: \.self) { number in
                 let isOn = mixer.muteGroups[number - 1]
-                let name = MuteGroupNames.shared.name(number)
                 let count = mixer.muteGroupCount(number)
                 Button {
                     mixer.toggleMuteGroup(number)
                 } label: {
                     VStack(spacing: 0) {
                         Text("\(number)").font(Theme.mono(15, .bold))
-                        Text(name.isEmpty ? (count == 0 ? L("Empty") : L("\(count) ch")) : name)
+                        Text(count == 0 ? L("Empty") : L("\(count) ch"))
                             .font(.system(size: 10, weight: .semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
@@ -209,7 +211,7 @@ struct PhoneMixerView: View {
                         .stroke(isOn ? Theme.muteBorder : Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(L("Mute group \(number)")) \(name), \(count)")
+                .accessibilityLabel("\(L("Mute group \(number)")), \(count)")
                 .accessibilityValue(isOn ? "on" : "off")
             }
         }
