@@ -43,9 +43,32 @@ a 32-bit count followed by signed 16-bit values in 1/256 dB.
 
 ## What this changed in Holly Mixer
 
-- Snapshots use `/snap/...` (Holly Mixer also tries `/-snap/...` and uses whichever the mixer answers to); saving sends the
-  name through `/snap/name` and then `/snap/save N`; delete is supported.
+- Snapshots use `/-snap/...`, which is what a real XR18 on firmware 1.16 answers to (Holly Mixer also tries `/snap/...` and
+  uses whichever the mixer answers to); saving sends the name through `/-snap/name` and then `/-snap/save N`; delete is
+  supported.
 - The gate and compressor gain-reduction meter reads `/meters/6`. The sign and scale of those values are an assumption
   (negative dB for reduction): verify on hardware.
 - Ideas it opens: snapshot **recall scope** editing (the 59-character string, which is the XR18's own "recall safe"),
   an RTA view from `/meters/4`, and DCA meters.
+
+## Checked on a real XR18 (firmware 1.16)
+
+`tools/xr18_dump.py dump --snapshots` at church, October 2026: 2475 addresses answered, 518 silent.
+
+- **Snapshots:** every `/-snap/...` read answers (`index`, `name`, the 64 `/-snap/NN/name` and `scope`); every
+  `/snap/...` is silent, although the official protocol document uses that spelling. `tools/xr18_snaptest.py` confirmed
+  `/-snap/name` + `/-snap/save N`, `/-snap/load N` and `/-snap/delete N`: save and load set `/-snap/index` to N, and
+  after a delete the index still points at the deleted slot.
+- **Exists as Holly Mixer expects:** DCA `on`, `fader`, `config/name`, `config/color`; `grp/dca` and `grp/mute` on
+  every strip; preamp, gate, dynamics and EQ fields; `/config/mute/1-4`; `/-stat/solosw/01-48`.
+- **Does not exist on the XR18** (silent, nothing in Holly Mixer depends on them):
+  - `config/icon` on every strip, the main LR and the DCAs: the XR18 keeps no per-strip icon.
+  - Send pan on even buses (`/ch/NN/mix/02|04|06/pan`): send pan belongs to the odd bus of each linked pair.
+  - `/rtn/N/preamp/invert` (no polarity on returns), `/fxsend/N/mix/lr` and `/fxsend/N/mix/pan`, `/lr/mix/lr`.
+  - `dyn/pos` (channels and LR), `/lr/dyn/keysrc`, `/fx/N/source`, `/config/linkcfg/hadly`, `/config/solo/mutegrp`,
+    `/-prefs/rta/source|peak|gain`.
+  - A graphic EQ on buses or on LR (`/bus/N/geq/NN`, `/lr/geq/NN`): on the XR18 the graphic EQ is an FX slot. Oddly,
+    `/lr/geq/20` and `/lr/geq/25` answer (0.65 and 0.567); treat them as a firmware quirk.
+- **Routing:** `/routing/main/01-02`, `/routing/aux/01-06` and `/routing/p16/01-16` exist. `/headamp/17` and `/18`
+  (aux line inputs) have `gain` but no `phantom`.
+- Still to check: the sign and scale of the gain-reduction meter (`/meters/6`); `tools/xr18_grtest.py` shows them (read-only).

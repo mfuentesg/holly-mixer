@@ -27,13 +27,13 @@ Binary facts (from REA): arm64 + x86_64, built with the macOS 14.2 SDK, minimum 
 
 ## What Holly Mixer already covers
 
-Faders, mutes, pan, solo; bus and FX-send levels per channel; names, colours, icons and input source (in the
+Faders, mutes, pan, solo; bus and FX-send levels per channel; names, colours and input source (in the
 backup); preamp gain, +48V, polarity, low cut; gate and dynamics (all fields); EQ (4 or 6 bands); mute groups;
 meters (bank 1); scenes stored in the app; settings backup and restore.
 
 ## Missing, in the order they matter for a church team
 
-1. **Mixer snapshots (`/-snap/N`)** — DONE in code, verify on hardware: save, load and name the XR18's own 64 snapshots. The design's "All 64
+1. **Mixer snapshots (`/-snap/N`)** — DONE, and save, load, delete and names confirmed on firmware 1.16: save, load and name the XR18's own 64 snapshots. The design's "All 64
    snapshots" button refers to these. Worth offering as a second layer next to Holly Mixer's scenes.
 2. **FX rack (`/fx/N`, `/fx/N/par`, `/fxsend`, `/rtn`)**: choose the effect type and edit its parameters for
    the 4 slots; edit returns (they have EQ and preamp-style config).
