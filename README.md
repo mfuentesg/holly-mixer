@@ -18,7 +18,7 @@ Everything in the Holly Mixer design canvas:
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
   SOLO and MUTE side by side) so every control fits; musician "My mix" mode set up on the phone with the mixer address, monitor and channel
 - **Safety on a live system:** a channel silenced by a mute group or a muted DCA shows "G1" / "DCA2" on its MUTE
-  button; mute groups can be named and show how many channels they hold; in a monitor mix the strip button takes the
+  button; mute groups show how many channels they hold; in a monitor mix the strip button takes the
   channel out of that mix instead of muting the room; a double-tap resets a fader only from its cap, and never from
   far below; undo shows what it reverted; disconnect asks first; a musician's phone can require a PIN to leave
 - **Mix selector:** Main LR and the six monitor buses; the effects (FX 1–4) are hidden by default and can be shown
@@ -35,13 +35,13 @@ Everything in the Holly Mixer design canvas:
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer. No address is
   assumed on a first run, and if the saved address stops answering (the router gave the mixer a new IP) the app
   looks for it and follows it when it is clearly the same mixer
-- **Settings backup:** Holly Mixer saves every level, mute, name, EQ, gate and dynamics value on the device a few
+- **Settings backup:** Holly Mixer saves every level, mute, name, EQ, gate, dynamics, effects, routing and link value on the device a few
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
   backups, export and import between iPads
 - **Safer power cycles:** a safety copy is saved before every snapshot load;
   optional automatic restore with a visible 10 s countdown (it waits while the sound system is live)
-- **DCA groups:** the four DCAs as faders (last strips on the iPad, last section on the iPhone) and DCA membership per channel
+- **DCA groups:** the four DCAs as faders (off by default; switch on in Settings, then first strips on the iPad, last section on the iPhone) and DCA membership per channel
   (channel page, Config tab)
 - **Mixer snapshots:** list, load and save the mixer's own 64 snapshot slots (commands to be verified on a real mixer)
 - **English and Spanish:** the language follows the device (Spanish if it is Spanish, otherwise English) and can be

@@ -23,7 +23,7 @@ struct HelpView: View {
                 L("Tap Main LR, or Back to Main in the blue banner, to return to the room mix."),
             ]),
             Topic(id: 3, icon: "rectangle.3.group", title: L("Mute groups"), steps: [
-                L("Settings › Mute groups: pick a group, name it, then tap the channels it should silence."),
+                L("Settings › Mute groups: pick a group, then tap the channels it should silence."),
                 L("The four buttons at the bottom mute or release a whole group at once."),
             ]),
             Topic(id: 4, icon: "clock.arrow.circlepath", title: L("The mixer lost its settings"), steps: [

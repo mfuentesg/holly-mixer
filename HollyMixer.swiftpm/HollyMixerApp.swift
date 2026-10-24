@@ -5,6 +5,8 @@ import UIKit
 struct HollyMixerApp: App {
     @State private var mixer = Mixer()
     @State private var localization = Localization.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var backgroundTask = UIBackgroundTaskIdentifier.invalid
 
     var body: some Scene {
         WindowGroup {
@@ -16,6 +18,31 @@ struct HollyMixerApp: App {
                 .id(localization.language)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
+                .onChange(of: scenePhase) { _, phase in handle(phase) }
+                // A locked screen freezes the connection, so keep the screen on while controlling a mixer.
+                .onChange(of: mixer.hasSession, initial: true) { _, active in
+                    UIApplication.shared.isIdleTimerDisabled = active
+                }
+        }
+    }
+
+    private func handle(_ phase: ScenePhase) {
+        switch phase {
+        case .background:
+            // iOS gives a few extra seconds: enough to keep the link alive through a quick switch to another app.
+            guard backgroundTask == .invalid else { return }
+            backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "mixer-link") {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+                backgroundTask = .invalid
+            }
+        case .active:
+            if backgroundTask != .invalid {
+                UIApplication.shared.endBackgroundTask(backgroundTask)
+                backgroundTask = .invalid
+            }
+            mixer.resumeAfterBackground()
+        default:
+            break
         }
     }
 }

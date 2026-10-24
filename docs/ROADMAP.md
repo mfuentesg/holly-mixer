@@ -48,5 +48,7 @@ Automatic restore with countdown, safety copies before risky actions, DCA groups
   special entitlement, and the XR18 does not list its clients.
 - **Guest network detection**: Holly Mixer shows a hint when the mixer can't be seen, because reading the network
   name needs an entitlement that Swift Playgrounds can't grant.
-- **Backup covers** levels, mutes, pan, sends, names, colors, icons, input source, preamp, EQ, gate and
-  dynamics. FX, routing and global settings are not read yet.
+- **Backup covers** levels, mutes, pan, sends, names, colors, input source, preamp, EQ, gate, dynamics, FX slots
+  (type and parameters), routing (main, aux, P16), channel/bus links, link and solo options. Automix and the USB
+  recorder are not covered. The FX, routing and link addresses follow the official protocol document and are
+  ignored if the mixer doesn't answer them; still to check on the real XR18 (`tools/xr18_dump.py`).

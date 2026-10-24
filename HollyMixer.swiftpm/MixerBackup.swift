@@ -202,7 +202,9 @@ final class BackupStore {
     func restore(_ changes: [BackupChange], includePhantom: Bool) async {
         guard let mixer, !isRestoring else { return }
         cancelCountdown()
+        // An effect's type first: changing it makes the mixer load that type's default parameters.
         let chosen = changes.filter { includePhantom || !$0.isPhantom }
+            .sorted { ($0.address.hasSuffix("/type") ? 0 : 1) < ($1.address.hasSuffix("/type") ? 0 : 1) }
         isRestoring = true
         restoreProgress = 0
         restoreTotal = chosen.count
@@ -482,6 +484,7 @@ extension BackupStore {
             return String(format: "/ch/%02d", number)
         }
         if parts.first == "lr" { return "/lr" }
+        if parts.first == "config" || parts.first == "routing" { return "/\(parts[0])" }
         if parts.count > 2 { return "/\(parts[0])/\(parts[1])" }
         return "/config"
     }
@@ -491,6 +494,10 @@ extension BackupStore {
         if address.contains("/eq/") { return L("EQ") }
         if address.contains("/gate/") { return L("gate") }
         if address.contains("/dyn/") { return L("dynamics") }
+        if address.hasPrefix("/fx/") { return L("effects") }
+        if address.hasPrefix("/routing/") { return L("routing") }
+        if address.hasPrefix("/config/chlink") || address.hasPrefix("/config/buslink") || address.hasPrefix("/config/linkcfg") { return L("links") }
+        if address.hasPrefix("/config/solo") { return L("solo options") }
         if address.contains("/config/name") || address.contains("/config/color") || address.contains("/config/icon") { return L("name & color") }
         if address.contains("/config/") { return L("config") }
         if address.contains("/mix/on") { return L("mute") }
@@ -500,6 +507,12 @@ extension BackupStore {
     }
 
     private static func readable(_ owner: String) -> String {
-        owner == "/config" ? L("Mute groups & config") : owner
+        switch owner {
+        case "/config": return L("Mute groups & config")
+        case "/routing": return L("Routing")
+        default:
+            if owner.hasPrefix("/fx/") { return L("Effect \(String(owner.dropFirst(4)))") }
+            return owner
+        }
     }
 }
