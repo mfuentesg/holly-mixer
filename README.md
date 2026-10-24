@@ -1,7 +1,7 @@
 # Holly Mixer
 
 An iPad/iPhone remote for Behringer X AIR mixers (XR18 first), built as a modern replacement
-for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
+for the X AIR app, with basic support for the Soundcraft Ui24R. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
 📖 **User manual (Spanish, with screenshots):** [docs/MANUAL_ES.md](docs/MANUAL_ES.md)
 
@@ -32,6 +32,11 @@ Everything in the Holly Mixer design canvas:
   without touching levels; the cap follows the finger one to one (relative, it never jumps) and the value is read in
   the box under the fader; stereo strips keep the cap clear of the meters
 - **App version:** shown in the mixer header (`v0.1 (1)`, from Info.plist) on iPad and iPhone
+- **Soundcraft Ui24R (basic):** the app tries X AIR and Soundcraft Ui at every address and keeps the one that
+  answers; discovery also finds Ui mixers (including `10.10.1.1` on the mixer's own "Soundcraft Ui24" Wi-Fi). Faders,
+  mutes, solo, pan, names, sends, buses (aux 1–6), FX returns, Main LR, VCAs as DCAs, mute groups, gain, +48V and
+  meters work; gate, EQ, dynamics, colours and snapshots are hidden for now. See
+  [docs/SOUNDCRAFT_UI24.md](docs/SOUNDCRAFT_UI24.md)
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer. No address is
   assumed on a first run, and if the saved address stops answering (the router gave the mixer a new IP) the app
   looks for it and follows it when it is clearly the same mixer
@@ -75,7 +80,8 @@ from a Mac, open `HollyMixer.swiftpm` in Xcode, pick your team and run (bundle i
 - **Demo mixer:** in-app simulated XR18 (connect screen → *Try the demo mixer*).
 - **Fake mixer server:** see [docs/FAKE_MIXER.md](docs/FAKE_MIXER.md) (`tools/fake_xair.py`), a local fake X AIR
   OSC server with fault injection (packet loss, latency, power-cycle reset, "changed elsewhere") for testing
-  connection and restore flows without hardware.
+  connection and restore flows without hardware. `tools/fake_ui24.py` is a fake Soundcraft Ui24R (WebSocket on
+  port 80) for the same purpose.
 - **Manual screenshots:** debug builds accept `SIMCTL_CHILD_HM_SHOT=<screen>` (see `ScreenshotMode.swift`) to open the
   demo mixer directly on a screen when launched with `xcrun simctl launch`.
 - Protocol and discovery notes: [docs/XAIR_PROTOCOL_NOTES.md](docs/XAIR_PROTOCOL_NOTES.md),

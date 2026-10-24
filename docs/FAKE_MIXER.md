@@ -110,3 +110,17 @@ python3 -m unittest tools.test_fake_xair -v
 
 The tests start the server on a random port inside the test process and cover info replies, get/set, `/xremote`
 echo and expiry, the 8-client limit, meters, loss, latency, freeze/drop, power cycle, snapshots and the scenarios.
+
+## Fake Soundcraft Ui24R (`tools/fake_ui24.py`)
+
+A fake Ui24R for the Soundcraft support ([SOUNDCRAFT_UI24.md](SOUNDCRAFT_UI24.md)): a WebSocket server that sends the
+state dump on connect, stores `SETD`/`SETS` lines and relays them to the other clients, and streams `VU2` meters about
+every 50 ms. The app always uses port 80, which needs `sudo` on macOS:
+
+```
+sudo python3 tools/fake_ui24.py          # 0.0.0.0:80
+python3 tools/fake_ui24.py --port 8080 -v
+```
+
+In the simulator connect to `127.0.0.1`; while both fakes run, the app connects to whichever answers first, so run
+only one. It has no EQ, effects, shows or snapshots, and no fault injection.

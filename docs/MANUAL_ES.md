@@ -2,8 +2,9 @@
 
 Las capturas son de la consola de demostración.
 
-Holly Mixer es un control remoto para consolas digitales **Behringer X AIR (XR18)**. Funciona en iPad y en
-iPhone, y se conecta a la consola por Wi-Fi o por cable de red.
+Holly Mixer es un control remoto para consolas digitales **Behringer X AIR (XR18)** y, con funciones básicas,
+**Soundcraft Ui24R** (ver [1.5](#15-soundcraft-ui24r)). Funciona en iPad y en iPhone, y se conecta a la consola por
+Wi-Fi o por cable de red.
 
 > ⚠️ **Todo lo que muevas en Holly Mixer cambia la consola de verdad**, y por lo tanto lo que suena en la sala.
 > Si quieres practicar, usa la **consola de demostración** (ver [1.4](#14-consola-de-demostración)).
@@ -76,6 +77,26 @@ superior el indicador pasa a **Reconectando…**.
 Es una XR18 simulada con canales con nombre, faders, mutes y medidores que se mueven. Sirve para aprender o
 enseñar a voluntarios. Mientras está activa, el indicador de conexión dice **Consola demo** y el botón de apagado
 se convierte en **Salir de la demo**.
+
+### 1.5 Soundcraft Ui24R
+
+Holly Mixer también se conecta a una **Soundcraft Ui24R** (y a las Ui16 / Ui12, que hablan el mismo idioma). No hay
+que elegir el modelo: al conectar, la app prueba los dos tipos de consola a la vez y se queda con la que responde.
+
+- **Conectarse:** únete a la red Wi-Fi de la consola (se llama **«Soundcraft Ui24…»**) o a la red del router donde
+  está conectada. La consola aparece en **ENCONTRADAS EN ESTA RED** como *Soundcraft Ui24R*. En su propia red Wi-Fi
+  su dirección es **`10.10.1.1`**; puedes escribirla en *O escribe una dirección IP*.
+- **Qué funciona:** faders, MUTE, SOLO, pan y nombres de los canales 1–16; la entrada de línea como *Aux In*; los
+  4 retornos de efectos; los auxiliares 1–6 como buses (monitores) y los envíos a ellos y a FX 1–4; Main LR (volumen
+  y pan); los VCA 1–4 como DCA (volumen, mute y nombre); los grupos de mute 1–4 y a qué grupos pertenece cada canal;
+  ganancia y +48V en la pestaña *Entrada*; medidores.
+- **Qué no está todavía:** en la página del canal no aparecen las pestañas *Gate*, *EQ* ni *Dinámica*, ni las
+  tarjetas de polaridad, corte de graves, color y DCA (la Ui24R no tiene colores por canal). Tampoco hay snapshots.
+  Los canales 17–24, los auxiliares 7–10 y los VCA 5–6 no se muestran. Main LR no tiene MUTE en la Ui24R (el botón no
+  hace nada) y los masters de FX quedan fijos en 0 dB.
+- La **copia de ajustes** guarda y restaura solo lo que la app sabe leer de la Ui24R (lo de «Qué funciona»).
+- La perilla de ganancia muestra la escala de la XR18 (−12 a +60 dB); la Ui24R llega de −6 a +57 dB y recorta lo que
+  quede fuera.
 
 ---
 
@@ -515,6 +536,7 @@ mantienen un tamaño fijo para que no cambien de sitio durante un servicio.
 
 **No encuentro la consola.** Comprueba que el dispositivo esté en la **misma red** que la XR18 (no la red de
 invitados), permite el acceso a la red local y, si no aparece, escribe su IP. *Revisar mi red* te dice qué falla.
+Con una Soundcraft Ui24R, únete a su Wi-Fi «Soundcraft Ui24…» o escribe `10.10.1.1` (ver 1.5).
 
 **Se movió un fader solo.** Ve el borde blanco con ↻: otro dispositivo (u otra persona) lo movió. Usa **Deshacer**
 para revertir los cambios hechos desde esta app.

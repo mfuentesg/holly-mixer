@@ -114,7 +114,7 @@ struct SettingsHubView: View {
     private var safetyRows: [SettingsRow] {
         var rows = [row("clock.arrow.circlepath", L("Settings backup"),
                         L("Saved copies of every setting; restore them if the mixer forgets them."), .backups)]
-        if FeatureFlags.snapshots {
+        if FeatureFlags.snapshots && !mixer.isSoundcraft {
             rows.append(row("camera.on.rectangle", L("Mixer snapshots"),
                             L("The 64 memories stored inside the mixer itself."), .snapshots))
         }

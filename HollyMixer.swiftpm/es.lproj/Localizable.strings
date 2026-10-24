@@ -185,7 +185,7 @@
 "%@ send to %@" = "Envío de %1$@ a %2$@";
 "Pan" = "Pan";
 "Connect to a mixer" = "Conectar a una consola";
-"Works with XR18 over Wi-Fi or LAN. More than one iPad can be connected at once." = "Funciona con la XR18 por Wi-Fi o red cableada. Se pueden conectar varios iPad a la vez.";
+"Works with Behringer XR18 and Soundcraft Ui24R over Wi-Fi or LAN. More than one iPad can be connected at once." = "Funciona con la Behringer XR18 y la Soundcraft Ui24R por Wi-Fi o red cableada. Se pueden conectar varios iPad a la vez.";
 "FOUND ON THIS NETWORK" = "ENCONTRADAS EN ESTA RED";
 "Scanning" = "Buscando";
 "Scan again" = "Buscar de nuevo";

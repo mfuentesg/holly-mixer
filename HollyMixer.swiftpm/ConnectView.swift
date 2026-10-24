@@ -54,7 +54,7 @@ struct ConnectView: View {
                     Text("Connect to a mixer")
                         .scaledFont(32, .bold)
                         .tracking(-0.4)
-                    Text("Works with XR18 over Wi-Fi or LAN. More than one iPad can be connected at once.")
+                    Text("Works with Behringer XR18 and Soundcraft Ui24R over Wi-Fi or LAN. More than one iPad can be connected at once.")
                         .scaledFont(15)
                         .foregroundStyle(Theme.textSecondary)
                 }

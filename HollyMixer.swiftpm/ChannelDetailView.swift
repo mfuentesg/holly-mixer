@@ -12,14 +12,15 @@ enum ChannelDetailTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     /// Tabs a strip has: channels all of them, returns EQ and sends, buses and main EQ and dynamics.
+    /// A Soundcraft Ui has no gate, EQ or dynamics the app can drive yet.
     @MainActor
-    static func available(for strip: Strip) -> [ChannelDetailTab] {
+    static func available(for strip: Strip, soundcraft: Bool = false) -> [ChannelDetailTab] {
         allCases.filter { tab in
             switch tab {
             case .input: return strip.hasPreamp
-            case .gate: return strip.hasGate
-            case .eq: return strip.hasEQ
-            case .dynamics: return strip.hasDynamics
+            case .gate: return strip.hasGate && !soundcraft
+            case .eq: return strip.hasEQ && !soundcraft
+            case .dynamics: return strip.hasDynamics && !soundcraft
             case .sends: return strip.hasSendLevels
             case .config: return true
             }
@@ -42,7 +43,7 @@ struct ChannelDetailView: View {
     }()
 
     var body: some View {
-        let tabs = ChannelDetailTab.available(for: strip)
+        let tabs = ChannelDetailTab.available(for: strip, soundcraft: mixer.isSoundcraft)
         let current = tabs.contains(selectedTab) ? selectedTab : (tabs.contains(.eq) ? .eq : .config)
         VStack(spacing: 0) {
             ScreenTopBar(title: strip.displayName, subtitle: subtitle) {

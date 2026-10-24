@@ -43,6 +43,9 @@ final class Mixer {
     private(set) var isDemo = false
     /// Round trip of the last `/xinfo` ping, in milliseconds.
     private(set) var latency: Int?
+    /// True for a Soundcraft Ui mixer (Ui24R, Ui16, Ui12), reached through `Ui24Transport`. It has no gate, EQ,
+    /// dynamics or snapshot addresses the app can use yet, so those pages are hidden.
+    var isSoundcraft: Bool { model.hasPrefix("Ui") }
 
     /// The mix the faders currently control.
     var selectedMix = MixTarget.main
@@ -84,7 +87,7 @@ final class Mixer {
     var inputs: [Strip] { channels + [auxIn] + fxReturns }
     var soloedStrips: [Strip] { channels.filter(\.isSoloed) }
 
-    @ObservationIgnored private var connection: MixerTransport = MixerConnection()
+    @ObservationIgnored private var connection: MixerTransport = AutoTransport()
     @ObservationIgnored private var stripsByBase: [String: Strip] = [:]
     @ObservationIgnored private var heartbeat: Task<Void, Never>?
     @ObservationIgnored private var lastReply = Date.distantPast
@@ -154,7 +157,7 @@ final class Mixer {
 
     func connect(host: String) {
         if isDemo {
-            use(MixerConnection())
+            use(AutoTransport())
         }
         isDemo = false
         start(host: host)
@@ -593,6 +596,8 @@ final class Mixer {
     }
 
     func toggleMute(_ strip: Strip) {
+        // A Soundcraft Ui has no Main mute: don't show one that isn't there.
+        if isSoundcraft && strip.kind == .main { return }
         let address = "\(strip.base)/mix/on"
         let old = strip.isOn
         strip.isOn.toggle()

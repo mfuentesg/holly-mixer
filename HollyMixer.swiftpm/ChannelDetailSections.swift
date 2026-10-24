@@ -39,8 +39,11 @@ struct ChannelDetailInputTab: View {
             CardGrid {
                 gainCard(number)
                 phantomCard(number)
-                polarityCard
-                lowCutCard
+                // Not mapped for Soundcraft Ui mixers yet.
+                if !mixer.isSoundcraft {
+                    polarityCard
+                    lowCutCard
+                }
             }
         }
     }
@@ -291,8 +294,11 @@ struct ChannelDetailConfigTab: View {
     var body: some View {
         CardGrid(minimumWidth: 340) {
             nameCard
-            colorCard
-            dcaCard
+            // A Soundcraft Ui has no strip colours, and its VCA membership isn't mapped yet.
+            if !mixer.isSoundcraft {
+                colorCard
+                dcaCard
+            }
             muteGroupCard
             // The side fader already shows level and MUTE on wide screens.
             if sizeClass == .compact { faderCard }
