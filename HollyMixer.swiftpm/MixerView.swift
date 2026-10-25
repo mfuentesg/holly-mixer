@@ -39,8 +39,10 @@ struct MixerView: View {
                             ForEach(mixer.inputs.filter { $0.hasControl(control) }) { strip in
                                 ChannelStripView(strip: strip, control: control, busColor: busColor)
                             }
+                            // Bus masters have no strip here: the MIX chips above select them, and the
+                            // selected bus's master takes the master slot on the right.
                             if target == .main {
-                                ForEach(mixer.buses + mixer.fxSends) { strip in
+                                ForEach(mixer.fxSends) { strip in
                                     ChannelStripView(strip: strip, control: .fader, busColor: nil)
                                 }
                             }
