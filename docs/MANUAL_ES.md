@@ -166,7 +166,8 @@ Cuando eliges un bus aparece una franja de color: **«Los faders son envíos a �
 ### 2.5 Pie de página: grupos de mute
 
 No hay selector de bancos: **todas las tiras están en una sola fila que se desplaza hacia los lados**, en este
-orden: canales 1–16, entrada aux, retornos FX, buses y envíos FX. Los **4 DCA** están **ocultos por defecto**: actívalos en *Ajustes → Mostrar faders DCA* y, con la mezcla *Main LR*,
+orden: canales 1–16, entrada aux, retornos FX y envíos FX. Los **buses** no tienen tira en la fila: se eligen con
+las píldoras de *MEZCLA* y su master aparece a la derecha. Los **4 DCA** están **ocultos por defecto**: actívalos en *Ajustes → Mostrar faders DCA* y, con la mezcla *Main LR*,
 aparecen al **principio** de la fila. Con la mezcla de un bus o de FX solo se ven las entradas, más el master a la derecha.
 
 En el pie están los botones **GRUPOS DE MUTE 1 2 3 4**. Cada botón muestra **«Grupo N»** y **cuántos canales**
@@ -215,7 +216,8 @@ normal, más:
 
 ### 3.3 Tiras de bus, FX y DCA
 
-- **Buses y envíos FX** (a continuación de los canales en la misma fila): igual que un canal, con su fader y mute.
+- **Envíos FX** (a continuación de los canales en la misma fila): igual que un canal, con su fader y mute.
+- **Buses**: no están en la fila; toca su píldora en *MEZCLA* y su master (fader, mute, EQ) queda a la derecha.
 - **DCA 1–4**: un fader que **mueve a la vez todos los canales asignados** a ese grupo, sin cambiar los faders
   individuales de cada uno. Muestra el nombre del grupo y cuántos canales tiene. Su **MUTE** silencia todo el grupo.
   Los canales se asignan a un DCA desde su página (*Config.*).

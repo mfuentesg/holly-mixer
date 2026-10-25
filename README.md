@@ -9,8 +9,8 @@ for the X AIR app. See [docs/PLAN.md](docs/PLAN.md) for the full plan.
 
 Everything in the Holly Mixer design canvas:
 
-- **Mixer (iPad):** graphite console design, channels 1–16, Aux In, FX returns, buses, FX sends and
-  Main LR with faders, mutes, solo, pan, EQ thumbnails, gate/compressor status, LED meters with peak hold;
+- **Mixer (iPad):** graphite console design, channels 1–16, Aux In, FX returns, FX sends and
+  Main LR (bus masters are reached from the mix chips, not the fader row) with faders, mutes, solo, pan, EQ thumbnails, gate/compressor status, LED meters with peak hold;
   mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
