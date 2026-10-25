@@ -18,8 +18,8 @@ let package = Package(
             name: "Holly Mixer",
             targets: ["AppModule"],
             bundleIdentifier: "com.mfuentesg.hollymixer",
-            displayVersion: "0.1",
-            bundleVersion: "1",
+            displayVersion: "0.2",
+            bundleVersion: "2",
             appIcon: .asset("AppIcon"),
             accentColor: .presetColor(.orange),
             supportedDeviceFamilies: [
