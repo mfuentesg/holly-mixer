@@ -31,7 +31,7 @@ Everything in the Holly Mixer design canvas:
 - **Faders:** only a clear vertical drag on the cap moves a fader, so swiping sideways across the strips scrolls
   without touching levels; the cap follows the finger one to one (relative, it never jumps) and the value is read in
   the box under the fader; stereo strips keep the cap clear of the meters
-- **App version:** shown in the mixer header (`v0.1 (1)`, from Info.plist) on iPad and iPhone
+- **App version:** shown in the mixer header (`v0.2 (2)`, from Info.plist) on iPad and iPhone
 - **Connect:** finds mixers on the network, manual IP, recent mixers, network check, demo mixer. No address is
   assumed on a first run, and if the saved address stops answering (the router gave the mixer a new IP) the app
   looks for it and follows it when it is clearly the same mixer
