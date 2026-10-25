@@ -156,10 +156,11 @@ struct BackupView: View {
                     if let notice = store.notice {
                         Text(notice)
                             .scaledFont(13, .semibold)
-                            .foregroundStyle(Theme.greenText)
+                            .foregroundStyle(store.noticeIsError ? Theme.amberText : Theme.greenText)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(14)
-                            .background(Theme.meterGreen.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
+                            .background((store.noticeIsError ? Theme.meterAmber : Theme.meterGreen).opacity(0.10),
+                                        in: RoundedRectangle(cornerRadius: 12))
                     }
                     if let pending = store.pending { pendingCard(pending) }
                     autoCard

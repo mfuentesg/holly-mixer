@@ -14,7 +14,8 @@ struct BackupValues: Codable, Equatable {
         for (address, value) in live {
             switch value {
             case .int(let number): ints[address] = number
-            case .float(let number): floats[address] = number
+            // JSON can't hold NaN or infinity: one such value would make the whole backup fail to save.
+            case .float(let number): if number.isFinite { floats[address] = number }
             case .string(let text): strings[address] = text
             case .blob: break
             }
@@ -95,6 +96,8 @@ final class BackupStore {
     private(set) var restoreTotal = 0
     /// Short text shown in the backup page after an action ("Restored 143 values").
     var notice: String?
+    /// The notice reports a failure (shown in amber).
+    private(set) var noticeIsError = false
 
     var isAutoBackupOn: Bool {
         didSet { UserDefaults.standard.set(isAutoBackupOn, forKey: Self.enabledKey) }
@@ -212,7 +215,7 @@ final class BackupStore {
             self?.restoreProgress = done
         }
         isRestoring = false
-        notice = L("Restored \(chosen.count) values to the mixer.")
+        report(L("Restored \(chosen.count) values to the mixer."))
         pending = nil
         dirty = true
     }
@@ -237,7 +240,7 @@ final class BackupStore {
         if let latest = pending?.backup { archive(latest) }
         pending = nil
         if isAutoBackupOn { writeAuto(from: mixer) }
-        notice = L("Kept the mixer's current settings.")
+        report(L("Kept the mixer's current settings."))
     }
 
     // MARK: - Automatic restore
@@ -301,7 +304,7 @@ final class BackupStore {
                                  mixerName: mixer.mixerName, firmware: mixer.firmware,
                                  values: BackupValues(mixer.liveValues))
         backup.isSafety = true
-        write(backup, file: "manual-\(backup.id.uuidString).json")
+        guard (try? write(backup, file: "manual-\(backup.id.uuidString).json")) != nil else { return nil }
         reload()
         let old = backups.filter { $0.isSafety == true }.dropFirst(Self.safetyLimit)
         for item in old { if let url = url(file(for: item)) { try? FileManager.default.removeItem(at: url) } }
@@ -318,16 +321,25 @@ final class BackupStore {
         let backup = MixerBackup(name: name.isEmpty ? Self.defaultName() : name, date: Date(), isAuto: false,
                                  mixerName: mixer.mixerName, firmware: mixer.firmware,
                                  values: BackupValues(mixer.liveValues))
-        write(backup, file: "manual-\(backup.id.uuidString).json")
+        do {
+            try write(backup, file: "manual-\(backup.id.uuidString).json")
+        } catch {
+            report(L("Couldn't save the backup: \(error.localizedDescription)"), isError: true)
+            return nil
+        }
         reload()
-        notice = L("Saved “\(backup.name)”.")
+        report(L("Saved “\(backup.name)”."))
         return backup
     }
 
     func rename(_ backup: MixerBackup, to name: String) {
         var copy = backup
         copy.name = name
-        write(copy, file: file(for: backup))
+        do {
+            try write(copy, file: file(for: backup))
+        } catch {
+            report(L("Couldn't save the backup: \(error.localizedDescription)"), isError: true)
+        }
         reload()
     }
 
@@ -346,15 +358,20 @@ final class BackupStore {
         let access = fileURL.startAccessingSecurityScopedResource()
         defer { if access { fileURL.stopAccessingSecurityScopedResource() } }
         guard let data = try? Data(contentsOf: fileURL), var backup = Self.decode(data) else {
-            notice = L("That file isn't a Holly Mixer backup.")
+            report(L("That file isn't a Holly Mixer backup."), isError: true)
             return
         }
         key = currentKey()
         backup.id = UUID()
         backup.isAuto = false
-        write(backup, file: "manual-\(backup.id.uuidString).json")
+        do {
+            try write(backup, file: "manual-\(backup.id.uuidString).json")
+        } catch {
+            report(L("Couldn't save the backup: \(error.localizedDescription)"), isError: true)
+            return
+        }
         reload()
-        notice = L("Imported “\(backup.name)”.")
+        report(L("Imported “\(backup.name)”."))
     }
 
     // MARK: - Automatic saving
@@ -373,7 +390,12 @@ final class BackupStore {
         let backup = MixerBackup(name: L("Automatic backup"), date: Date(), isAuto: true,
                                  mixerName: mixer.mixerName, firmware: mixer.firmware,
                                  values: BackupValues(mixer.liveValues))
-        write(backup, file: "auto.json")
+        do {
+            try write(backup, file: "auto.json")
+        } catch {
+            report(L("Couldn't save the backup: \(error.localizedDescription)"), isError: true)
+            return
+        }
         lastAutoSave = backup.date
         reload()
     }
@@ -388,7 +410,7 @@ final class BackupStore {
     private func archive(_ backup: MixerBackup) {
         var copy = backup
         copy.id = UUID()
-        write(copy, file: "auto-\(copy.id.uuidString).json")
+        try? write(copy, file: "auto-\(copy.id.uuidString).json")
         // Keep the newest few.
         guard let directory else { return }
         let files = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
@@ -419,13 +441,18 @@ final class BackupStore {
         return backup.isAuto ? "auto-\(backup.id.uuidString).json" : "manual-\(backup.id.uuidString).json"
     }
 
-    private func write(_ backup: MixerBackup, file: String) {
-        guard let directory, let url = url(file) else { return }
+    private func write(_ backup: MixerBackup, file: String) throws {
+        guard let directory, let url = url(file) else { throw CocoaError(.fileNoSuchFile) }
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
-        guard let data = try? encoder.encode(backup) else { return }
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try? data.write(to: url, options: .atomic)
+        let data = try encoder.encode(backup)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try data.write(to: url, options: .atomic)
+    }
+
+    private func report(_ text: String, isError: Bool = false) {
+        notice = text
+        noticeIsError = isError
     }
 
     private static func decode(_ data: Data) -> MixerBackup? {

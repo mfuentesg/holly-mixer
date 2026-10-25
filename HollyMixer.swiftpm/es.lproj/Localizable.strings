@@ -41,6 +41,7 @@
 "Saved “%@”." = "Se guardó “%@”.";
 "That file isn't a Holly Mixer backup." = "Ese archivo no es una copia de Holly Mixer.";
 "Imported “%@”." = "Se importó “%@”.";
+"Couldn't save the backup: %@" = "No se pudo guardar la copia: %@";
 "Saved " = "Guardado ";
 "preamp" = "preamp";
 "EQ" = "EQ";

@@ -38,7 +38,7 @@ Everything in the Holly Mixer design canvas:
 - **Settings backup:** Holly Mixer saves every level, mute, name, EQ, gate, dynamics, effects, routing and link value on the device a few
   seconds after each change. If the XR18 is switched off and on and has lost them, a banner offers to
   restore them (phantom power is only restored if you ask). Manual saves, history of the last automatic
-  backups, export and import between iPads
+  backups, export and import between iPads. A save that can't be written says so, with the reason
 - **Safer power cycles:** a safety copy is saved before every snapshot load;
   optional automatic restore with a visible 10 s countdown (it waits while the sound system is live)
 - **DCA groups:** the four DCAs as faders (off by default; switch on in Settings, then first strips on the iPad, last section on the iPhone) and DCA membership per channel

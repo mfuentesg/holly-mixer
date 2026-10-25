@@ -475,6 +475,9 @@ CONSOLA SE VE DISTINTA») con:
 Cada copia muestra su nombre (o «Copia automática»), fecha y número de valores. Botones: **Revisar** (restaurarla),
 **Compartir copia** (exportar), **Cambiar nombre** y **Eliminar**.
 
+Si una copia no se puede guardar, arriba aparece un aviso ámbar «No se pudo guardar la copia: …» con el motivo.
+En ese caso la copia **no** quedó guardada.
+
 ---
 
 ## 8. Snapshots de la consola (oculto en esta versión)
