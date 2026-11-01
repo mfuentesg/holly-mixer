@@ -1,6 +1,17 @@
 # AI EQ inside Holly Mixer: proposal
 
-Status: proposal, nothing built yet. The audit script `tools/xr18_eq_audit.py` is the first step (rules only, no AI).
+Status: the **tools** exist and run from a terminal (also on an iPad); the **in-app** version is not built yet.
+
+| Step | Tool | Needs |
+|---|---|---|
+| Review the EQ in force | `tools/xr18_eq_audit.py` (rules only) | the mixer on the network |
+| Record a service: RTA spectrum + levels + the EQ at that moment, saved to `eq_sessions/` | `tools/xr18_eq_record.py` | the mixer; one RTA source per recording |
+| Analyse the recordings and propose an EQ (local rules; with `--ai` also Claude) | `tools/xr18_eq_suggest.py` | `ANTHROPIC_API_KEY` for `--ai` |
+
+The suggestion JSON (`eq_suggestions-*.json`) uses the shape an in-app version would use. The guard rails are the
+ones described below and are enforced in code, whatever the model returns. Open points: the RTA bin axis (assumed
+log, 20 Hz-20 kHz) must be checked on the real mixer, and the RTA source can only be chosen from X-AIR-Edit
+(`/-prefs/rta/source` does not answer on the XR18, see `XAIR_PROTOCOL_NOTES.md`).
 
 ## What is worth building
 
