@@ -497,10 +497,16 @@ struct MixerFooter: View {
     var isShort = false
 
     var body: some View {
+        // Groups with no channels are hidden; with none filled the whole bar goes away.
+        let groups = (1...4).filter { mixer.muteGroupCount($0) > 0 }
+        if !groups.isEmpty { bar(groups) }
+    }
+
+    private func bar(_ groups: [Int]) -> some View {
         HStack(spacing: 14) {
             Text("MUTE GROUPS").sectionLabelStyle()
             HStack(spacing: 8) {
-                ForEach(1...4, id: \.self) { number in
+                ForEach(groups, id: \.self) { number in
                     let isOn = mixer.muteGroups[number - 1]
                     let count = mixer.muteGroupCount(number)
                     Button {
@@ -514,13 +520,13 @@ struct MixerFooter: View {
                                     Text(L("Group \(number)"))
                                         .font(.system(size: 12, weight: .bold))
                                         .lineLimit(1)
-                                    Text(count == 0 ? L("Empty") : (count == 1 ? L("1 channel") : L("\(count) channels")))
+                                    Text(count == 1 ? L("1 channel") : L("\(count) channels"))
                                         .font(.system(size: 10))
                                         .opacity(0.8)
                                 }
                             }
                         }
-                        .foregroundStyle(isOn ? .white : (count == 0 ? Theme.textMuted : Theme.textSecondary))
+                        .foregroundStyle(isOn ? .white : Theme.textSecondary)
                         .padding(.horizontal, 14)
                         .frame(minWidth: 72, minHeight: isShort ? 34 : 44)
                         .frame(height: isShort ? 34 : 48)
