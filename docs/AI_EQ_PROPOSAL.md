@@ -1,6 +1,8 @@
 # AI EQ inside Holly Mixer: proposal
 
-Status: the **tools** exist and run from a terminal (also on an iPad); the **in-app** version is not built yet.
+Status: the **tools** exist and run from a terminal (also on an iPad), and the **in-app EQ assistant** is written
+(`EQAssistantSheet.swift`, `EQAdvisor.swift`, `EQRecording.swift`, button on the EQ tab). The in-app code has NOT been
+compiled or run yet (it was written without Xcode): build it, try it with the demo mixer, then on the real XR18.
 
 | Step | Tool | Needs |
 |---|---|---|
