@@ -31,6 +31,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import xr18_dump as dump  # noqa: E402  (same folder: OSC encoding and socket helpers)
 
 TYPES = ["low cut", "low shelf", "peak", "vintage", "high shelf", "high cut"]
+TAGS = {"low cut": "LC ", "low shelf": "LS ", "peak": "", "vintage": "V ", "high shelf": "HS ", "high cut": "HC "}
 
 
 # --- Value conversion (same ranges as XR18Params.swift) -----------------------------------
@@ -181,6 +182,7 @@ def is_default_name(label, name):
 
 def audit(model):
     findings = []  # (severity 0..2, strip label, text)
+    flat_on = []
 
     def add(level, strip, text):
         findings.append((level, strip, text))
@@ -202,11 +204,29 @@ def audit(model):
             add(1, label, "EQ is OFF but " + str(len(active)) + " band(s) are set; none of it is being heard. "
                           "Turn EQ on or flatten the bands.")
         if strip["eq_on"] and bands and not active:
-            add(0, label, "EQ is on but every band is flat: harmless, but switching it off makes the strip's "
-                          "state clear.")
+            flat_on.append(label)
 
         # Low cut
         lc = strip["low_cut"]
+        if lc is not None and lc["on"] and lc["hz"] <= 25 and is_channel:
+            add(1, label, f"low cut is ON but at {fmt_hz(lc['hz'])}, the minimum: it filters nothing. "
+                          "Set a real frequency or switch it off.")
+        if lc is not None and lc["on"] and lc["hz"] > 200 and is_channel:
+            add(1, label, f"low cut at {fmt_hz(lc['hz'])} is very high: it thins everything below. Intended?")
+        if lc is not None and lc["on"] and lc["hz"] >= 40 and is_channel:
+            for b in active:
+                if b["type"] in ("peak", "vintage") and b["hz"] < lc["hz"] * 0.8 and abs(b["gain_db"]) >= 3:
+                    add(1, label, f"band {b['band']} ({b['gain_db']:+.1f} dB at {fmt_hz(b['hz'])}) sits below the "
+                                  f"low cut ({fmt_hz(lc['hz'])}): the filter works against it.")
+        for b in boosts:
+            if is_channel and b["hz"] < 45 and b["gain_db"] >= 3 and b["type"] in ("peak", "vintage") and \
+                    category not in ("kick", "bass"):
+                add(1, label, f"band {b['band']} boosts {b['gain_db']:+.1f} dB at {fmt_hz(b['hz'])}: almost only "
+                              "rumble there, it eats headroom and the PA hardly reproduces it.")
+        for b in active:
+            if b["gain_db"] <= -10:
+                add(1, label, f"band {b['band']} cuts {b['gain_db']:+.1f} dB at {fmt_hz(b['hz'])}: very deep. "
+                              "Often a sign of a mic/placement problem or a cut that belongs on a monitor.")
         if lc is not None and is_channel and category not in (None, "playback"):
             if not lc["on"] and cut_range and category in ("voice", "guitar", "drums", "bass", "keys"):
                 add(1, label, f"low cut is off; for {category} something around "
@@ -268,6 +288,8 @@ def audit(model):
             if shelf_low:
                 add(1, label, "low shelf boost on the main ties up amplifier power below 100 Hz; check with music "
                               "you know before keeping it.")
+    if flat_on:
+        add(0, "Flat strips", "EQ on but every band flat (harmless): " + ", ".join(flat_on) + ".")
     findings.sort(key=lambda f: -f[0])
     return findings
 
@@ -298,7 +320,7 @@ def print_report(model, info=None):
         active = [b for b in strip["bands"] if b["type"] not in ("low cut", "high cut") and abs(b["gain_db"]) >= 0.5]
         lc = strip["low_cut"]
         lc_text = "-" if lc is None else (f"{fmt_hz(lc['hz'])}" if lc["on"] else "off")
-        bands = "  ".join(f"{fmt_hz(b['hz'])} {b['gain_db']:+.1f}dB" +
+        bands = "  ".join(f"{TAGS.get(b['type'], '?')}{fmt_hz(b['hz'])} {b['gain_db']:+.1f}dB" +
                           (f" Q{b['q']:.1f}" if b["type"] in ("peak", "vintage") else "") for b in active) or "flat"
         name = f"«{strip['name']}»" if strip["name"] else ""
         print(f"{strip['label']:<10}{name:<18}EQ {'on ' if strip['eq_on'] else 'OFF'}  LC {lc_text:<8}{bands}")
