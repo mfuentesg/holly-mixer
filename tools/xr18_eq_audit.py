@@ -172,6 +172,19 @@ def categorise(name):
     return None, None, None
 
 
+ROLES = {}  # strip key ("ch09") -> category, from --roles; beats guessing from the name
+
+
+def role_of(key, name):
+    """(category, low cut range, hint) for a strip: the --roles file first, then the name."""
+    wanted = ROLES.get(key)
+    if wanted:
+        for category, _, cut, hint in CATEGORIES:
+            if category == wanted:
+                return category, cut, hint
+    return categorise(name)
+
+
 def is_default_name(label, name):
     if not name:
         return True
@@ -194,7 +207,7 @@ def audit(model):
         is_bus = key.startswith("bus")
         active = [b for b in bands if b["type"] not in ("low cut", "high cut") and abs(b["gain_db"]) >= 0.5]
         boosts = [b for b in active if b["gain_db"] > 0]
-        category, cut_range, hint = categorise(strip["name"])
+        category, cut_range, hint = role_of(key, strip["name"])
         used = bool(active) or (strip["low_cut"] or {}).get("on", False)
 
         if is_channel and used and is_default_name(strip["label"], strip["name"]):
@@ -300,7 +313,7 @@ def suggestions(model):
     for key, strip in model.items():
         if not key.startswith("ch"):
             continue
-        category, cut, hint = categorise(strip["name"])
+        category, cut, hint = role_of(key, strip["name"])
         if category is None or category == "playback":
             continue
         has_eq = any(abs(b["gain_db"]) >= 0.5 for b in strip["bands"])
@@ -388,9 +401,13 @@ def main():
     parser.add_argument("host", nargs="?", help="mixer IP address")
     parser.add_argument("--dump", help="audit a JSON written by xr18_dump.py instead of reading a mixer")
     parser.add_argument("--json", help="also write the EQ in real units to this file")
+    parser.add_argument("--roles", help='JSON {"ch09": "guitar", ...}: what each channel is when its name does not say '
+                                        '(voice, guitar, bass, keys, drums, kick, playback)')
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
 
+    if args.roles:
+        ROLES.update(json.loads(pathlib.Path(args.roles).read_text()))
     if args.selftest:
         return selftest()
     info = None
