@@ -154,12 +154,12 @@ CATEGORIES = [
     ("drums", ("snare", "caja", "tom", "hat", "hh", "oh", "over", "drum", "bateria", "batería", "perc"),
      (60, 150), "cut below the fundamental, overheads from 150-250 Hz"),
     ("voice", ("voz", "vox", "vocal", "coro", "lead", "pastor", "predic", "speak", "habla", "lider", "líder",
-               "mic", "cantante", "worship", "alab"),
+               "mic", "cantante", "worship", "alab", "pulpito", "púlpito"),
      (80, 140), "cut 200-400 Hz if boxy, presence at 3-5 kHz, a little air above 10 kHz"),
     ("guitar", ("gtr", "guit", "ac.", "acou", "acús", "acus", "elec", "banjo", "uke"), (80, 120),
      "cut mud at 200-300 Hz, presence at 3-5 kHz; keep out of the vocal's 2-4 kHz"),
     ("keys", ("key", "tecl", "piano", "synth", "organ", "órgano", "pad"), (40, 100), "usually needs little EQ"),
-    ("playback", ("pb", "track", "play", "laptop", "pc", "ipad", "dvd", "video", "usb", "click"), None,
+    ("playback", ("pb", "track", "play", "laptop", "pc", "ipad", "dvd", "video", "usb", "click", "pista"), None,
      "already mastered: avoid boosts, use a low cut only if it rumbles"),
 ]
 
