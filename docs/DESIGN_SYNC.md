@@ -14,7 +14,7 @@ tokens: "Graphite console", see the *System* board). The SwiftUI code is the sou
 | iPhone channel page (`ChannelDetailView.swift`, compact) | `PhoneChannel.dc.html` |
 | Musician mode: `PhoneMonitorView.swift`, `PhoneViews.swift` (pairing) | `PhoneMonitor.dc.html` |
 | Channel page: `ChannelDetail*.swift` | `Channel.dc.html` (EQ tab) · `ChannelConfig.dc.html` (Config tab: name, colour, DCA, mute groups, fader) |
-| EQ assistant: `EQAssistantSheet.swift` (logic in `EQAdvisor.swift`, `EQRecording.swift`) | `EQAssistant.dc.html` (sheet) · the ✦ Assist button in `Channel.dc.html` · its confirmation in `Alerts.dc.html` |
+| EQ assistant: `EQAssistantSheet.swift`, `RoomMeasurementCard.swift` (logic in `EQAdvisor.swift`, `EQRecording.swift`, `RoomMeter.swift`) | `EQAssistant.dc.html` (sheet) · the ✦ Assist button in `Channel.dc.html` · its confirmation in `Alerts.dc.html` |
 | Settings page: `SettingsHubView.swift` | `Settings.dc.html` |
 | Help: `HelpView.swift` | `Help.dc.html` |
 | Mute groups: `MuteGroupsView.swift`, footer/bottom bars | `MuteGroups.dc.html`, footer of `Main.dc.html`, bar of `PhoneMixer.dc.html` |

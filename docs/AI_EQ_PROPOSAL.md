@@ -75,3 +75,12 @@ on: they validate whatever the model returns.
    acceptable? (Decides between API and on-device.)
 2. Is level 3 (real spectrum) wanted? It needs the RTA work first and is the biggest improvement in quality.
 3. Which iPads/iPhones must be supported? Foundation Models needs recent hardware.
+
+## Room measurement (added)
+
+On the Main's assistant, **Measure the room** uses the device microphone where the audience sits: pink noise through the
+PA gives the PA-plus-room response (a flat line is a flat room; `tools/make_pink_noise.py` makes the file) and a clap
+gives the reverberation time (T20 x 3, broadband). Both algorithms were checked in Python on synthetic signals (pink
+noise reads flat within +/-0.3 dB; decays of 0.6, 1.2 and 2.4 s come back as 0.6, 1.2 and 2.43 s); the Swift port has
+not been compiled. Limits: a device microphone is not flat (trust 63 Hz-12.5 kHz and big differences only), the RT60 is
+broadband, and one position says little about the whole room: measure at two or three seats.

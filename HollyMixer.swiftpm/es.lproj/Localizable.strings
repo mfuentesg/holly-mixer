@@ -629,3 +629,27 @@
 "Claude's answer could not be read." = "No se pudo leer la respuesta de Claude.";
 "Cannot reach Claude: %@" = "No se puede conectar con Claude: %@";
 "Claude returned an error (%lld): %@" = "Claude devolvió un error (%lld): %@";
+
+/* Room measurement */
+"MEASURE THE ROOM" = "MEDIR LA SALA";
+"Put the device where the audience sits (for example row 6) and stay quiet. Play pink noise through the PA for the spectrum, or clap once for the reverberation." = "Pon el dispositivo donde se sienta el público (por ejemplo la fila 6) y guarda silencio. Reproduce ruido rosa por el PA para el espectro, o aplaude una vez para medir la reverberación.";
+"Level: %lld dB" = "Nivel: %lld dB";
+"Pink noise · 20 s" = "Ruido rosa · 20 s";
+"Clap · 8 s" = "Aplauso · 8 s";
+"Uses the microphone only while measuring. No audio is saved or sent: only the spectrum and the reverberation time are kept. The microphone is not flat, so trust big differences more than small ones." = "Usa el micrófono solo mientras mide. No se guarda ni se envía audio: solo se conservan el espectro y el tiempo de reverberación. El micrófono no es plano, así que confía más en las diferencias grandes que en las pequeñas.";
+"Last measurement: %@" = "Última medición: %@";
+"Reverberation: %@ s" = "Reverberación: %@ s";
+"The PA and room look reasonably even between 63 Hz and 12 kHz." = "El PA y la sala se ven razonablemente parejos entre 63 Hz y 12 kHz.";
+"Suggest a main EQ from the room" = "Sugerir una EQ del Main según la sala";
+"Long: speech loses clarity. Keep low-mids tight and avoid boosting highs." = "Larga: la palabra pierde claridad. Mantén controlados los medios graves y evita realzar agudos.";
+"Moderate: usual for a church. Watch the low-mids." = "Moderada: normal en una iglesia. Cuida los medios graves.";
+"Short: a dry room." = "Corta: una sala seca.";
+"Microphone access is off. Allow it in Settings › Holly Mixer." = "El acceso al micrófono está desactivado. Actívalo en Ajustes › Holly Mixer.";
+"No microphone is available." = "No hay micrófono disponible.";
+"Not enough sound was heard. Is the pink noise playing?" = "No se oyó suficiente sonido. ¿Está sonando el ruido rosa?";
+"No clear decay was found. Clap once, loudly, then stay quiet." = "No se encontró una caída clara. Aplaude una vez, fuerte, y luego guarda silencio.";
+"The room measurement shows nothing worth correcting." = "La medición de la sala no muestra nada que valga la pena corregir.";
+"Around %@ Hz the PA and room are %lld dB above their neighbours: a resonance or a room mode." = "Alrededor de %@ Hz el PA y la sala están %lld dB sobre sus vecinos: una resonancia o un modo de la sala.";
+"63–125 Hz is %lld dB above the mids: the room reinforces the bass." = "63–125 Hz está %lld dB sobre los medios: la sala refuerza los graves.";
+"6–12 kHz is %lld dB below the mids: dull (the microphone also rolls off up there)." = "6–12 kHz está %lld dB bajo los medios: suena opaco (el micrófono también pierde ahí).";
+"From the measurement at the listening spot: cuts first, small boosts. Check by ear and measure again." = "A partir de la medición en el punto de escucha: primero cortes, realces pequeños. Verifica de oído y vuelve a medir.";

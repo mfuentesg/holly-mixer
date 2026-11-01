@@ -11,6 +11,7 @@ struct EQAssistantSheet: View {
     @State private var recorder = EQSpectrumRecorder()
     @State private var role = EQRole.other
     @State private var recording: EQRecording?
+    @State private var room: RoomMeasurement?
     @State private var proposal: EQProposal?
     @State private var summary = ""
     @State private var goal = ""
@@ -30,6 +31,16 @@ struct EQAssistantSheet: View {
                     roleCard
                     checksCard(snapshot)
                     recordCard
+                    if strip.kind == .main {
+                        RoomMeasurementCard(room: $room) { bins in
+                            error = nil
+                            applied = false
+                            summary = ""
+                            let result = EQAdvisor.roomProposal(snapshot, bins: bins)
+                            proposal = result
+                            if result.isEmpty { error = L("The room measurement shows nothing worth correcting.") }
+                        }
+                    }
                     suggestCard(snapshot)
                     if let proposal {
                         proposalCard(snapshot, proposal)
@@ -42,6 +53,7 @@ struct EQAssistantSheet: View {
         .task {
             role = EQRoleStore.role(base: strip.base, name: strip.name)
             recording = EQRecordingStore.latest(label: EQRecording.label(for: strip))
+            room = RoomStore.latest()
             apiKey = APIKeyStore.load() ?? ""
         }
         .onDisappear { recorder.cancel() }
@@ -223,7 +235,7 @@ struct EQAssistantSheet: View {
                 Text("Kept in this device's Keychain.").scaledFont(11).foregroundStyle(Theme.textTertiary)
                 DisclosureGroup {
                     Text(EQClaude.payload(snapshot, spectrum: recording?.hasSignal == true ? recording?.rta : nil,
-                                          findings: recording?.rta.findings() ?? [], goal: goal))
+                                          findings: recording?.rta.findings() ?? [], goal: goal, room: room))
                         .font(Theme.mono(11, .regular))
                         .foregroundStyle(Theme.textSecondary)
                         .textSelection(.enabled)
@@ -356,7 +368,7 @@ struct EQAssistantSheet: View {
         isAsking = true
         let spectrum = recording?.hasSignal == true ? recording?.rta : nil
         let payload = EQClaude.payload(snapshot, spectrum: spectrum,
-                                       findings: spectrum?.findings() ?? [], goal: goal)
+                                       findings: spectrum?.findings() ?? [], goal: goal, room: room)
         let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         Task {
             do {
@@ -374,7 +386,7 @@ struct EQAssistantSheet: View {
 // MARK: - Drawing
 
 /// The recorded spectrum on a log frequency axis. The vertical scale shows the 60 dB below the loudest bin.
-private struct EQSpectrumPlot: View {
+struct EQSpectrumPlot: View {
     let bins: [Float]
 
     var body: some View {

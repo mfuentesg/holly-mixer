@@ -445,6 +445,79 @@ extension EQModel {
     }
 }
 
+// MARK: - Room
+
+extension EQAdvisor {
+    /// Third-octave levels of a room measurement (dB against the mids), limited to the range a device microphone
+    /// can be trusted for.
+    static func roomDeviations(_ bins: [Float]) -> [(hz: Double, db: Double)] {
+        EQSpectrum(meanDb: bins, peakDb: bins).thirdOctaves().filter { $0.hz >= 63 && $0.hz <= 12500 }
+    }
+
+    private static func roomMean(_ bands: [(hz: Double, db: Double)], _ low: Double, _ high: Double) -> Double? {
+        let powers = bands.filter { $0.hz >= low && $0.hz <= high }.map { pow(10, $0.db / 10) }
+        guard !powers.isEmpty else { return nil }
+        return 10 * log10(powers.reduce(0, +) / Double(powers.count))
+    }
+
+    /// Bands that stand out from their neighbours by 4 dB or more: resonances of the PA or the room.
+    private static func roomPeaks(_ bands: [(hz: Double, db: Double)]) -> [(hz: Double, excess: Double)] {
+        var out: [(hz: Double, excess: Double)] = []
+        for index in bands.indices {
+            let neighbours = bands.indices.filter { $0 != index && abs($0 - index) <= 3 }.map { bands[$0].db }
+            guard neighbours.count >= 3 else { continue }
+            let excess = bands[index].db - neighbours.reduce(0, +) / Double(neighbours.count)
+            let isMax = (index == 0 || bands[index].db >= bands[index - 1].db)
+                && (index == bands.count - 1 || bands[index].db >= bands[index + 1].db)
+            if excess >= 4 && isMax { out.append((hz: bands[index].hz, excess: excess)) }
+        }
+        return out.sorted { $0.excess > $1.excess }
+    }
+
+    static func roomFindings(_ bins: [Float]) -> [String] {
+        let bands = roomDeviations(bins)
+        var out: [String] = []
+        for peak in roomPeaks(bands).prefix(3) {
+            out.append(L("Around \(hz(Float(peak.hz))) Hz the PA and room are \(Int(peak.excess.rounded())) dB above their neighbours: a resonance or a room mode."))
+        }
+        if let low = roomMean(bands, 63, 125), low > 6 {
+            out.append(L("63–125 Hz is \(Int(low.rounded())) dB above the mids: the room reinforces the bass."))
+        }
+        if let high = roomMean(bands, 6300, 12500), high < -8 {
+            out.append(L("6–12 kHz is \(Int((-high).rounded())) dB below the mids: dull (the microphone also rolls off up there)."))
+        }
+        return out
+    }
+
+    /// A conservative main EQ from the room measurement: cuts at resonances, a gentle shelf for bass build-up.
+    static func roomProposal(_ s: EQSnapshot, bins: [Float]) -> EQProposal {
+        let bands = roomDeviations(bins)
+        var free = s.bands.enumerated().filter { $0.element.type.hasGain && abs($0.element.gain) < 0.5 }
+            .map { $0.offset + 1 }
+        var proposed: [EQProposedBand] = []
+        if let low = roomMean(bands, 63, 125), low > 6, !free.isEmpty {
+            proposed.append(EQProposedBand(
+                band: free.removeFirst(), type: .lowShelf, frequency: 120, gain: Float(-min(low * 0.5, 4)), q: 1,
+                why: L("63–125 Hz is \(Int(low.rounded())) dB above the mids: the room reinforces the bass.")))
+        }
+        for peak in roomPeaks(bands).prefix(3) {
+            guard !free.isEmpty else { break }
+            proposed.append(EQProposedBand(
+                band: free.removeFirst(), type: .parametric, frequency: Float(peak.hz),
+                gain: Float(-min(peak.excess * 0.6, 6)), q: 3,
+                why: L("Around \(hz(Float(peak.hz))) Hz the PA and room are \(Int(peak.excess.rounded())) dB above their neighbours: a resonance or a room mode.")))
+        }
+        if let high = roomMean(bands, 6300, 12500), high < -8, !free.isEmpty {
+            proposed.append(EQProposedBand(
+                band: free.removeFirst(), type: .highShelf, frequency: 8000, gain: Float(min(-high * 0.3, 3)), q: 1,
+                why: L("6–12 kHz is \(Int((-high).rounded())) dB below the mids: dull (the microphone also rolls off up there).")))
+        }
+        return sanitize(EQProposal(source: .rules, lowCutHz: nil, bands: proposed,
+                                   reasoning: L("From the measurement at the listening spot: cuts first, small boosts. Check by ear and measure again.")),
+                        for: s)
+    }
+}
+
 // MARK: - Claude
 
 enum EQAIError: LocalizedError {
@@ -481,7 +554,8 @@ enum EQClaude {
     }
 
     /// The JSON the model sees. Shown to the user before anything is sent.
-    static func payload(_ s: EQSnapshot, spectrum: EQSpectrum?, findings: [EQFinding], goal: String) -> String {
+    static func payload(_ s: EQSnapshot, spectrum: EQSpectrum?, findings: [EQFinding], goal: String,
+                        room: RoomMeasurement? = nil) -> String {
         var strip: [String: Any] = [
             "strip": s.base, "name": s.name, "role": s.role.rawValue, "band_count": s.bands.count,
             "eq_on": s.eqOn,
@@ -507,6 +581,16 @@ enum EQClaude {
         var root: [String: Any] = ["strips": [strip]]
         let trimmed = goal.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmed.isEmpty { root["goal"] = String(trimmed.prefix(200)) }
+        if let room {
+            var info: [String: Any] = [:]
+            if let bins = room.bins {
+                var relative: [String: Double] = [:]
+                for item in EQAdvisor.roomDeviations(bins) { relative[String(format: "%g", item.hz)] = (item.db * 10).rounded() / 10 }
+                info["pa_and_room_third_octave_db_vs_mids"] = relative
+            }
+            if let rt60 = room.rt60 { info["rt60_seconds"] = Double((rt60 * 10).rounded() / 10) }
+            if !info.isEmpty { root["room"] = info }
+        }
         let data = (try? JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys])) ?? Data()
         return String(decoding: data, as: UTF8.self)
     }
@@ -525,6 +609,11 @@ enum EQClaude {
         Do not invent measurements.
         - Voices need clarity (cut mud around 200-400 Hz, presence 2-5 kHz). Monitors (buses) must avoid boosts \
         around 1-4 kHz because of feedback. The main EQ should stay nearly flat. "talkback" is not in the PA.
+        - If "room" is present it was measured with a device microphone where the audience sits: \
+        "pa_and_room_third_octave_db_vs_mids" is the PA plus room response to pink noise (positive = too much, \
+        0 = flat; trust it only between 63 Hz and 12.5 kHz) and "rt60_seconds" is the reverberation time. Use it for \
+        the main EQ; on a reverberant room (long RT60) keep low-mids tight and avoid boosting highs on channels. \
+        Never try to fix room modes on individual channels.
         - Do not call settings wrong if they may be intentional; explain what the numbers show.
         - Write "why", "reasoning" and "summary" in \(language), short and concrete (frequency, amount, reason).
         """

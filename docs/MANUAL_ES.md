@@ -309,6 +309,14 @@ Ecualizador paramétrico (4 bandas en canales, 6 en buses y Main).
      (±6 dB por banda, +9 dB de realce total, corte de graves de 20 a 250 Hz, sin realces de 1 a 4 kHz en buses).
      **Aplicar a la consola** primero guarda una copia de seguridad (en *Respaldos*, «Antes de sugerencia de EQ») y
      se revierte con **Deshacer** en un solo paso.
+  6. **Medir la sala** (solo en el Main): lleva el iPad a donde se sienta el público (por ejemplo la fila 6) y guarda
+     silencio. **Ruido rosa · 20 s** mide el espectro de lo que llega al público (PA más sala) mientras reproduces
+     ruido rosa por el sistema; en `tools/make_pink_noise.py` hay un script que genera el archivo. **Aplauso · 8 s**
+     mide la reverberación con un solo aplauso fuerte. La app usa el micrófono solo mientras mide, no guarda ni envía
+     audio (solo el espectro y el tiempo de reverberación) y muestra resonancias o exceso de graves.
+     **Sugerir una EQ del Main según la sala** prepara cortes en las resonancias, con los mismos límites y la misma
+     confirmación que el resto. Si Claude está activado, también recibe estos datos para sus sugerencias. El micrófono
+     del iPad no es plano: fíate más de las diferencias grandes que de las pequeñas, y vuelve a medir tras cambiar algo.
 
 #### Dinámica
 

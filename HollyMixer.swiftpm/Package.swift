@@ -33,7 +33,8 @@ let package = Package(
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
             ],
             capabilities: [
-                .localNetwork(purposeString: "Holly Mixer connects to your X AIR mixer on the local network.")
+                .localNetwork(purposeString: "Holly Mixer connects to your X AIR mixer on the local network."),
+                .microphone(purposeString: "Holly Mixer listens with the microphone only while you measure the room's sound. Nothing is recorded to a file or sent anywhere.")
             ],
             appCategory: .music
         )
