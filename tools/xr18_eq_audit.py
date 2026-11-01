@@ -159,6 +159,8 @@ CATEGORIES = [
     ("guitar", ("gtr", "guit", "ac.", "acou", "acús", "acus", "elec", "banjo", "uke"), (80, 120),
      "cut mud at 200-300 Hz, presence at 3-5 kHz; keep out of the vocal's 2-4 kHz"),
     ("keys", ("key", "tecl", "piano", "synth", "organ", "órgano", "pad"), (40, 100), "usually needs little EQ"),
+    ("talkback", ("talkback", "intercom", "comms"), (100, 200),
+     "spoken instructions to the stage only (not in the PA): a low cut for clarity is enough, no EQ needed"),
     ("playback", ("pb", "track", "play", "laptop", "pc", "ipad", "dvd", "video", "usb", "click", "pista"), None,
      "already mastered: avoid boosts, use a low cut only if it rumbles"),
 ]
@@ -402,7 +404,7 @@ def main():
     parser.add_argument("--dump", help="audit a JSON written by xr18_dump.py instead of reading a mixer")
     parser.add_argument("--json", help="also write the EQ in real units to this file")
     parser.add_argument("--roles", help='JSON {"ch09": "guitar", ...}: what each channel is when its name does not say '
-                                        '(voice, guitar, bass, keys, drums, kick, playback)')
+                                        '(voice, guitar, bass, keys, drums, kick, talkback, playback)')
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
 
