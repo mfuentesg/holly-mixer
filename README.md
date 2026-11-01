@@ -14,6 +14,12 @@ Everything in the Holly Mixer design canvas:
   mute groups, undo with history, monitor mixes (sends on faders), "changed elsewhere" highlight
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
+- **EQ assistant** (✦ on the EQ tab): rule checks on the EQ in force, a recording of the strip's RTA spectrum saved on the
+  device, and a proposed EQ from rules or (opt-in, with your own API key in the Keychain) from Claude. Every proposal
+  goes through guard rails (±6 dB per band, +9 dB total boost, low cut 20-250 Hz, no 1-4 kHz boosts on buses); Apply
+  saves a safety backup first and is one Undo step. On the Main it can also measure the room with the device microphone
+  (pink noise through the PA for the spectrum, a clap for the reverberation) and propose a main EQ from it. The same logic exists as read-only scripts:
+  `tools/xr18_eq_audit.py`, `xr18_eq_record.py`, `xr18_eq_suggest.py` (see [docs/AI_EQ_PROPOSAL.md](docs/AI_EQ_PROPOSAL.md))
 - **Simple view (for the pastor):** the sound lead chooses which input channels someone sees; he gets one big MUTE button per channel (optional volume slider) and nothing else. It locks the device it is started on (each device is set up once), and leaving it can require a PIN
 - **iPhone:** portrait mixer with horizontal faders; in landscape the iPad mixer in a compact layout (extras hidden,
   SOLO and MUTE side by side) so every control fits; musician "My mix" mode set up on the phone with the mixer address, monitor and channel

@@ -34,6 +34,7 @@ struct ChannelDetailEQTab: View {
 
     @State private var selection = EQSelection.band(0)
     @State private var confirmFlatten = false
+    @State private var showsAssistant = false
 
     var body: some View {
         if sizeClass == .compact {
@@ -61,6 +62,24 @@ struct ChannelDetailEQTab: View {
                         undoLabel: L("\(strip.displayName) EQ"))
                 .frame(width: 130)
             Spacer()
+            Button {
+                showsAssistant = true
+            } label: {
+                Label("Assist", systemImage: "sparkles")
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Theme.accentText)
+            .padding(.horizontal, 14)
+            .frame(height: 44)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.accent.opacity(0.5), lineWidth: 1))
+            .sheet(isPresented: $showsAssistant) {
+                EQAssistantSheet(strip: strip)
+                    .environment(mixer)
+                    .preferredColorScheme(.dark)
+                    .tint(Theme.accent)
+            }
             Button("Flatten…") { confirmFlatten = true }
                 .buttonStyle(.plain)
                 .font(.system(size: 13, weight: .semibold))

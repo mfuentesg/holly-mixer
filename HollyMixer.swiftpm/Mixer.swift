@@ -21,6 +21,8 @@ final class Mixer {
         let new: OSCArgument
         let label: String
         let date = Date()
+        /// Changes made together (for example by the EQ assistant) share a group and are undone as one.
+        var group: UUID?
     }
 
     private(set) var status = Status.disconnected
@@ -79,6 +81,9 @@ final class Mixer {
     @ObservationIgnored var onValuesChanged: (() -> Void)?
     /// Called once per connection when `fullStateReady` becomes true.
     @ObservationIgnored var onFullState: (() -> Void)?
+    /// Receives the 100 RTA bins (dB) while set. The EQ assistant sets it for the length of a recording; the RTA
+    /// is only requested from the mixer while someone listens.
+    @ObservationIgnored private(set) var rtaListener: (@MainActor ([Float]) -> Void)?
 
     /// Strips that feed the mixes: channels 1-16, aux in and FX returns.
     var inputs: [Strip] { channels + [auxIn] + fxReturns }
@@ -248,6 +253,29 @@ final class Mixer {
         connection.send(OSCMessage("/xremote"))
         connection.send(OSCMessage("/meters", .string("/meters/1")))
         connection.send(OSCMessage("/meters", .string("/meters/6")))
+        if rtaListener != nil {
+            connection.send(OSCMessage("/meters", .string("/meters/4")))
+        }
+    }
+
+    /// Starts (or with nil stops) delivering RTA frames. The subscription lasts about 10 s and is renewed with the others.
+    func setRTAListener(_ listener: (@MainActor ([Float]) -> Void)?) {
+        rtaListener = listener
+        if listener != nil, hasSession {
+            connection.send(OSCMessage("/meters", .string("/meters/4")))
+        }
+    }
+
+    /// `/meters/4`: an int32 count, then 100 int16 values in 1/256 dB, little-endian.
+    private func handleRTA(_ bytes: [UInt8]) {
+        guard let listener = rtaListener, bytes.count >= 4 else { return }
+        let count = Int(UInt32(bytes[0]) | UInt32(bytes[1]) << 8 | UInt32(bytes[2]) << 16 | UInt32(bytes[3]) << 24)
+        var bins: [Float] = []
+        for index in 0..<min(count, (bytes.count - 4) / 2) {
+            let offset = 4 + index * 2
+            bins.append(Float(Int16(bitPattern: UInt16(bytes[offset]) | UInt16(bytes[offset + 1]) << 8)) / 256)
+        }
+        listener(bins)
     }
 
     private func requestState() {
@@ -381,6 +409,10 @@ final class Mixer {
         case "/meters/1":
             if case .blob(let bytes)? = message.arguments.first {
                 handleMeters(bytes)
+            }
+        case "/meters/4":
+            if case .blob(let bytes)? = message.arguments.first {
+                handleRTA(bytes)
             }
         default:
             route(message, fromMixer: true)
@@ -795,13 +827,13 @@ final class Mixer {
     }
 
     /// Sets a parameter once (a switch, a picker). With a `label` the change can be undone.
-    func set(_ address: String, _ value: OSCArgument, label: String? = nil) {
+    func set(_ address: String, _ value: OSCArgument, label: String? = nil, group: UUID? = nil) {
         let param = param(address)
         let old = param.value
         route(OSCMessage(address, value), fromMixer: false)
         connection.send(OSCMessage(address, value))
         if let label, let old, old != value {
-            record(Change(address: address, old: old, new: value, label: label))
+            record(Change(address: address, old: old, new: value, label: label, group: group))
         }
     }
 
@@ -851,9 +883,17 @@ final class Mixer {
     func undo() {
         guard let change = history.popLast() else { return }
         undoToast = UndoToast(text: L("Undone: \(change.label)"))
-        let message = OSCMessage(change.address, change.old)
-        route(message, fromMixer: false)
-        connection.send(message)
+        var reverted = [change]
+        if let group = change.group {
+            while let last = history.last, last.group == group {
+                reverted.append(history.removeLast())
+            }
+        }
+        for item in reverted {
+            let message = OSCMessage(item.address, item.old)
+            route(message, fromMixer: false)
+            connection.send(message)
+        }
     }
 }
 

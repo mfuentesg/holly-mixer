@@ -291,6 +291,32 @@ Ecualizador paramétrico (4 bandas en canales, 6 en buses y Main).
 - **Aplanar…**: pone todas las bandas en 0 dB (pide confirmación). No toca el corte de graves.
 - **Tarjetas inferiores**: **LC** (corte de graves, con su interruptor y «12 dB/oct») y **Banda 1…n** con tipo
   (*Shelf de graves*, *Campana PEQ*, *Vintage VEQ*, *Shelf de agudos*, *Corte de agudos*), **FREC**, **GAN.** y **Q**.
+- **Asistente** (✦): abre una hoja que ayuda a revisar y mejorar la EQ de ese canal. Nada llega a la consola hasta que
+  tocas **Aplicar a la consola**.
+  1. **Este canal lleva…**: elige qué es (voz, guitarra, bajo, teclado, batería, bombo, indicaciones, pista). Por defecto
+     lo adivina por el nombre; las revisiones y sugerencias dependen de esto.
+  2. **Revisión de la EQ actual**: reglas generales sobre los números (corte de graves sin efecto, realces muy grandes o
+     angostos, EQ apagada con bandas ajustadas…). Funciona sin internet y sin grabar nada.
+  3. **Grabar el espectro**: el RTA de la consola muestra **una sola fuente a la vez**, la que se elige en X-AIR Edit.
+     Ponla en este canal, toca **Grabar** (30 o 60 s) mientras suena y la app guarda el resultado en el iPad. Después
+     indica picos angostos sostenidos (posible feedback), retumbo, «caja» o aspereza. La escala de frecuencias del RTA
+     es una suposición (20 Hz–20 kHz, logarítmica) que aún falta comprobar en la consola real.
+  4. **Sugerir una EQ**: **Sugerir con reglas** (sin internet) o, si lo activas, **Preguntar a Claude**. Con Claude se
+     envían por internet solo el nombre del canal, su EQ, el espectro grabado y tu objetivo (nunca la dirección de la
+     consola ni las copias de seguridad); **Ver exactamente qué se envía** muestra el contenido. La clave de la API se
+     guarda en el llavero del dispositivo y la función está desactivada por defecto.
+  5. **Propuesta**: muestra la curva actual y la propuesta, cada cambio con su motivo y los límites que se aplicaron
+     (±6 dB por banda, +9 dB de realce total, corte de graves de 20 a 250 Hz, sin realces de 1 a 4 kHz en buses).
+     **Aplicar a la consola** primero guarda una copia de seguridad (en *Respaldos*, «Antes de sugerencia de EQ») y
+     se revierte con **Deshacer** en un solo paso.
+  6. **Medir la sala** (solo en el Main): lleva el iPad a donde se sienta el público (por ejemplo la fila 6) y guarda
+     silencio. **Ruido rosa · 20 s** mide el espectro de lo que llega al público (PA más sala) mientras reproduces
+     ruido rosa por el sistema; en `tools/make_pink_noise.py` hay un script que genera el archivo. **Aplauso · 8 s**
+     mide la reverberación con un solo aplauso fuerte. La app usa el micrófono solo mientras mide, no guarda ni envía
+     audio (solo el espectro y el tiempo de reverberación) y muestra resonancias o exceso de graves.
+     **Sugerir una EQ del Main según la sala** prepara cortes en las resonancias, con los mismos límites y la misma
+     confirmación que el resto. Si Claude está activado, también recibe estos datos para sus sugerencias. El micrófono
+     del iPad no es plano: fíate más de las diferencias grandes que de las pequeñas, y vuelve a medir tras cambiar algo.
 
 #### Dinámica
 

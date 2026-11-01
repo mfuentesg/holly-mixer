@@ -10,6 +10,8 @@ final class DemoTransport: MixerTransport {
 
     private var values = DemoTransport.initialState().merging(DemoSeeds.channelDetail()) { current, _ in current }
     private var meterTask: Task<Void, Never>?
+    /// True once the app has asked for `/meters/4` (the RTA), which only happens while the EQ assistant records.
+    private var rtaRequested = false
 
     func connect(host: String) {
         onStateChange?(.ready)
@@ -28,6 +30,7 @@ final class DemoTransport: MixerTransport {
         case "/xremote":
             break
         case "/meters":
+            if case .string("/meters/4")? = message.arguments.first { rtaRequested = true }
             startMeters()
         default:
             if let value = message.arguments.first {
@@ -199,6 +202,26 @@ final class DemoTransport: MixerTransport {
             appendLittleEndian(UInt16(bitPattern: Int16(max(min(value, 0), -60) * 256)), to: &dyn)
         }
         onMessage?(OSCMessage("/meters/6", .blob(dyn)))
+
+        if rtaRequested { sendRTA(time: time) }
+    }
+
+    /// `/meters/4`: 100 bins, 20 Hz...20 kHz on a log axis. A voice-like demo spectrum: a gentle tilt, rumble below
+    /// 70 Hz, a boxy bump near 300 Hz and a ringing peak near 2.4 kHz, so the assistant has something to find.
+    private func sendRTA(time: Double) {
+        var bytes = [UInt8]()
+        appendLittleEndian(UInt32(100), to: &bytes)
+        for index in 0..<100 {
+            let hertz = 20 * pow(1000, (Double(index) + 0.5) / 100)
+            var level = -34 - 3 * log2(hertz / 1000)
+            if hertz < 70 { level += 16 }
+            if hertz > 230 && hertz < 380 { level += 8 }
+            if hertz > 2300 && hertz < 2700 { level += 14 }
+            level += 3 * sin(time * 1.3 + Double(index)) + Double.random(in: -1...1)
+            let raw = Int16(max(min(level, 0), -128) * 256)
+            appendLittleEndian(UInt16(bitPattern: raw), to: &bytes)
+        }
+        onMessage?(OSCMessage("/meters/4", .blob(bytes)))
     }
 
     /// Phrase-like movement around a base level: a slow swell plus a little flutter.
