@@ -184,13 +184,19 @@ struct PhoneMixerView: View {
     }
 
     /// The four mute groups, always at hand. Assign channels in Settings > Mute groups.
-    private var muteGroupBar: some View {
+    @ViewBuilder private var muteGroupBar: some View {
+        // Groups with no channels are hidden; with none filled the whole bar goes away.
+        let groups = (1...4).filter { mixer.muteGroupCount($0) > 0 }
+        if !groups.isEmpty { muteGroupBar(groups) }
+    }
+
+    private func muteGroupBar(_ groups: [Int]) -> some View {
         HStack(spacing: 6) {
             Text("MUTE GROUPS")
                 .sectionLabelStyle()
                 .multilineTextAlignment(.leading)
                 .frame(width: 70, alignment: .leading)
-            ForEach(1...4, id: \.self) { number in
+            ForEach(groups, id: \.self) { number in
                 let isOn = mixer.muteGroups[number - 1]
                 let count = mixer.muteGroupCount(number)
                 Button {
@@ -198,12 +204,12 @@ struct PhoneMixerView: View {
                 } label: {
                     VStack(spacing: 0) {
                         Text("\(number)").font(Theme.mono(15, .bold))
-                        Text(count == 0 ? L("Empty") : L("\(count) ch"))
+                        Text(L("\(count) ch"))
                             .font(.system(size: 10, weight: .semibold))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                     }
-                    .foregroundStyle(isOn ? .white : (count == 0 ? Theme.textMuted : Theme.textSecondary))
+                    .foregroundStyle(isOn ? .white : Theme.textSecondary)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
                     .background(isOn ? Theme.mute : Theme.strip, in: RoundedRectangle(cornerRadius: 10))

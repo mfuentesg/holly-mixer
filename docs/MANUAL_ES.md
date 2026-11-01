@@ -171,7 +171,7 @@ las píldoras de *MEZCLA* y su master aparece a la derecha. Los **4 DCA** están
 aparecen al **principio** de la fila. Con la mezcla de un bus o de FX solo se ven las entradas, más el master a la derecha.
 
 En el pie están los botones **GRUPOS DE MUTE 1 2 3 4**. Cada botón muestra **«Grupo N»** y **cuántos canales**
-tiene («7 canales»; «Vacío» si no tiene ninguno). Un toque silencia (rojo) o reactiva a la vez todos los
+tiene («7 canales»). Los grupos sin canales **no se muestran**, y si los cuatro están vacíos desaparece todo el pie. Un toque silencia (rojo) o reactiva a la vez todos los
 canales del grupo. **Qué canales forman cada grupo:** *Ajustes → Grupos de mute* (ver 2.2), o en la
 página de cada canal, pestaña **Config.**, tarjeta **Grupos de mute** (ver 4.2). Los grupos de mute no tienen nombre: la XR18 no puede guardarlo.
 
