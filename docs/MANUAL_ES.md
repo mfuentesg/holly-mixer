@@ -518,6 +518,8 @@ iCloud). Holly Mixer copia ahí las copias guardadas (las manuales y las «Antes
 - La **copia automática** no se sincroniza: cada dispositivo compara la consola con *su propia* última sesión.
 - Las copias van por consola (nombre de la consola). Si iCloud aún no descargó un archivo, el aviso lo dice; vuelve a
   sincronizar en un momento.
+- Hace falta estar conectado a la consola para sincronizar; sin conexión, **Sincronizar ahora** avisa «Conéctate a la
+  consola para sincronizar.» y la carpeta elegida se conserva.
 - **Dejar de sincronizar** no borra nada: las copias se quedan en el dispositivo y en la carpeta.
 
 ---

@@ -387,7 +387,12 @@ final class BackupStore {
 
     /// Copies saved backups to and from the sync folder, in the background. Does nothing when sync is off.
     func sync(announce: Bool = false) {
-        guard let folder = syncFolder(), mixer != nil else { return }
+        guard let folder = syncFolder() else { return }
+        guard mixer != nil else {
+            // Backups are kept per mixer, so there is nothing to match without one. Say so when asked by hand.
+            if announce { report(L("Connect to the mixer to sync."), isError: true) }
+            return
+        }
         if isSyncing { syncAgain = true; return }
         key = key ?? currentKey()
         guard let key, let directory else { return }
@@ -397,8 +402,10 @@ final class BackupStore {
                 BackupSync.run(local: directory, folder: folder, key: key)
             }.value
             isSyncing = false
-            lastSync = Date()
             if outcome.changedLocal { reload() }
+            // Sync was switched off while this run was going: don't show it as a sync of the new state.
+            guard syncFolderName != nil else { return }
+            lastSync = Date()
             if announce || outcome.changedLocal { report(Self.summary(of: outcome)) }
             if syncAgain {
                 syncAgain = false

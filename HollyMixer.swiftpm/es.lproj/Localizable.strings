@@ -51,6 +51,7 @@
 "Last synced %@" = "Última sincronización %@";
 "Syncing…" = "Sincronizando…";
 "Not synced yet" = "Aún sin sincronizar";
+"Connect to the mixer to sync." = "Conéctate a la consola para sincronizar.";
 "Couldn't use that folder." = "No se pudo usar esa carpeta.";
 "Sync is off. Your backups stay on this device." = "La sincronización está apagada. Tus copias se quedan en este dispositivo.";
 "Everything is up to date." = "Todo está al día.";
