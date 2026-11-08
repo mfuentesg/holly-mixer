@@ -15,7 +15,6 @@ struct EQAssistantSheet: View {
     @State private var proposal: EQProposal?
     @State private var summary = ""
     @State private var goal = ""
-    @State private var apiKey = ""
     @State private var isAsking = false
     @State private var error: String?
     @State private var confirmsApply = false
@@ -54,7 +53,6 @@ struct EQAssistantSheet: View {
             role = EQRoleStore.role(base: strip.base, name: strip.name)
             recording = EQRecordingStore.latest(label: EQRecording.label(for: strip))
             room = RoomStore.latest()
-            apiKey = APIKeyStore.load() ?? ""
         }
         .onDisappear { recorder.cancel() }
         .onChange(of: recorder.state) { _, state in
@@ -64,7 +62,6 @@ struct EQAssistantSheet: View {
             }
         }
         .onChange(of: role) { _, new in EQRoleStore.set(new, base: strip.base) }
-        .onChange(of: apiKey) { _, new in APIKeyStore.save(new) }
     }
 
     // MARK: Header
@@ -225,14 +222,6 @@ struct EQAssistantSheet: View {
                 }
             }
             if usesClaude {
-                SecureField("Claude API key", text: $apiKey)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .scaledFont(14)
-                    .padding(10)
-                    .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
-                    .foregroundStyle(Theme.textPrimary)
-                Text("Kept in this device's Keychain.").scaledFont(11).foregroundStyle(Theme.textTertiary)
                 DisclosureGroup {
                     Text(EQClaude.payload(snapshot, spectrum: recording?.hasSignal == true ? recording?.rta : nil,
                                           findings: recording?.rta.findings() ?? [], goal: goal, room: room))
@@ -246,7 +235,7 @@ struct EQAssistantSheet: View {
                 actionButton(isAsking ? L("Asking…") : L("Ask Claude"), icon: "sparkles", prominent: true) {
                     ask(snapshot)
                 }
-                .disabled(isAsking || apiKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(isAsking)
             }
             if let error {
                 Text(error).scaledFont(13).foregroundStyle(Theme.amberText)
@@ -369,7 +358,7 @@ struct EQAssistantSheet: View {
         let spectrum = recording?.hasSignal == true ? recording?.rta : nil
         let payload = EQClaude.payload(snapshot, spectrum: spectrum,
                                        findings: spectrum?.findings() ?? [], goal: goal, room: room)
-        let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = (APIKeyStore.load() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         Task {
             do {
                 let (result, text) = try await EQClaude.ask(payload: payload, apiKey: key, snapshot: snapshot)

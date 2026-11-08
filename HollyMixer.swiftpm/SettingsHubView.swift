@@ -10,6 +10,8 @@ struct SettingsHubView: View {
     @AppStorage(MixSelectorSettings.showEffectsKey) private var showsEffects = false
     @AppStorage(MixSelectorSettings.showDCAsKey) private var showsDCAs = false
     @State private var confirmsDisconnect = false
+    @State private var aiKey = ""
+    @AppStorage(APIKeyStore.configuredKey) private var hasAIKey = false
 
     /// Musician mode is for phones in portrait.
     private var offersMusicianSetup: Bool { UIDevice.current.userInterfaceIdiom == .phone && verticalSizeClass != .compact }
@@ -72,6 +74,7 @@ struct SettingsHubView: View {
                     }
                     group(L("SAFETY"), rows: safetyRows)
                     if !musicianRows.isEmpty { group(L("MUSICIANS"), rows: musicianRows) }
+                    aiCard
                     group(L("HELP"), rows: [
                         row("questionmark.circle", L("Help"),
                             L("Why a channel is silent, mixing for a musician, mute groups and restoring settings."), .help),
@@ -109,6 +112,31 @@ struct SettingsHubView: View {
         .background(Theme.background.ignoresSafeArea())
         .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
+    }
+
+    /// Where the Claude API key lives. The EQ assistant (✦ Assist in a channel's EQ) stays disabled until one is set.
+    private var aiCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(L("AI")).sectionLabelStyle()
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("Claude API key")).scaledFont(16, .semibold)
+                Text(L("Turns on the EQ assistant. Without a key its Assist button stays disabled."))
+                    .scaledFont(12).foregroundStyle(Theme.textTertiary)
+                SecureField(L("Claude API key"), text: $aiKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .scaledFont(14)
+                    .padding(10)
+                    .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                    .onChange(of: aiKey) { _, new in APIKeyStore.save(new) }
+                Text(hasAIKey ? L("Key saved. Kept in this device's Keychain.") : L("Kept in this device's Keychain."))
+                    .scaledFont(11).foregroundStyle(hasAIKey ? Theme.accentText : Theme.textTertiary)
+            }
+            .padding(14)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border, lineWidth: 1))
+        }
+        .task { aiKey = APIKeyStore.load() ?? "" }
     }
 
     private var safetyRows: [SettingsRow] {

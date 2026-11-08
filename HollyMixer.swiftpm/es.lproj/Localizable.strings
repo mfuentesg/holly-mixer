@@ -653,3 +653,7 @@
 "63–125 Hz is %lld dB above the mids: the room reinforces the bass." = "63–125 Hz está %lld dB sobre los medios: la sala refuerza los graves.";
 "6–12 kHz is %lld dB below the mids: dull (the microphone also rolls off up there)." = "6–12 kHz está %lld dB bajo los medios: suena opaco (el micrófono también pierde ahí).";
 "From the measurement at the listening spot: cuts first, small boosts. Check by ear and measure again." = "A partir de la medición en el punto de escucha: primero cortes, realces pequeños. Verifica de oído y vuelve a medir.";
+
+"AI" = "IA";
+"Turns on the EQ assistant. Without a key its Assist button stays disabled." = "Activa el asistente de EQ. Sin una clave, su botón Asistente queda desactivado.";
+"Key saved. Kept in this device's Keychain." = "Clave guardada. Se guarda en el llavero de este dispositivo.";

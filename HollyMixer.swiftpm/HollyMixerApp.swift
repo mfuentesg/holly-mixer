@@ -18,6 +18,7 @@ struct HollyMixerApp: App {
                 .id(localization.language)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
+                .task { APIKeyStore.syncConfigured() }
                 .onChange(of: scenePhase) { _, phase in handle(phase) }
                 // A locked screen freezes the connection, so keep the screen on while controlling a mixer.
                 .onChange(of: mixer.hasSession, initial: true) { _, active in

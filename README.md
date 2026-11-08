@@ -15,7 +15,7 @@ Everything in the Holly Mixer design canvas:
 - **Channel detail:** tap a selected channel name (or a master's "EQ · Dyn"): Input (gain, +48V, polarity,
   low cut), Gate, interactive EQ, Dynamics, Sends, Config (name, colour)
 - **EQ assistant** (✦ on the EQ tab): rule checks on the EQ in force, a recording of the strip's RTA spectrum saved on the
-  device, and a proposed EQ from rules or (opt-in, with your own API key in the Keychain) from Claude. Every proposal
+  device, and a proposed EQ from rules or (opt-in) from Claude. The assistant is disabled until you add your own Claude API key in Settings › AI (kept in the Keychain). Every proposal
   goes through guard rails (±6 dB per band, +9 dB total boost, low cut 20-250 Hz, no 1-4 kHz boosts on buses); Apply
   saves a safety backup first and is one Undo step. On the Main it can also measure the room with the device microphone
   (pink noise through the PA for the spectrum, a clap for the reverberation) and propose a main EQ from it. The same logic exists as read-only scripts:

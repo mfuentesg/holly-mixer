@@ -35,6 +35,7 @@ struct ChannelDetailEQTab: View {
     @State private var selection = EQSelection.band(0)
     @State private var confirmFlatten = false
     @State private var showsAssistant = false
+    @AppStorage(APIKeyStore.configuredKey) private var hasAIKey = false
 
     var body: some View {
         if sizeClass == .compact {
@@ -67,6 +68,8 @@ struct ChannelDetailEQTab: View {
             } label: {
                 Label("Assist", systemImage: "sparkles")
             }
+            .disabled(!hasAIKey)
+            .opacity(hasAIKey ? 1 : 0.4)
             .buttonStyle(.plain)
             .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(Theme.accentText)

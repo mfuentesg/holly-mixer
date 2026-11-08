@@ -133,6 +133,7 @@ página que reúne todo lo que no es un fader, con una descripción debajo de ca
 | | **Vista simple** | Deja que alguien (por ejemplo el pastor) **silencie y active solo los canales que tú elijas**. Ver la [sección 6b](#6b-vista-simple-para-el-pastor). |
 | **SEGURIDAD** | **Copia de ajustes** | Copias de seguridad de todos los ajustes ([sección 7](#7-copia-de-seguridad-de-ajustes)). |
 | **MÚSICOS** | **Configurar como músico…** (solo en iPhone) | Deja ese teléfono controlando solo la mezcla de monitor de un músico ([sección 6](#6-modo-músico-mi-mezcla)). |
+| **IA** | **Clave de la API de Claude** | Pega aquí tu clave (se guarda en el llavero del dispositivo). **Sin clave, el botón Asistente de la pestaña EQ de cada canal queda desactivado**; con ella se activa el asistente de EQ. |
 | **AYUDA** | **Ayuda** | Una guía corta con las cuatro preguntas habituales durante un servicio: por qué un canal no suena, cambiar lo que oye un músico, grupos de mute y restaurar ajustes. |
 | **IDIOMA** | Sistema / English / Español | Cambia el idioma de la app. |
 | | **Desconectar de la consola** / **Salir de la demo** | Vuelve a la pantalla de conexión (pide confirmación; la consola sigue funcionando). Ya no hay botón de apagado en la barra superior. |
@@ -304,7 +305,7 @@ Ecualizador paramétrico (4 bandas en canales, 6 en buses y Main).
   4. **Sugerir una EQ**: **Sugerir con reglas** (sin internet) o, si lo activas, **Preguntar a Claude**. Con Claude se
      envían por internet solo el nombre del canal, su EQ, el espectro grabado y tu objetivo (nunca la dirección de la
      consola ni las copias de seguridad); **Ver exactamente qué se envía** muestra el contenido. La clave de la API se
-     guarda en el llavero del dispositivo y la función está desactivada por defecto.
+     agrega en *Ajustes › IA*, se guarda en el llavero del dispositivo y la función está desactivada por defecto.
   5. **Propuesta**: muestra la curva actual y la propuesta, cada cambio con su motivo y los límites que se aplicaron
      (±6 dB por banda, +9 dB de realce total, corte de graves de 20 a 250 Hz, sin realces de 1 a 4 kHz en buses).
      **Aplicar a la consola** primero guarda una copia de seguridad (en *Respaldos*, «Antes de sugerencia de EQ») y

@@ -210,6 +210,8 @@ final class EQSpectrumRecorder {
 
 /// The user's Claude API key, in the Keychain (never in the app's preferences, a backup or the repository).
 enum APIKeyStore {
+    /// Mirror of "a key is stored" in the preferences (the key itself never goes there), so views can react to it.
+    static let configuredKey = "aiKeyConfigured"
     private static let service = "com.mfuentesg.hollymixer.anthropic"
     private static let account = "api-key"
 
@@ -217,6 +219,11 @@ enum APIKeyStore {
         [kSecClass as String: kSecClassGenericPassword,
          kSecAttrService as String: service,
          kSecAttrAccount as String: account]
+    }
+
+    /// Re-reads the Keychain into the preferences mirror (a key saved by an earlier version has no mirror yet).
+    static func syncConfigured() {
+        UserDefaults.standard.set(!(load() ?? "").isEmpty, forKey: configuredKey)
     }
 
     static func load() -> String? {
@@ -233,6 +240,7 @@ enum APIKeyStore {
     static func save(_ key: String) {
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
         SecItemDelete(query as CFDictionary)
+        UserDefaults.standard.set(!trimmed.isEmpty, forKey: configuredKey)
         guard !trimmed.isEmpty else { return }
         var add = query
         add[kSecValueData as String] = Data(trimmed.utf8)
