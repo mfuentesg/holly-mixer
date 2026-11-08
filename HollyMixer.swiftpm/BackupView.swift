@@ -128,6 +128,7 @@ struct BackupView: View {
     @State private var renaming: MixerBackup?
     @State private var renameText = ""
     @State private var importing = false
+    @State private var choosingSyncFolder = false
 
     private struct ReviewItem: Identifiable {
         let id = UUID()
@@ -164,6 +165,7 @@ struct BackupView: View {
                     }
                     if let pending = store.pending { pendingCard(pending) }
                     autoCard
+                    syncCard
                     listCard
                 }
                 .padding(20)
@@ -174,7 +176,10 @@ struct BackupView: View {
         .background(Theme.background.ignoresSafeArea())
         .textPageTypeSize()
         .foregroundStyle(Theme.textPrimary)
-        .onAppear { store.reload() }
+        .onAppear {
+            store.reload()
+            store.sync()
+        }
         .alert("Save current settings", isPresented: $saving) {
             TextField("Name (e.g. Sunday good state)", text: $newName)
             Button("Save") { store.saveNow(name: newName) }
@@ -273,6 +278,87 @@ struct BackupView: View {
             }
             .frame(minHeight: 44)
         }
+    }
+
+    /// Mirrors the saved backups to a Files folder (iCloud Drive) so every iPad and iPhone has them.
+    private var syncCard: some View {
+        card {
+            Text("SYNC BETWEEN DEVICES").sectionLabelStyle()
+            if let name = store.syncFolderName {
+                HStack(spacing: 12) {
+                    Image(systemName: "icloud")
+                        .scaledFont(16)
+                        .foregroundStyle(Theme.accentText)
+                        .frame(width: 40, height: 40)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 10))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(name)
+                            .scaledFont(16, .semibold)
+                            .lineLimit(1)
+                        Text(syncStatus)
+                            .scaledFont(12)
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                    Spacer()
+                    if store.isSyncing { ProgressView() }
+                }
+                Text("Saved backups are copied to this folder and to every device that uses it. Delete one here and it goes from all of them. The automatic backup stays on each device.")
+                    .scaledFont(13)
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 10) {
+                    Button {
+                        store.sync(announce: true)
+                    } label: {
+                        Text("Sync now")
+                            .scaledFont(14, .bold)
+                            .foregroundStyle(Theme.onAccent)
+                            .padding(.horizontal, 16)
+                            .frame(height: 44)
+                            .background(Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                    .disabled(store.isSyncing)
+                    Button {
+                        store.stopSyncing()
+                    } label: {
+                        Text("Stop syncing")
+                            .scaledFont(14, .semibold)
+                            .foregroundStyle(Theme.textBright)
+                            .padding(.horizontal, 16)
+                            .frame(height: 44)
+                            .background(Theme.control, in: RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text("Pick a folder in iCloud Drive and choose the same folder on your other iPad or iPhone. Your saved backups then appear on all of them.")
+                    .scaledFont(13)
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    choosingSyncFolder = true
+                } label: {
+                    Text("Choose folder…")
+                        .scaledFont(14, .bold)
+                        .foregroundStyle(Theme.onAccent)
+                        .padding(.horizontal, 16)
+                        .frame(height: 44)
+                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        // On this card, not on the page: two file pickers on one view and only one of them opens.
+        .fileImporter(isPresented: $choosingSyncFolder, allowedContentTypes: [.folder]) { result in
+            if case .success(let url) = result { store.chooseSyncFolder(url) }
+        }
+    }
+
+    private var syncStatus: String {
+        if let date = store.lastSync {
+            return L("Last synced \(date.hollyMixer(date: .omitted, time: .shortened))")
+        }
+        return store.isSyncing ? L("Syncing…") : L("Not synced yet")
     }
 
     private var listCard: some View {

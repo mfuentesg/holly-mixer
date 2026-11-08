@@ -98,6 +98,10 @@ final class BackupStore {
     var notice: String?
     /// The notice reports a failure (shown in amber).
     private(set) var noticeIsError = false
+    /// Name of the folder the saved backups are mirrored to (for several devices), or nil when sync is off.
+    private(set) var syncFolderName: String?
+    private(set) var isSyncing = false
+    private(set) var lastSync: Date?
 
     var isAutoBackupOn: Bool {
         didSet { UserDefaults.standard.set(isAutoBackupOn, forKey: Self.enabledKey) }
@@ -128,8 +132,11 @@ final class BackupStore {
     @ObservationIgnored private var countdownTask: Task<Void, Never>?
     /// The backup stored in auto.json: the one automatic saving overwrites.
     @ObservationIgnored private var latestAutoID: UUID?
+    /// A change arrived while syncing: sync once more when the current run ends.
+    @ObservationIgnored private var syncAgain = false
 
     init() {
+        syncFolderName = BackupSync.savedFolder()?.url.lastPathComponent
         let defaults = UserDefaults.standard
         isAutoBackupOn = defaults.object(forKey: Self.enabledKey) == nil ? true : defaults.bool(forKey: Self.enabledKey)
         isAutoRestoreOn = defaults.object(forKey: Self.autoRestoreKey) == nil ? false : defaults.bool(forKey: Self.autoRestoreKey)
@@ -165,6 +172,7 @@ final class BackupStore {
         guard let mixer else { return }
         key = currentKey()
         reload()
+        sync()
         dirty = false
         pending = nil
         guard let latest = backups.first(where: { $0.id == latestAutoID }) else {
@@ -307,8 +315,9 @@ final class BackupStore {
         guard (try? write(backup, file: "manual-\(backup.id.uuidString).json")) != nil else { return nil }
         reload()
         let old = backups.filter { $0.isSafety == true }.dropFirst(Self.safetyLimit)
-        for item in old { if let url = url(file(for: item)) { try? FileManager.default.removeItem(at: url) } }
+        for item in old { removeStored(file: file(for: item)) }
         if !old.isEmpty { reload() }
+        sync()
         return backup
     }
 
@@ -328,6 +337,7 @@ final class BackupStore {
             return nil
         }
         reload()
+        sync()
         report(L("Saved “\(backup.name)”."))
         return backup
     }
@@ -341,11 +351,77 @@ final class BackupStore {
             report(L("Couldn't save the backup: \(error.localizedDescription)"), isError: true)
         }
         reload()
+        sync()
     }
 
     func delete(_ backup: MixerBackup) {
-        if let url = url(file(for: backup)) { try? FileManager.default.removeItem(at: url) }
+        removeStored(file: file(for: backup))
         reload()
+    }
+
+    /// Deletes a backup file here and, when sync is on, tells the other devices to delete theirs.
+    private func removeStored(file: String) {
+        if let url = url(file) { try? FileManager.default.removeItem(at: url) }
+        guard BackupSync.isBackupName(file), let folder = syncFolder(), let key else { return }
+        Task.detached(priority: .utility) { BackupSync.markDeleted(file: file, folder: folder, key: key) }
+    }
+
+    // MARK: - Several devices
+
+    /// Starts mirroring the saved backups to a folder picked in the Files app (e.g. in iCloud Drive).
+    func chooseSyncFolder(_ url: URL) {
+        guard BackupSync.save(folder: url) else {
+            report(L("Couldn't use that folder."), isError: true)
+            return
+        }
+        syncFolderName = url.lastPathComponent
+        sync(announce: true)
+    }
+
+    func stopSyncing() {
+        BackupSync.forgetFolder()
+        syncFolderName = nil
+        lastSync = nil
+        report(L("Sync is off. Your backups stay on this device."))
+    }
+
+    /// Copies saved backups to and from the sync folder, in the background. Does nothing when sync is off.
+    func sync(announce: Bool = false) {
+        guard let folder = syncFolder(), mixer != nil else { return }
+        if isSyncing { syncAgain = true; return }
+        key = key ?? currentKey()
+        guard let key, let directory else { return }
+        isSyncing = true
+        Task { [self] in
+            let outcome = await Task.detached(priority: .utility) {
+                BackupSync.run(local: directory, folder: folder, key: key)
+            }.value
+            isSyncing = false
+            lastSync = Date()
+            if outcome.changedLocal { reload() }
+            if announce || outcome.changedLocal { report(Self.summary(of: outcome)) }
+            if syncAgain {
+                syncAgain = false
+                sync()
+            }
+        }
+    }
+
+    private func syncFolder() -> URL? {
+        guard let saved = BackupSync.savedFolder() else {
+            syncFolderName = nil
+            return nil
+        }
+        if saved.isStale { BackupSync.save(folder: saved.url) }
+        return saved.url
+    }
+
+    private static func summary(of outcome: BackupSync.Outcome) -> String {
+        var text = outcome.received + outcome.sent + outcome.removed == 0
+            ? L("Everything is up to date.")
+            : L("Synced: \(outcome.received) received, \(outcome.sent) sent, \(outcome.removed) removed.")
+        if outcome.waiting > 0 { text += " " + L("Some files are still downloading from iCloud; sync again in a moment.") }
+        return text
     }
 
     /// The JSON file of a backup, for sharing or moving to another iPad.
@@ -371,6 +447,7 @@ final class BackupStore {
             return
         }
         reload()
+        sync()
         report(L("Imported “\(backup.name)”."))
     }
 
