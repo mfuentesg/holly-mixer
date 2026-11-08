@@ -496,6 +496,7 @@ CONSOLA SE VE DISTINTA») con:
 | **Restaurar automáticamente** | Si la consola vuelve reseteada, cuenta **10 s** («Restaurando tus ajustes en N s») y devuelve la última copia. Puedes **Cancelar** en cualquier momento. **Espera** mientras haya sonido en la sala. |
 | **Guardar ahora…** | Guarda una copia manual con nombre (p. ej. «Domingo, estado ideal»). |
 | **Importar** | Trae una copia exportada desde otro dispositivo. |
+| **Sincronizar entre dispositivos** | Ver 8.4. |
 
 ### 8.3 Lista «AJUSTES GUARDADOS»
 
@@ -504,6 +505,22 @@ Cada copia muestra su nombre (o «Copia automática»), fecha y número de valor
 
 Si una copia no se puede guardar, arriba aparece un aviso ámbar «No se pudo guardar la copia: …» con el motivo.
 En ese caso la copia **no** quedó guardada.
+
+### 8.4 Sincronizar entre iPad y iPhone
+
+Para tener las mismas copias en todos tus dispositivos: en la tarjeta **SINCRONIZAR ENTRE DISPOSITIVOS** pulsa
+**Elegir carpeta…** y elige una carpeta de **iCloud Drive** (la misma en cada dispositivo, con la misma cuenta de
+iCloud). Holly Mixer copia ahí las copias guardadas (las manuales y las «Antes de…») y trae las que falten.
+
+- Se sincroniza al abrir la página, al conectar la consola, tras guardar, renombrar o eliminar, y con **Sincronizar ahora**.
+- **Eliminar** una copia la elimina también en los demás dispositivos. Una copia renombrada en dos sitios conserva la
+  más reciente.
+- La **copia automática** no se sincroniza: cada dispositivo compara la consola con *su propia* última sesión.
+- Las copias van por consola (nombre de la consola). Si iCloud aún no descargó un archivo, el aviso lo dice; vuelve a
+  sincronizar en un momento.
+- Hace falta estar conectado a la consola para sincronizar; sin conexión, **Sincronizar ahora** avisa «Conéctate a la
+  consola para sincronizar.» y la carpeta elegida se conserva.
+- **Dejar de sincronizar** no borra nada: las copias se quedan en el dispositivo y en la carpeta.
 
 ---
 
